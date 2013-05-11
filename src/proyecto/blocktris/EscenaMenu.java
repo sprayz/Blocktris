@@ -13,6 +13,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import proyecto.blocktris.logica.EscenaBase;
+import proyecto.blocktris.recursos.ManagerEscenas;
 import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 
 public class EscenaMenu extends EscenaBase implements IOnMenuItemClickListener{
@@ -25,10 +26,10 @@ public class EscenaMenu extends EscenaBase implements IOnMenuItemClickListener{
 		setBackground(new Background(Color.BLUE));
 		 
 		  menuScene = new MenuScene(camara);
-		  final IMenuItem botonSingle = new TextMenuItem(1, managerRecursos.fGlobal , "Single", vbom);
+		  final IMenuItem botonSingle = new ScaleMenuItemDecorator(new TextMenuItem(1, managerRecursos.fGlobal , "Single", vbom) , 1.1f, 1);
 		  final IMenuItem botonMulti = new ScaleMenuItemDecorator(new TextMenuItem(2, managerRecursos.fGlobal , "Multi", vbom) , 1.1f, 1);
 		  final IMenuItem botonPuntuaciones = new ScaleMenuItemDecorator(new TextMenuItem(3, managerRecursos.fGlobal , "Salir", vbom) , 1.1f, 1);
-		  final IMenuItem botonSalir = new ScaleMenuItemDecorator(new TextMenuItem(3, managerRecursos.fGlobal , "Salir", vbom) , 1.1f, 1);
+		  final IMenuItem botonSalir = new ScaleMenuItemDecorator(new TextMenuItem(4, managerRecursos.fGlobal , "Salir", vbom) , 1.1f, 1);
 			 
 		
 		 
@@ -72,7 +73,7 @@ public class EscenaMenu extends EscenaBase implements IOnMenuItemClickListener{
 		switch(pMenuItem.getID()){
 		
 		case 1:
-		
+			ManagerEscenas.getInstancia().setEscena(TipoEscena.ESCENA_JUEGO );
 			return true;
 		case 2:
 			return true;

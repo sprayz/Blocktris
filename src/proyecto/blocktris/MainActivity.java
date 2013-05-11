@@ -107,6 +107,7 @@ public class MainActivity extends BaseGameActivity{
 	    public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback) throws IOException
 	    {
 	    	escenas.crearEscenaMenu();
+	    	escenas.crearEscenaJuego();
 	    	
 	        escenas.setEscena(TipoEscena.ESCENA_MENU );
 	        pOnCreateSceneCallback.onCreateSceneFinished(escenas.getEscenaActual());
@@ -115,5 +116,6 @@ public class MainActivity extends BaseGameActivity{
 	    public void onPopulateScene(Scene pScene, OnPopulateSceneCallback pOnPopulateSceneCallback) throws IOException
 	    {
 	        
+	    	pOnPopulateSceneCallback.onPopulateSceneFinished();
 	    }
 	}

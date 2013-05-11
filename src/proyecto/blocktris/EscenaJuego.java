@@ -2,6 +2,13 @@ package proyecto.blocktris;
 
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.background.Background;
+import org.andengine.entity.sprite.AnimatedSprite;
+import org.andengine.entity.sprite.TiledSprite;
+import org.andengine.opengl.texture.region.*;
+import org.andengine.util.adt.color.Color;
+
+
 
 import proyecto.blocktris.logica.EscenaBase;
 import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
@@ -11,8 +18,16 @@ public class EscenaJuego extends EscenaBase{
 
 	@Override
 	public void crearEscena() {
-		Rectangle  caja = new Rectangle(camara.getCenterX(), camara.getCenterY(), camara.getWidth(), camara.getHeight() /2, vbom);
-		this.attachChild(caja);
+		setBackground(new Background(Color.WHITE));
+		AnimatedSprite caja = new AnimatedSprite(camara.getCenterX(),
+				camara.getCenterY(),
+				managerRecursos.trBloques.deepCopy() ,vbom);
+		caja.setSize(200, 200);
+		super.attachChild(caja);
+		caja.setVisible(true);
+		caja.animate(100);
+		
+		
 	}
 
 	@Override
