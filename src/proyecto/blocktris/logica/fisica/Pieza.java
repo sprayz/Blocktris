@@ -188,16 +188,24 @@ public class Pieza extends ObjetoFisico {
 						fixture= this.cuerpo.createFixture(fixturedef);
 						
 						sprite = new TiledSprite(0,0, tamaño_bloque,tamaño_bloque, ManagerRecursos.getInstancia().trBloques.deepCopy(),ManagerRecursos.getInstancia().vbom );
-						coordsCentroLocalSprite= sprite.getSceneCenterCoordinates();
-								
-								
+						
+							coordsCentroLocalSprite[0] +=	(x-tipo.getEstructura().length/2 );
+							coordsCentroLocalSprite[1] +=	(y- tipo.getEstructura()[0].length /2);
+						
+						
+						//dios que función más obtusa	
+						//Según parece el anchorcenter se  especifica en  relacion con el tamaño de  el sprite
+						//Es decir  el valor por defecto en esta rama ,AnchorCenter(adivinas por qué?) , 0.5 
+							//coloca en ancla en la mitad del sprite
 							
-							coordsCentroLocalSprite[0] +=	(x-tipo.getEstructura().length/2 )* tamaño_bloque;
-							coordsCentroLocalSprite[1] +=	(y- tipo.getEstructura()[0].length /2) * tamaño_bloque;
-						
-						
+						//Ya rozaba los lindes de la locura cuando me dió por mirar la definición de
+						//este método. Por lo visto incluso los jodidos comentarios sobran cuando el código es,
+						//según esta panda de  patanes, "suficientemente descriptivo" o " autodocumentado"
 						sprite.setAnchorCenter(coordsCentroLocalSprite[0],coordsCentroLocalSprite[1]);
- 						Log.i("FIGURA SPRITE", sprite.getOffsetCenterX() + "  " +sprite.getOffsetCenterY());
+ 						
+						
+						
+						Log.i("FIGURA SPRITE", sprite.getOffsetCenterX() + "  " +sprite.getOffsetCenterY());
 						mundo.registerPhysicsConnector(new PhysicsConnector( sprite, cuerpo));
 						graficos[cuenta] = sprite;
 						
