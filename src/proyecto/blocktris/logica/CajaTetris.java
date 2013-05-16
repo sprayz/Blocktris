@@ -16,7 +16,7 @@ public class CajaTetris{
 	//mundo fisico que se alica  en el area
 	
 	private PhysicsWorld world ;
-	//la entidad a la que confinamos nuestra fisica
+	
 	private Entity entidad;
 	//si tiene muros o no
 
