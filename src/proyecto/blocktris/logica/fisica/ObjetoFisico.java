@@ -1,5 +1,8 @@
 package proyecto.blocktris.logica.fisica;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.andengine.entity.Entity;
 import org.andengine.entity.shape.IShape;
 import org.andengine.entity.shape.Shape;
@@ -16,17 +19,17 @@ import com.badlogic.gdx.physics.box2d.Body;
  */
 public abstract class ObjetoFisico {
 	protected Body cuerpo;
-	protected IShape grafico;
+	protected List<Entity> graficos = new ArrayList<Entity>();
 	/**
 	 * @param cuerpo
 	 * @param grafico
 	 */
 	public ObjetoFisico(){}
 	
-	public ObjetoFisico(Body cuerpo,IShape grafico) {
+	public ObjetoFisico(Body cuerpo,List<Entity> graficos) {
 		super();
 		this.cuerpo = cuerpo;
-		this.grafico = grafico;
+		this.graficos = graficos;
 	}
 	
 	
@@ -43,13 +46,10 @@ public abstract class ObjetoFisico {
 		this.cuerpo = cuerpo;
 	}
 
-	public IShape getGrafico() {
-		return grafico;
+	public List<Entity> getGraficos() {
+		return graficos;
 	}
 
-	public void setGrafico(IShape grafico) {
-		this.grafico = grafico;
-	}
 	
 
 	

@@ -106,7 +106,6 @@ public class Pieza extends ObjetoFisico {
 	
 	private static FixtureDef fixturedef = new FixtureDef();
 	private static BodyDef bodydef = new BodyDef();
-	private TiledSprite[] graficos = new TiledSprite[16];
 	private PIEZAS tipo;
 	
 	/*Tenemos que hacer un jodido cuerpo compuesto a base de fixtures
@@ -122,6 +121,7 @@ public class Pieza extends ObjetoFisico {
 	 *  ESTA JODIDA MANERA ES LA "RECOMENDADA". FML.
 	 */
 	
+	protected Pieza(){}
 	
 	 public Pieza(float tamaño_bloque, PIEZAS tipo,PhysicsWorld mundo) {
 		 fixturedef.friction = 0.5f;
@@ -129,7 +129,7 @@ public class Pieza extends ObjetoFisico {
 		 fixturedef.density =1f;
 		 fixturedef.isSensor = false; //los sensores registran eventos pero no actúan sobre ellos.
 		 
-		 bodydef.active = true; //obviamente empezamos activos
+		 bodydef.active = false; //obviamente empezamos activos
 		 bodydef.allowSleep =false; // en permanente simulación
 		bodydef.type =BodyType.DynamicBody ;
 		 //las "balas" no atraviesan  otros objetos móviles por brutas que sean las fuerzas
@@ -147,12 +147,12 @@ public class Pieza extends ObjetoFisico {
 		 Fixture fixture;
 		 
 		 TiledSprite sprite;
-		 float[] coordsCentroLocalSprite = null ;
+		
 		 
 		 //las definiciones de las piezas son cuadrículas imaginarias de 4x4
 		 for (int y = 0,cuenta=0; y < tipo.getEstructura().length; y++) {
 				for (int x = 0; x < tipo.getEstructura()[0].length; x++) {
-					if(tipo.getEstructura()[x][y] == true || true == true){
+					if(tipo.getEstructura()[x][y] == true ){
 						
 						/*
 						 * esta es la parte interesante.El yo pasado agradecera que prestes atencion.
@@ -177,10 +177,17 @@ public class Pieza extends ObjetoFisico {
 						
 						//y le sumamos la mitad del tamaño físico de un bloque por que el ancla inicial esta en ela esquina izquierda inferior
 						// y no en el centro como en el motor grafico
-						Vector2 centro = Vector2Pool.obtain(((x-tipo.getEstructura().length/2)*tamaño_bloque_fisico) + tamaño_bloque_fisico /2 ,
-															((y- tipo.getEstructura()[0].length /2) * tamaño_bloque_fisico) +tamaño_bloque_fisico /2  );
+					//	Vector2 centro = Vector2Pool.obtain(((y-tipo.getEstructura().length/2)*tamaño_bloque_fisico) + tamaño_bloque_fisico /2 ,
+							//								((x- tipo.getEstructura()[0].length /2) * tamaño_bloque_fisico) +tamaño_bloque_fisico /2  );
 						
-				
+
+						//NO TOCAR
+						//Yo futuro, puede que creas que sabes lo que haces, TE EQUIVOCAS.
+						Vector2 centro = Vector2Pool.obtain(((x-tipo.getEstructura()[0].length/2)*tamaño_bloque_fisico) + tamaño_bloque_fisico /2 ,
+								((y- tipo.getEstructura().length /2) * tamaño_bloque_fisico) +tamaño_bloque_fisico /2  );
+
+						
+						
 						//sin rotación respecto al cuerpo
 						forma.setAsBox( tamaño_bloque_fisico /2, tamaño_bloque_fisico/2,centro,0f); 
 						fixturedef.shape=forma;
@@ -189,8 +196,8 @@ public class Pieza extends ObjetoFisico {
 						
 						sprite = new TiledSprite(0,0, tamaño_bloque,tamaño_bloque, ManagerRecursos.getInstancia().trBloques.deepCopy(),ManagerRecursos.getInstancia().vbom );
 						
-							coordsCentroLocalSprite[0] +=	(x-tipo.getEstructura().length/2 );
-							coordsCentroLocalSprite[1] +=	(y- tipo.getEstructura()[0].length /2);
+								
+							
 						
 						
 						//dios que función más obtusa	
@@ -201,13 +208,16 @@ public class Pieza extends ObjetoFisico {
 						//Ya rozaba los lindes de la locura cuando me dió por mirar la definición de
 						//este método. Por lo visto incluso los jodidos comentarios sobran cuando el código es,
 						//según esta panda de  patanes, "suficientemente descriptivo" o " autodocumentado"
-						sprite.setAnchorCenter(coordsCentroLocalSprite[0],coordsCentroLocalSprite[1]);
+
+						//NO TOCAR
+						//Yo futuro, puede que creas que sabes lo que haces, TE EQUIVOCAS.
+						
+						sprite.setAnchorCenter(tipo.getEstructura()[0].length/2f -x  ,
+								tipo.getEstructura().length /2f   -y);
  						
-						
-						
-						Log.i("FIGURA SPRITE", sprite.getOffsetCenterX() + "  " +sprite.getOffsetCenterY());
+		//	sprite.setAnchorCenter(-1, -1);
 						mundo.registerPhysicsConnector(new PhysicsConnector( sprite, cuerpo));
-						graficos[cuenta] = sprite;
+						graficos.add(sprite);
 						
 						//Vector2Pool.recycle(centro);
 						
@@ -228,7 +238,7 @@ public class Pieza extends ObjetoFisico {
 		 
 	}
 	 public void adjuntarGraficos(Entity entidad){
-		 for (TiledSprite s : graficos)
+		 for (Entity s : graficos)
 			 entidad.attachChild(s);
 			 
 		 

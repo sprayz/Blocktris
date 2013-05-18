@@ -37,7 +37,8 @@ public class EscenaJuego extends EscenaBase{
 		AnimatedSprite caja = new AnimatedSprite(camara.getCenterX(),
 			camara.getCenterY(),
 				managerRecursos.trBloques ,vbom);
-		caja.setVisible(false);
+		caja.setSize(5, 5);
+		caja.setVisible(true);
 		caja.animate(100);
 	//cuerpo=	PhysicsFactory.createBoxBody(pwMundo, caja, BodyType.DynamicBody , 
 	//			PhysicsFactory.createFixtureDef(1, 1, 1));
