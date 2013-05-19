@@ -8,15 +8,28 @@ import com.badlogic.gdx.physics.box2d.Body;
 
 public abstract class ObjetoFisico {
 	
-	protected ArrayList<Body> cuerpos = new ArrayList<Body>();
-	protected ArrayList<IEntity> graficos = new ArrayList<IEntity>();
-	
+	protected Body cuerpo  ;
+	protected IEntity grafico ;
+	protected Object padre; 
 	/*
 	 * Esta clase es práctica cómo base para   cualquier elemento físisco.
 	 * De esta manear se puede  incluir una referencia en  los userdata de los objetos y tener
 	 * siempre a disposicion el tipo completo y no solo la parte (fisica o gráfica)
 	 */
 	public ObjetoFisico(){}
+	
+	public Object getPadre() {
+		return padre;
+	}
+	public void setPadre(Object padre) {
+		this.padre = padre;
+	}
+	public Body getCuerpo() {
+		return cuerpo;
+	}
+	public IEntity getGrafico() {
+		return grafico;
+	}
 	
 	
 	
@@ -26,19 +39,7 @@ public abstract class ObjetoFisico {
 	 */
 	
 	
-	public ArrayList<Body> getCuerpos() {
-		return cuerpos;
-	}
-
-
-
-
-	public ArrayList<IEntity> getGraficos() {
-		return graficos;
-	}
-
 	
-
 	
 	
 }
