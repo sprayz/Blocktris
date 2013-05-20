@@ -39,8 +39,8 @@ static	class Bloque extends ObjetoFisico{
 	
 	
 	
-	private static FixtureDef fixturedef ;
-	private static BodyDef bodydef ;
+	
+	
 	private PIEZAS tipo;
 	protected boolean modificada = false;
 	protected ArrayList<Bloque> bloques = new ArrayList<Bloque>();

@@ -46,7 +46,7 @@ public interface IPieza {
 
       public static FixtureDef PROPIEDADES_DEFECTO = PhysicsFactory.createFixtureDef(1.0f, 0.5f, 0.5f);
 
-
+      public static FixtureDef FIXTUREDEF_DEFECTO = PhysicsFactory.createFixtureDef(0.5f, 0.5f, 0.5f);
 	
 
 		

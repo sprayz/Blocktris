@@ -22,7 +22,7 @@ public class EscenaJuego extends EscenaBase{
 		AnimatedSprite caja = new AnimatedSprite(camara.getCenterX(),
 				camara.getCenterY(),
 				managerRecursos.trBloques.deepCopy() ,vbom);
-		caja.setSize(200, 200);
+		caja.setSize(10, 10);
 		super.attachChild(caja);
 		caja.setVisible(true);
 		caja.animate(100);
