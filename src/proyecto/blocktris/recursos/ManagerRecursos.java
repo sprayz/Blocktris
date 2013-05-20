@@ -29,7 +29,7 @@ public class ManagerRecursos {
 	public VertexBufferObjectManager vbom;
 
 	// TEXTURAS Y REGIONES
-	private BitmapTextureAtlas  taBloques;
+	private BuildableBitmapTextureAtlas taBloques;
 	public TiledTextureRegion trBloques;
 	public TiledTextureRegion trBloquesSombra;
 	public TiledTextureRegion trAnimBrillo;
@@ -38,7 +38,6 @@ public class ManagerRecursos {
 
 	public Font fGlobal;
 
-	
 	public void cargarRecursosGenerales() {
 		// cargamos la fuente común
 		FontFactory.setAssetBasePath("font/");
@@ -50,17 +49,27 @@ public class ManagerRecursos {
 
 		// cargamos los bloques
 		BitmapTextureAtlasTextureRegionFactory.setAssetBasePath("gfx/sprites/");
-taBloques = new BitmapTextureAtlas(
-				actividadJuego.getTextureManager(), 1024, 1024,TextureOptions.NEAREST_PREMULTIPLYALPHA);
-			
+		taBloques = new BuildableBitmapTextureAtlas(
+				actividadJuego.getTextureManager(), 1024, 1024,
+				TextureOptions.NEAREST_PREMULTIPLYALPHA);
 
-		//Nuestro spritesheet tiene 6 columnas y 2 filas
-		trBloques = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset( taBloques, actividadJuego,"blocks_2.png",0,0 ,6,2 );
-		
-	trAnimBrillo= BitmapTextureAtlasTextureRegionFactory
-			.createTiledFromAsset(taBloques, actividadJuego,
-					"clear.png",0,0 ,6, 2);
-		taBloques.load();
+		// Nuestro spritesheet tiene 6 columnas y 2 filas
+		trBloques = BitmapTextureAtlasTextureRegionFactory
+				.createTiledFromAsset(taBloques, actividadJuego,
+						"blocks_2.png", 6, 2);
+
+		trAnimBrillo = BitmapTextureAtlasTextureRegionFactory
+				.createTiledFromAsset(taBloques, actividadJuego, "clear.png",
+						8, 1);
+
+		try {
+			taBloques
+					.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(
+							0, 0, 1));
+			taBloques.load();
+		} catch (TextureAtlasBuilderException e) {
+			Debug.e(e);
+		}
 	}
 
 	public static void prepararManager(Engine motor,
