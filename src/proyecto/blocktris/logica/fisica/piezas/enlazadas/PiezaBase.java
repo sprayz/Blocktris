@@ -1,9 +1,10 @@
-package proyecto.blocktris.logica.fisica.piezas;
+package proyecto.blocktris.logica.fisica.piezas.enlazadas;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.andengine.entity.IEntity;
+import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.TiledSprite;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
@@ -11,9 +12,12 @@ import org.andengine.extension.physics.box2d.PhysicsWorld;
 
 
 import proyecto.blocktris.logica.fisica.ObjetoFisico;
+import proyecto.blocktris.logica.fisica.piezas.IPieza;
+import proyecto.blocktris.logica.fisica.piezas.IPieza.PIEZAS;
 import proyecto.blocktris.recursos.ManagerRecursos;
 
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 
@@ -56,11 +60,20 @@ static	class Bloque extends ObjetoFisico{
 		}
 	}
 	
-	public PiezaBase destruirPieza(List<Bloque> a_borrar){
+	
+	
+	
+	public void registrarAreasTactiles(Scene escena){
 		
+		for(Bloque b: bloques){
+			escena.registerTouchArea(b.getGrafico());	
+		}
+	}
+	public void desregistrarAreasTactiles(Scene escena){
 		
-		
-		return null;	
+		for(Bloque b: bloques){
+			escena.unregisterTouchArea(b.getGrafico());	
+		}
 	}
 	
 	public void desregistrarGraficos(){

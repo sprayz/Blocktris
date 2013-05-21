@@ -6,6 +6,7 @@ import java.util.*;
 
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
+import org.andengine.entity.scene.Scene;
 import org.andengine.entity.shape.IShape;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.sprite.TiledSprite;
@@ -15,6 +16,8 @@ import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.extension.physics.box2d.util.Vector2Pool;
 import org.andengine.extension.physics.box2d.util.constants.PhysicsConstants;
 import org.andengine.util.adt.array.ArrayUtils;
+
+
 
 import proyecto.blocktris.recursos.ManagerRecursos;
 
@@ -47,8 +50,12 @@ public interface IPieza {
       public static FixtureDef PROPIEDADES_DEFECTO = PhysicsFactory.createFixtureDef(1.0f, 0.5f, 0.5f);
 
       public static FixtureDef FIXTUREDEF_DEFECTO = PhysicsFactory.createFixtureDef(0.001f, 0.0f, 0.5f);
-	
-
+      public void registrarGraficos(IEntity entidad);
+      public void desregistrarGraficos();
+      public IPieza destruirPieza(List<Fixture> a_borrar);
+      public void registrarAreasTactiles(Scene escena);
+      public void desregistrarAreasTactiles(Scene escena);
+      
 		
 		
 	

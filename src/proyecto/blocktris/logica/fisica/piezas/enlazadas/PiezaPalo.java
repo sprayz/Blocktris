@@ -1,11 +1,15 @@
-package proyecto.blocktris.logica.fisica.piezas;
+package proyecto.blocktris.logica.fisica.piezas.enlazadas;
+
+import java.util.List;
 
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.extension.physics.box2d.util.constants.PhysicsConstants;
 
-import proyecto.blocktris.logica.fisica.piezas.PiezaBase.Bloque.ColorBloque;
+import proyecto.blocktris.logica.fisica.piezas.enlazadas.PiezaBase.Bloque.ColorBloque;
 
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.JointDef;
 import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 
 public class PiezaPalo extends PiezaBase {
@@ -23,8 +27,9 @@ public class PiezaPalo extends PiezaBase {
 		 float yf = y / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT;
 		 float tamaño_bloque_fisico = tamaño_bloque / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT;
 		 WeldJointDef jointdef = new  WeldJointDef();
-		 jointdef.collideConnected =true;
-		 jointdef.referenceAngle=45;
+		 
+		 jointdef.referenceAngle=0;
+		
 		 bloques.get(0).getCuerpo().setTransform(xf, yf, 0);
 		 bloques.get(1).getCuerpo().setTransform(xf, yf+tamaño_bloque_fisico , 0);
 		 bloques.get(2).getCuerpo().setTransform(xf, yf+tamaño_bloque_fisico*2, 0);
@@ -64,6 +69,12 @@ public class PiezaPalo extends PiezaBase {
 		 }
 		
 		 
+	}
+
+	@Override
+	public PiezaBase destruirPieza(List<Fixture> a_borrar) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	
