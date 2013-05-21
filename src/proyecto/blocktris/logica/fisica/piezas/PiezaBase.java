@@ -1,7 +1,9 @@
 package proyecto.blocktris.logica.fisica.piezas;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import org.andengine.entity.IEntity;
 import org.andengine.entity.sprite.TiledSprite;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
@@ -30,6 +32,8 @@ static	class Bloque extends ObjetoFisico{
 			grafico = new TiledSprite(0,0, tamaño_bloque,tamaño_bloque, ManagerRecursos.getInstancia().trBloques.deepCopy(),ManagerRecursos.getInstancia().vbom );
 			cuerpo  = PhysicsFactory.createBoxBody(mundo, grafico, BodyType.DynamicBody , fixturedef);
 			
+			cuerpo.setUserData(this);
+			grafico.setUserData(this);
 			((TiledSprite)grafico).setCurrentTileIndex(color.ordinal());
 			mundo.registerPhysicsConnector(new PhysicsConnector(this.grafico ,this.cuerpo));
 		}
@@ -45,7 +49,26 @@ static	class Bloque extends ObjetoFisico{
 	protected boolean modificada = false;
 	protected ArrayList<Bloque> bloques = new ArrayList<Bloque>();
 	
-
+	
+	public void registrarGraficos(IEntity entidad){
+		for(Bloque b: bloques){
+			entidad.attachChild(b.getGrafico());	
+		}
+	}
+	
+	public PiezaBase destruirPieza(List<Bloque> a_borrar){
+		
+		
+		
+		return null;	
+	}
+	
+	public void desregistrarGraficos(){
+		for(Bloque b: bloques){
+			b.getGrafico().detachSelf();	
+		}
+	}
+	
 	public PiezaBase(PhysicsWorld mundo, float x,float y,float tamaño_bloque,FixtureDef fixturedef)	{}
 
 }
