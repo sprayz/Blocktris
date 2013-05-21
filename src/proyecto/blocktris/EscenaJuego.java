@@ -11,6 +11,7 @@ import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.TiledSprite;
+import org.andengine.entity.util.FPSLogger;
 import org.andengine.extension.debugdraw.DebugRenderer;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
@@ -41,7 +42,7 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import proyecto.blocktris.logica.EscenaBase;
 import proyecto.blocktris.logica.fisica.ObjetoFisico;
 import proyecto.blocktris.logica.fisica.piezas.IPieza;
-import proyecto.blocktris.logica.fisica.piezas.enlazadas.PiezaPalo;
+import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaPalo;
 import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 
 public class EscenaJuego extends EscenaBase implements IAccelerationListener, IOnSceneTouchListener, IOnAreaTouchListener {
@@ -69,12 +70,12 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		
 		tamaño_bloque = tamaño_bloque - 0.2f / COLUMNAS;
 		
-	
+		motor.registerUpdateHandler(new FPSLogger());
 		//fondo
 		setBackground(new Background(Color.RED));
 		
 		//mundo fisico
-		mundo= new FixedStepPhysicsWorld(60,new Vector2(0, SensorManager.GRAVITY_EARTH), false,100,50);
+		mundo= new FixedStepPhysicsWorld(60,new Vector2(0, SensorManager.GRAVITY_EARTH), false);
 		//activamos le sensor de rientacion para cambiar la gravedad
 		managerRecursos.actividadJuego.getEngine().enableAccelerationSensor(managerRecursos.actividadJuego,this);
 		 motor .setTouchController(new MultiTouchController());
@@ -101,7 +102,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		pared_derecha=PhysicsFactory.createLineBody(mundo, camara.getWidth(), 0,camara.getWidth() , camara.getHeight(), fdef_muro);
 		
 		Random rnd = new Random();
-		for(int i =0;i <3;i++){
+		for(int i =0;i<4;i++){
 			PiezaPalo pieza = new PiezaPalo(mundo, camara.getWidth() * rnd.nextFloat(), camara.getHeight()* rnd. nextFloat(), tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO ); 
 			pieza.registrarGraficos(this);
 			pieza.registrarAreasTactiles(this);
@@ -110,10 +111,10 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		
 		
 		registerUpdateHandler(mundo); 
-	  //  DebugRenderer debug = new DebugRenderer(mundo, vbom);
-	  //  debug.setDrawBodies(true);
-	  //  debug.setDrawJoints(true);
-	  //  attachChild(debug); 
+	    DebugRenderer debug = new DebugRenderer(mundo, vbom);
+	    debug.setDrawBodies(true);
+	    debug.setDrawJoints(true);
+	    attachChild(debug); 
 	}
 
 	@Override
@@ -152,7 +153,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		final Body body = ((ObjetoFisico)entidad.getUserData()).getCuerpo();
 		final MouseJointDef mouseJointDef = new MouseJointDef();
 
-		final Vector2 localPoint = Vector2Pool.obtain((pTouchAreaLocalX - entidad.getWidth() * 0.5f) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, (pTouchAreaLocalY - entidad.getHeight() * 0.5f) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
+		final Vector2 localPoint = Vector2Pool.obtain((pTouchAreaLocalX - entidad.getWidth() * entidad.getOffsetCenterX()) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, 
+				(pTouchAreaLocalY - entidad.getHeight() * entidad.getOffsetCenterY()) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
 		//this.mGroundBody.setTransform(localPoint, 0);
 
 		mouseJointDef.bodyA = suelo;
