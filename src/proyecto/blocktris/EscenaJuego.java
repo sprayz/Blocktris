@@ -102,7 +102,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		pared_derecha=PhysicsFactory.createLineBody(mundo, camara.getWidth(), 0,camara.getWidth() , camara.getHeight(), fdef_muro);
 		
 		Random rnd = new Random();
-		for(int i =0;i<4;i++){
+		for(int i =0;i<5;i++){
 			PiezaPalo pieza = new PiezaPalo(mundo, camara.getWidth() * rnd.nextFloat(), camara.getHeight()* rnd. nextFloat(), tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO ); 
 			pieza.registrarGraficos(this);
 			pieza.registrarAreasTactiles(this);

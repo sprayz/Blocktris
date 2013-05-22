@@ -31,7 +31,7 @@ public abstract class PiezaBase implements IPieza {
 	
 	
 public static	class Bloque extends ObjetoFisico{
-		
+		private ArrayList<Bloque> adjacentes;
 		private Fixture fixtura;
 		public static enum ColorBloque{
 			AZUL,VERDE,GRIS,MORADO,ROJO,ARENA
@@ -39,6 +39,7 @@ public static	class Bloque extends ObjetoFisico{
 		}
 		
 		public Bloque (PhysicsWorld  mundo, Body cuerpo_base ,float x,float y, float tamaño_bloque,ColorBloque color ,FixtureDef fixturedef) {
+			this.adjacentes= new ArrayList<Bloque>();
 			this.cuerpo = cuerpo_base;
 			grafico = new TiledSprite(0,0, tamaño_bloque,tamaño_bloque, ManagerRecursos.getInstancia().trBloques.deepCopy(),ManagerRecursos.getInstancia().vbom );
 			
@@ -48,53 +49,29 @@ public static	class Bloque extends ObjetoFisico{
 			//NO TOCAR
 			//Yo futuro, puede que creas que sabes lo que haces, TE EQUIVOCAS.
 			Vector2 centro ;
-			
 			centro =Vector2Pool.obtain((x*tamaño_bloque_fisico) + tamaño_bloque_fisico /2 ,
 					(y* tamaño_bloque_fisico) +tamaño_bloque_fisico /2  );
 
-			
 			fixturedef.shape = new PolygonShape();
 			((PolygonShape) fixturedef.shape).setAsBox(tamaño_bloque_fisico /2, tamaño_bloque_fisico /2, centro, 0f);
-			//sin rotación respecto al cuerpo
-			//forma.setAsBox( tamaño_bloque_fisico /2, tamaño_bloque_fisico/2,centro,0f); 
 			
-			//añadimos la fixture al cuerpo y rezamos apra que todo haya ido bien 
 			fixtura= this.cuerpo.createFixture(fixturedef);
 			
-			
-					
-				
-			
-			
-			//dios que función más obtusa	
-			//Según parece el anchorcenter se  especifica en  relacion con el tamaño de  el sprite
-			//Es decir  el valor por defecto en esta rama ,AnchorCenter(adivinas por qué?) , 0.5 
-				//coloca en ancla en la mitad del sprite
-				
-			//Ya rozaba los lindes de la locura cuando me dió por mirar la definición de
-			//este método. Por lo visto incluso los jodidos comentarios sobran cuando el código es,
-			//según esta panda de  patanes, "suficientemente descriptivo" o " autodocumentado"
-
-			//NO TOCAR
-			//Yo futuro, puede que creas que sabes lo que haces, TE EQUIVOCAS.
-			
+			fixtura.setUserData(this);
 			grafico.setAnchorCenter(-x  ,
 					-y);
 				
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
 			grafico.setUserData(this);
 			((TiledSprite)grafico).setCurrentTileIndex(color.ordinal());
 			mundo.registerPhysicsConnector(new PhysicsConnector(this.grafico ,this.cuerpo));
+		}
+
+		public ArrayList<Bloque> getAdjacentes() {
+			return adjacentes;
+		}
+
+		public Fixture getFixtura() {
+			return fixtura;
 		}
 	}
 	

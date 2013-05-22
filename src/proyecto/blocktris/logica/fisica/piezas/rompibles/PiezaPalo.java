@@ -38,6 +38,16 @@ public class PiezaPalo extends PiezaBase {
 		bloques.add(new Bloque(mundo,cuerpo,-1,1,tamaño_bloque,ColorBloque.ROJO ,IPieza.FIXTUREDEF_DEFECTO ));
 		cuerpo.setTransform(xf, yf, 0);
 		 
+		bloques.get(0).getAdjacentes().add(bloques.get(1));
+		bloques.get(1).getAdjacentes().add(bloques.get(0));
+		
+		
+		bloques.get(1).getAdjacentes().add(bloques.get(2));
+		bloques.get(2).getAdjacentes().add(bloques.get(1));
+		
+		bloques.get(2).getAdjacentes().add(bloques.get(3));
+		bloques.get(3).getAdjacentes().add(bloques.get(2));
+		
 		 
 		 for(Bloque b: bloques){
 			 b.setPadre(this);
