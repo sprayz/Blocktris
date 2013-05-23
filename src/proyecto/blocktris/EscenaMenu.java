@@ -9,6 +9,7 @@ import org.andengine.entity.scene.menu.item.*;
 import org.andengine.entity.scene.menu.item.decorator.*;
 import org.andengine.util.adt.color.Color;
 
+import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -18,6 +19,7 @@ import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 
 public class EscenaMenu extends EscenaBase implements IOnMenuItemClickListener{
 
+	final static int ACTIVIDAD_BLUETOOTH = 6;
 
 	@Override
 	public void crearEscena() {
@@ -64,6 +66,12 @@ public class EscenaMenu extends EscenaBase implements IOnMenuItemClickListener{
 		
 	}
 
+	
+	
+	
+	
+	
+	
 	@Override
 	public boolean onMenuItemClicked(MenuScene pMenuScene, IMenuItem pMenuItem,
 			float pMenuItemLocalX, float pMenuItemLocalY) {
@@ -76,6 +84,7 @@ public class EscenaMenu extends EscenaBase implements IOnMenuItemClickListener{
 			ManagerEscenas.getInstancia().setEscena(TipoEscena.ESCENA_JUEGO );
 			return true;
 		case 2:
+			ActividadBluetooth.lanzar(managerRecursos.actividadJuego);
 			return true;
 		default:
 		

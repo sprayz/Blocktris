@@ -22,6 +22,7 @@ import org.andengine.input.touch.detector.PinchZoomDetector;
 import org.andengine.input.touch.detector.PinchZoomDetector.IPinchZoomDetectorListener;
 import org.andengine.ui.activity.BaseGameActivity;
 
+import android.content.Intent;
 import android.view.KeyEvent;
 
 import proyecto.blocktris.recursos.ManagerEscenas;
@@ -118,4 +119,30 @@ public class MainActivity extends BaseGameActivity{
 	        
 	    	pOnPopulateSceneCallback.onPopulateSceneFinished();
 	    }
+	    
+	    
+	    @Override
+		protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		    switch(requestCode) {
+		        case EscenaMenu.ACTIVIDAD_BLUETOOTH :
+		            
+		        	
+		            break;
+		        
+		    }
+		}
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
 	}
