@@ -72,8 +72,8 @@ public class ActividadBluetooth extends Activity{
 		tr.setLayoutParams(lp);
 
 		TextView tvLeft = new TextView(this);
-		tvLeft.setLayoutParams(lp);
-		tvLeft.setBackgroundColor(Color.WHITE);
+		//tvLeft.setLayoutParams(lp);
+		tvLeft.setBackgroundColor(Color.RED);
 		tvLeft.setText(bd.getName());
 		
 		tr.addView(tvLeft);
@@ -85,10 +85,10 @@ public class ActividadBluetooth extends Activity{
 		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
 		TableRow tr = new TableRow(this);
-		//tr.setLayoutParams(lp);
+		tr.setLayoutParams(lp);
 
 		TextView tvLeft = new TextView(this);
-		//tvLeft.setLayoutParams(lp);
+	tvLeft.setLayoutParams(lp);
 		tvLeft.setBackgroundColor(Color.RED);
 		tvLeft.setText(prueba);
 		tr.addView(tvLeft);
