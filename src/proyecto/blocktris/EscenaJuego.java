@@ -1,5 +1,6 @@
 package proyecto.blocktris;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.andengine.entity.IEntity;
@@ -26,7 +27,9 @@ import org.andengine.input.touch.controller.ITouchEventCallback;
 import org.andengine.input.touch.controller.MultiTouch;
 import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.opengl.texture.region.*;
+import org.andengine.util.adt.array.ArrayUtils;
 import org.andengine.util.adt.color.Color;
+import org.andengine.util.adt.list.ListUtils;
 
 import android.hardware.SensorManager;
 import android.view.MotionEvent;
@@ -102,8 +105,18 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		pared_derecha=PhysicsFactory.createLineBody(mundo, camara.getWidth(), 0,camara.getWidth() , camara.getHeight(), fdef_muro);
 		
 		Random rnd = new Random();
+	
 		for(int i =0;i<5;i++){
 			PiezaPalo pieza = new PiezaPalo(mundo, camara.getWidth() * rnd.nextFloat(), camara.getHeight()* rnd. nextFloat(), tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO ); 
+			pieza.getCuerpo().setAngularVelocity(3);
+			IPieza temp = pieza.separarBloques(new ArrayList(pieza.getBloques().subList(0, 2)));
+			temp.getCuerpo().setAngularVelocity(3);
+				temp.registrarGraficos(this);
+				temp.registrarAreasTactiles(this);
+					IPieza temp2 =temp.separarBloques(new ArrayList(temp.getBloques().subList(0, 1)));
+					temp2.getCuerpo().setAngularVelocity(3);
+					temp2.registrarGraficos(this);
+					temp2.registrarAreasTactiles(this);
 			pieza.registrarGraficos(this);
 			pieza.registrarAreasTactiles(this);
 		}

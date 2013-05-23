@@ -71,11 +71,7 @@ public class PiezaPalo extends PiezaBase {
 		 
 	}
 
-	@Override
-	public PiezaBase destruirPieza(List<Fixture> a_borrar) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	
 
 	
 

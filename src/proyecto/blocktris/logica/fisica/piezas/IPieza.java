@@ -19,6 +19,7 @@ import org.andengine.util.adt.array.ArrayUtils;
 
 
 
+import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
 import proyecto.blocktris.recursos.ManagerRecursos;
 
 
@@ -44,7 +45,7 @@ public interface IPieza {
 		PIEZA_CUBO,
 		PIEZA_PALO,
 		PIEZA_LLAVE,
-		PIEZA_LLAVE2
+		PIEZA_LLAVE2,
 		}
 
       public static FixtureDef PROPIEDADES_DEFECTO = PhysicsFactory.createFixtureDef(1.0f, 0.5f, 0.5f);
@@ -55,7 +56,9 @@ public interface IPieza {
       public IPieza destruirPieza(List<Fixture> a_borrar);
       public void registrarAreasTactiles(Scene escena);
       public void desregistrarAreasTactiles(Scene escena);
-      
+  		public IPieza separarBloques(List<Bloque> list);
+		public AbstractList getBloques();
+		public Body getCuerpo();
 		
 		
 	

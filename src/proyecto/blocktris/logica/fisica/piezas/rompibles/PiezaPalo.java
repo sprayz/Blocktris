@@ -29,7 +29,6 @@ public class PiezaPalo extends PiezaBase {
 		bdef.active=true;
 		bdef.awake= true;
 		bdef.type = BodyType.DynamicBody ;
-
 		
 		cuerpo= mundo.createBody(bdef);
 		bloques.add(new Bloque(mundo,cuerpo,-1,-2,tamaño_bloque,ColorBloque.ROJO ,IPieza.FIXTUREDEF_DEFECTO ));
@@ -41,7 +40,7 @@ public class PiezaPalo extends PiezaBase {
 		bloques.get(0).getAdjacentes().add(bloques.get(1));
 		bloques.get(1).getAdjacentes().add(bloques.get(0));
 		
-		
+//	bloques.get(0).getCuerpo().destroyFixture();
 		bloques.get(1).getAdjacentes().add(bloques.get(2));
 		bloques.get(2).getAdjacentes().add(bloques.get(1));
 		
