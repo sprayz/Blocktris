@@ -22,6 +22,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="proyecto.blocktris.ActividadBluetooth"
+            android:label="@string/title_activity_actividad_bluetooth" 
+            android:theme="@android:style/Theme.Dialog"
+            android:excludeFromRecents="true">
+        </activity>
     </application>
 
 </manifest>
