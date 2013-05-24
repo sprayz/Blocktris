@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="actividadBluetooth_refrescar">Refrescar</string>
+    <string name="title_activity_actividad_bluetooth">Selecciona un Dispositivo</string>
+     <string name="actividadBluetooth_conectar">Conectar</string>
 </resources>

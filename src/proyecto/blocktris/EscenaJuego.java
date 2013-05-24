@@ -123,6 +123,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		
 		
 		
+		
+		
 		registerUpdateHandler(mundo); 
 	    DebugRenderer debug = new DebugRenderer(mundo, vbom);
 	    debug.setDrawBodies(true);
@@ -239,6 +241,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					if(joints[pSceneTouchEvent.getPointerID()]!= null) {
 						final Vector2 vec = Vector2Pool.obtain(pSceneTouchEvent.getX() / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, pSceneTouchEvent.getY() / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
 						joints[pSceneTouchEvent.getPointerID()].setTarget(vec);
+						//joints[pSceneTouchEvent.getPointerID()].getBodyB().applyAngularImpulse(0.5f);
 						Vector2Pool.recycle(vec);
 					}
 					return true;

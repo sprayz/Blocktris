@@ -16,7 +16,9 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -58,7 +60,29 @@ public class ActividadBluetooth extends Activity{
 		resultado.putExtra("Oponente", seleccionado);
 		// put data that you want returned to activity A
 		setResult(Activity.RESULT_OK, resultado);
+		
+		br = new BroadcastReceiver() {
+			public void onReceive(Context context, Intent intent) {
+			    String action = intent.getAction();
 
+			
+
+			    if (BluetoothDevice.ACTION_FOUND.equals(action)) 
+			    {
+			       
+			    	// sacamos el dispositivo
+			        BluetoothDevice d = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+			    
+			        Log.d("Actividad Blutooth", "Dispositivo de nombre:" + d.getName());
+			        //y lo añadimos a la lista para luego ponerlo en la tabla
+			        dispositivos.add(d);
+			        añadirLista(d);
+			        
+			    }
+			  }
+			};
+			IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+			registerReceiver(br, filter);
 	}
 
 	public void dispositivoSeleccionado(View v) {
@@ -71,30 +95,32 @@ public class ActividadBluetooth extends Activity{
 		TableRow tr = new TableRow(this);
 		tr.setLayoutParams(lp);
 
-		TextView tvLeft = new TextView(this);
+		TextView tvNombre = new TextView(this);
+		Button bConectar= new Button(this);
 		//tvLeft.setLayoutParams(lp);
-		tvLeft.setBackgroundColor(Color.RED);
-		tvLeft.setText(bd.getName());
-		
-		tr.addView(tvLeft);
+		//tvLeft.setBackgroundColor(Color.DKGRAY);
+		bConectar.setText(getString(R.string.actividadBluetooth_conectar));
+		tvNombre.setText(bd.getName());
+		bConectar.setTextColor(Color.rgb(3, 255, 255));
+		tr.addView(bConectar);
+		tr.addView(tvNombre);
+		tr.setTag(new Integer(lista.getChildCount()));
+		bConectar.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				Button bot = (Button) v;
+				TableRow tr = (TableRow) bot.getParent();
+				resultado.putExtra("Oponente", dispositivos.get(((Integer)tr.getTag()).intValue()));
+				// put data that you want returned to activity A
+				setResult(Activity.RESULT_OK, resultado);
+				finish();
+			}
+		});
 		lista.addView(tr);
 	}
 	
 	
-	private void añadirListap(String prueba) {
-		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.WRAP_CONTENT);
-		TableRow tr = new TableRow(this);
-		tr.setLayoutParams(lp);
-
-		TextView tvLeft = new TextView(this);
-	tvLeft.setLayoutParams(lp);
-		tvLeft.setBackgroundColor(Color.RED);
-		tvLeft.setText(prueba);
-		tr.addView(tvLeft);
-		lista.addView(tr);
-
-	}
 	
 	
 
@@ -110,46 +136,20 @@ public class ActividadBluetooth extends Activity{
 
 	public void refrescar(View v) {
 		// borramos llas entradas actuales
-		//dispositivos.clear();
-		//limpiarLista();
+		dispositivos.clear();
+		limpiarLista();
 
 		//ponemos el bluetooth a escanear
-		
+		BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
 		BluetoothAdapter.getDefaultAdapter().startDiscovery(); 
-		br = new BroadcastReceiver() {
-		public void onReceive(Context context, Intent intent) {
-		    String action = intent.getAction();
-
 		
 
-		    if (BluetoothDevice.ACTION_FOUND.equals(action)) 
-		    {
-		       
-		    	// sacamos el dispositivo
-		        BluetoothDevice d = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-		        Log.d("Actividad Blutooth", "Dispositivo de nombre:" + d.getName() );
-		        //y lo añadimos a la lista para luego ponerlo en la tabla
-		        dispositivos.add(d);
-		        añadirLista(d);
-		        
-		    }
-		  }
-		};
-
-		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND); 
-		registerReceiver(br, filter);
+		 
 		
 		
-		añadirListap("adsasd");
+		
+		
 		// añadimos las entradas de los dispositivos conocidos
-		BluetoothAdapter mBluetoothAdapter = BluetoothAdapter
-				.getDefaultAdapter();
-		Set<BluetoothDevice> pairedDevices = mBluetoothAdapter
-				.getBondedDevices();
-
-		for (BluetoothDevice bt : pairedDevices)
-			dispositivos.add(bt);
-		
 		
 		
 		
@@ -160,9 +160,11 @@ public class ActividadBluetooth extends Activity{
 	@Override
 	protected void onDestroy() {
 		Log.d("Actividad Bluetooth", "Actividad Destruida");
+		BluetoothAdapter.getDefaultAdapter().cancelDiscovery();
+		unregisterReceiver(br);
 		super.onDestroy();
 		
-		unregisterReceiver(br);
+		
 	}
 
 	// Wheeee! en la era de la multitarea tenemos una API que asume una de dos

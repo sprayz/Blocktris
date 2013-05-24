@@ -4,6 +4,7 @@
     <string name="app_name">Blocktris</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-    <string name="title_activity_actividad_bluetooth">Bluetooth</string>
-	  <string name="actividadBluetooth_refrescar">Refresh</string>
+    <string name="title_activity_actividad_bluetooth">Select a Device</string>
+	<string name="actividadBluetooth_refrescar">Scan</string>
+	 <string name="actividadBluetooth_conectar">Connect</string>
 </resources>
