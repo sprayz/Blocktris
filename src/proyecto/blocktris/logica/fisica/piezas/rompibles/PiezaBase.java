@@ -1,7 +1,9 @@
 package proyecto.blocktris.logica.fisica.piezas.rompibles;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.andengine.entity.IEntity;
 import org.andengine.entity.scene.Scene;
@@ -96,7 +98,12 @@ public static	class Bloque extends ObjetoFisico{
 			return adjacentes;
 		}
 		
-
+		public float distanciaA(Bloque b){
+			
+			return   Math.abs(this.getX() - b.getX())  +   Math.abs(this.getY() - b.getY());
+		}
+		
+		
 		@Override
 		public void destruir() {
 			//cuerpo.setActive(false);
@@ -107,6 +114,100 @@ public static	class Bloque extends ObjetoFisico{
 
 		public Fixture getFixtura() {
 			return fixtura;
+		}
+		
+		//FML  no quiero empezar con problemas de pathfinding
+		
+		/*
+		 * en principio  es un algoritmo A* muy simplificado por varios motivos:
+		 * 
+		 * 1.Cada bloque  guarda su posición absoluta en coordenadas
+		 * 
+		 * 2.Cada bloque  guarda una lista  de sus adjuntos
+		 * 
+		 * En este caso calcular el coste es tan facil cómo restar sus 
+		 * coordenadas absolutas.
+		 * 
+		 * Y cómo los adjuntos están precomputados no hay  que  pegarse cón problemas de 
+		 * obstáculos.
+		 * 
+		 * 
+		 * 
+		 */
+		/**
+		 * Esta funcion busca  si  hay un camino entre BloqueA y BloqueB.
+		 * En caso negativo  puebla  ListaIsla con todos los bloques, alcanzables desde 
+		 * BloqueA
+		 * 
+		 * 
+		 * 
+		 */
+		
+		
+		
+		
+		public boolean caminoEntreBloques(Bloque inicio, Bloque  objetivo, Set<Bloque> alcanzablesDesdeInicio ){
+			/* Aunque Bloque no implementa hashCode() ni equals() podemos usar  un HashSet
+			 * aceptando que solo diferenciará entre referencias al mismo objeto
+			 * 
+			 * Es decir, dos instancias de Bloque  con exactamente los mismos datos se considerarán 
+			 * diferentes.Pero dos referencias al mismo Bloque (Adyacentes etc) se considerarán iguales.
+			 * 
+			 * Teniendo en cuenta que se usa la comparación de igualdad  para comprobar duplicados.
+			 * es decir (IMPORTANTE!):
+			 * 
+			 *  1 A.equals(B)   significa que   A.hashCode() == B.hashcode()
+			 *  2 !A.equals(B)  significa que  A.hashCode() != B.hashcode()
+			 *  
+			 *  Al no implementar Bloque ninguno de los dos métodos la distinción se hace
+			 *  a nivel de Object.
+			 * 
+			 * 
+			 */
+			Set<Bloque> candidatos = new HashSet<Bloque>(); //candidatos a considerear 
+			Set <Bloque> navegados = new HashSet<Bloque>(); // candidatos descartados(ya visitados)
+			Bloque actual;		//Bloque  en el que estamos
+			float puntuacionActual;
+			float puntuacionCandidato;
+			actual = inicio;
+			
+			
+			
+			candidatos.add(inicio);
+			while(!candidatos.isEmpty()){
+				/*
+				 * en pathfinding real  llevaria la cuenta de la puntuación
+				 * peor en esta caso  dados los pocos nodos a atravesar
+				 * lo mas probable es que  simplemente alojar la memoria para llevar la puntuación 
+				 * a parte  cueste más tiempo que  calcularla.
+				 * 
+				 * TODO: Revisar si el rendimiento es aceptable
+				 */
+				
+				//sacamos el candidato  con la menor puntuación
+				
+				for (Bloque b: candidatos){
+					
+					puntuacionCandidato = b.distanciaA(objetivo);
+					if(puntuacionCandidato < puntuacionActual){
+						
+						
+					}
+				}
+				
+				
+				
+				
+				
+				
+				
+			}
+			if(alcanzablesDesdeInicio != null)
+				alcanzablesDesdeInicio = navegados;
+			
+			
+			
+			return  false;
 		}
 		
 	}
@@ -156,16 +257,16 @@ public ArrayList<Bloque> getBloques() {
 		//teneos que sacar la distancia entre  los bloques para la nueva 
 		//para poder centrar el cuerpo y posicionar las fixturas adecuadamente.
 		
-		/*
-		int maxDimX= bloques_antiguos.get(0).getX();
+		
+		float maxDimX= lista_bloques.get(0).getX();
 		
 		
 		
-		int minDimX= bloques_antiguos.get(0).getX();
-		int maxDimY= bloques_antiguos.get(0).getY();
-		int minDimY= bloques_antiguos.get(0).getY();
+		float minDimX= lista_bloques.get(0).getX();
+		float maxDimY= lista_bloques.get(0).getY();
+		float minDimY= lista_bloques.get(0).getY();
 		
-		for(Bloque b : bloques_antiguos){
+		for(Bloque b : lista_bloques){
 			//para las X
 			if(b.getX() > maxDimX){
 				maxDimX = b.getX();
@@ -187,10 +288,11 @@ public ArrayList<Bloque> getBloques() {
 		
 		//nuestra nueva pieza ocupa una cuadrícula virtual de (dimX+1) por (dimY+1) 
 	
-		 int dimX =(maxDimX - minDimX);
-		 int dimY=(maxDimY - minDimY);
+		 float dimX =(maxDimX - minDimX);
+		 float dimY=(maxDimY - minDimY);
 		 
-		 */
+		 //TODO: reajustar el centro(anchor) del cuerpo
+		 
 		
 		
 		//sacamos la definicion del cuerpo anterior
@@ -228,14 +330,72 @@ public ArrayList<Bloque> getBloques() {
 	
 	}
 	
+	/**
+	 * Quita el bloque de la pieza teniendo en cuenta las dependencias.
+	 * Divide la pieza en varias si fuese necesario.
+	 * @return Esta función retorna una lista de piezas que se divide la original 
+	 */
+	public ArrayList<IPieza> quitarBloqueDesenlazar(Bloque b){
+		boolean division = true;
+		
+		//quitamos el bloque de los bloque adyacentes , de los contiguos a él mismo
+		//y  comprobamos  si tienen algún bloque adyacente en común
+		//si fiuese el caso no hace falta dividir la pieza
+		//en caso contrario cada adyacente ( y  sus resèctivos adyacentes recursivamente)
+		//representa una sección nueva de la pieza
+		List<Bloque> comunes=new ArrayList<Bloque>();
+		for (Bloque bloque : b.getAdjacentes()){
+			
+			//quitamos el bloque de los ad
+			bloque.getAdjacentes().remove(b);
+			comunes.retainAll(bloque.getAdjacentes());
+			
+			
+			// si  tienen algúin bloque en común  entonces 
+			// no hace falta dividir
+			if ( !comunes.isEmpty()){
+				division=false;
+				break;
+				
+			}
+				
+			
+			//creamos una lista con  los adyacentes del bloque
+			comunes =  new ArrayList<Bloque>(bloque.getAdjacentes());
+			//si la lista contiene 
+			
+		}
+		
+		
+		// si division es verdadero
+		if(division){
+			for(Bloque  bloque_inicial : b.getAdjacentes()  ){
+				
+				
+			}
+			
+				
+				
+		}
+		
+		
+		return null;
+	}
 	
 	
-	
-	public Bloque quitarBloque(Bloque b){
+	public boolean quitarBloque(Bloque b){
 		Bloque res= null;
-		b.destruir();
-		bloques.remove(b);
-		return res;
+		if(bloques.remove(b)){
+		
+			for(Bloque bloque : bloques){
+				
+				bloque.getAdjacentes().remove(b);	
+			}
+			b.destruir();
+			return true;
+		}
+		return false;	
+		
 		
 	}
 	
