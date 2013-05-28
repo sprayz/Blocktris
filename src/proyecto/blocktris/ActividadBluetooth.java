@@ -170,7 +170,8 @@ public class ActividadBluetooth extends Activity{
 	// Wheeee! en la era de la multitarea tenemos una API que asume una de dos
 	// cosas:
 	// 1.La multitarea es una leyenda
-	// 2.El programador/usuario es hyperactivo
+	// 2.El programador/usuario es hyperactivo e incapaz de prestar atencion a nada 
+	//	 que no lo esté abofeteando continuamente
 	// FML con android y su diseño autoritario
 
 	@Override

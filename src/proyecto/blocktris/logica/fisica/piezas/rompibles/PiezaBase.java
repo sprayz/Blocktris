@@ -1,14 +1,8 @@
 package proyecto.blocktris.logica.fisica.piezas.rompibles;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Deque;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 
 import org.andengine.entity.IEntity;
@@ -25,7 +19,6 @@ import proyecto.blocktris.logica.fisica.ObjetoFisico;
 import proyecto.blocktris.logica.fisica.Utilidades;
 import proyecto.blocktris.logica.fisica.piezas.IPieza;
 import proyecto.blocktris.logica.fisica.piezas.IPieza.PIEZAS;
-import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
 import proyecto.blocktris.recursos.ManagerRecursos;
 
 import com.badlogic.gdx.math.Vector2;
@@ -115,87 +108,58 @@ public static	class Bloque extends ObjetoFisico{
 		public void destruir() {
 			//cuerpo.setActive(false);
 			cuerpo.destroyFixture(fixtura);
-			Scene esce =(Scene) grafico.getParent();
-			esce.unregisterTouchArea(grafico);
 			grafico.detachSelf();
-			grafico.dispose();
+			
 		}
 
 		public Fixture getFixtura() {
 			return fixtura;
 		}
 		
+		//FML  no quiero empezar con problemas de pathfinding
 		
-	
-	
+		/*
+		 * en principio  es un algoritmo A* muy simplificado por varios motivos:
+		 * 
+		 * 1.Cada bloque  guarda su posición absoluta en coordenadas
+		 * 
+		 * 2.Cada bloque  guarda una lista  de sus adjuntos
+		 * 
+		 * En este caso calcular el coste es tan facil cómo restar sus 
+		 * coordenadas absolutas.
+		 * 
+		 * Y cómo los adjuntos están precomputados no hay  que  pegarse cón problemas de 
+		 * obstáculos.
+		 * 
+		 * 
+		 * 
+		 */
+		/**
+		 * Esta funcion busca  si  hay un camino entre BloqueA y BloqueB.
+		 * En caso negativo  puebla  ListaIsla con todos los bloques, alcanzables desde 
+		 * BloqueA
+		 * 
+		 * 
+		 * 
+		 */
 		
 		
-		public Set<Bloque> getAdyacentesRecursivo(){
-			/* Aunque Bloque no implementa hashCode() ni equals() podemos usar  un HashSet
-			 * aceptando que solo diferenciará entre referencias al mismo objeto
-			 * 
-			 * Es decir, dos instancias de Bloque  con exactamente los mismos datos se considerarán 
-			 * diferentes.Pero dos referencias al mismo Bloque (Adyacentes etc) se considerarán iguales.
-			 * 
-			 * Teniendo en cuenta que se usa la comparación de igualdad  para comprobar duplicados.
-			 * es decir (IMPORTANTE!):
-			 * 
-			 *  1 A.equals(B)   significa que   A.hashCode() == B.hashcode()
-			 *  2 !A.equals(B)  significa que  A.hashCode() != B.hashcode()
-			 *  
-			 *  Al no implementar Bloque ninguno de los dos métodos la distinción se hace
-			 *  a nivel de Object.
-			 * 
-			 * 
-			 * 
-			 */
-			
-			
-			
-		Deque<Bloque> candidatos = new LinkedList<Bloque>(); //candidatos a considerear 
-			
-			Set <Bloque> navegados = new HashSet<Bloque>(); // candidatos descartados(ya visitados)
-			
 		
-			Bloque actual;		//Bloque  en el que estamos
-			float puntuacionActual;
-			float puntuacionCandidato;
-			
-		  	
-			candidatos.addFirst(this);
-			
 		
-			/*
-			 * podemos usar poll() poruq no se va a dar el caso de elementos nulos
-			 */
-			//por cada candidato
-			while( !( (actual= candidatos.pollLast()) ==null  )  ){
-				//sacamos sus adyacentes
-				for( Bloque b : actual.getAdjacentes()){
-					//por cada adyacente , l añadimos a los navegados y a los candidatos
-					//para comprobar y tiene hijos que navegar
-					
-					
-					if(navegados.contains(b)==false){
-						candidatos.add(b);		
-					}
-					navegados.add(b);
-				}	
-				
-			}
-			return navegados;
+		
 	}
 	
 	
 	
 	
-}
+	
+	
 	
 	public PIEZAS getTipo() {
 	return tipo;
 }
 
-public List<Bloque> getBloques() {
+public ArrayList<Bloque> getBloques() {
 	return bloques;
 }
 
@@ -230,8 +194,11 @@ public List<Bloque> getBloques() {
 		//teneos que sacar la distancia entre  los bloques para la nueva 
 		//para poder centrar el cuerpo y posicionar las fixturas adecuadamente.
 		
-		/*
+		
 		float maxDimX= lista_bloques.get(0).getX();
+		
+		
+		
 		float minDimX= lista_bloques.get(0).getX();
 		float maxDimY= lista_bloques.get(0).getY();
 		float minDimY= lista_bloques.get(0).getY();
@@ -260,7 +227,7 @@ public List<Bloque> getBloques() {
 	
 		 float dimX =(maxDimX - minDimX);
 		 float dimY=(maxDimY - minDimY);
-		 */
+		 
 		 //TODO: reajustar el centro(anchor) del cuerpo
 		 
 		
@@ -303,82 +270,54 @@ public List<Bloque> getBloques() {
 	/**
 	 * Quita el bloque de la pieza teniendo en cuenta las dependencias.
 	 * Divide la pieza en varias si fuese necesario.
-	 * @return Esta función retorna una  lista de piezas que se divide la original 
+	 * @return Esta función retorna una lista de piezas que se divide la original 
 	 */
-	public List<IPieza> quitarBloqueDesenlazar(Bloque b){
+	public ArrayList<IPieza> quitarBloqueDesenlazar(Bloque b){
 		boolean division = true;
-		List<IPieza> resultado = new ArrayList<IPieza>();
-		//matriz de matrices (una para cada pieza resultado
-		ArrayList<Set<Bloque>> listaPieza = new ArrayList<Set<Bloque>>();
 		
-		//representa todos los bloques a los que se puede llegar desde  uno
-		//siguiendo los adyacentes.
-		Set<Bloque> isla ; 
-		
-		ArrayList<Bloque> aSaltarse = new ArrayList<Bloque>();
-		quitarBloque(b);
-		//por cada uno de los adyacente s al que bvvamos a quitar
- 		for(Bloque adyacente : b.getAdjacentes()){
+		//quitamos el bloque de los bloque adyacentes , de los contiguos a él mismo
+		//y  comprobamos  si tienen algún bloque adyacente en común
+		//si fiuese el caso no hace falta dividir la pieza
+		//en caso contrario cada adyacente ( y  sus resèctivos adyacentes recursivamente)
+		//representa una sección nueva de la pieza
+		List<Bloque> comunes=new ArrayList<Bloque>();
+		for (Bloque bloque : b.getAdjacentes()){
 			
-			//quitamos el bloque que vamos a eliminar de sus adyacentes
-			adyacente.getAdjacentes().remove(b);
-			
-			//si el bloque se queda solo no hace falta seguir calculando
-			//ya sabemos que  es parte de una pieza a separar
-			if(adyacente.getAdjacentes().isEmpty()){
-				Set<Bloque> temp = new HashSet<Bloque>();
-				temp.add(adyacente);
-				listaPieza.add(temp);
-				continue;
-			}
-				//si ya está incluido en otro conjunto nos lo saltamos
-			if(!aSaltarse.contains(adyacente)){
-				//en caso contrario sacamos todos sus adyacentes
-				isla = adyacente.getAdyacentesRecursivo();
-				//si sus adyacentes contienen alguno de los adyacentes del bloque a quitar
-				//siginifica que están en el mismo fragmento
-				for(Bloque c : isla){
-					if(b.getAdjacentes().contains(c)){
-						aSaltarse.add(c);
-					}
-					
-				}
-				//añadimos la "isla a la lista para mas tarde hacer una pieza con ella
-				listaPieza.add(isla);
-				
-				
-				
-				
-				
-				
-			}
+			//quitamos el bloque de los ad
+			bloque.getAdjacentes().remove(b);
+			comunes.retainAll(bloque.getAdjacentes());
 			
 			
-		
-			
-			
-			
-			
-			
-			
-		}
- 		
- 		for(Set<Bloque> bloques : listaPieza){
-			if(bloques.size() == this.getBloques().size()){
+			// si  tienen algúin bloque en común  entonces 
+			// no hace falta dividir
+			if ( !comunes.isEmpty()){
+				division=false;
 				break;
+				
 			}
 				
- 			resultado.add(separarBloques(new ArrayList<Bloque>(bloques)));
+			
+			//creamos una lista con  los adyacentes del bloque
+			comunes =  new ArrayList<Bloque>(bloque.getAdjacentes());
+			//si la lista contiene 
 			
 		}
 		
+		
+		// si division es verdadero
+		if(division){
+			for(Bloque  bloque_inicial : b.getAdjacentes()  ){
 				
 				
-		return resultado;
+			}
+			
+				
+				
 		}
 		
 		
-
+		return null;
+	}
 	
 	
 	public boolean quitarBloque(Bloque b){
@@ -401,10 +340,7 @@ public List<Bloque> getBloques() {
 	public IPieza separarBloques(List<Bloque> list){
 		if(list.size()== bloques.size())
 			return this;
-		Iterator<Bloque> it =list.iterator();
-		
-	
-		IPieza res = new PiezaBase(this.bloques.get(0).getMundo(),list);
+		IPieza res = new PiezaBase(list.get(0).getMundo(),list);
 		
 		for(Bloque b : list){
 			quitarBloque(b);
@@ -463,12 +399,9 @@ public List<Bloque> getBloques() {
 
 	@Override
 	public IPieza destruirPieza(List<Fixture> a_borrar) {
-		for(Bloque b : bloques ){
-			b.destruir();
-		}
-		bloques.clear();
-		this.cuerpo.setActive(false);
-		this.cuerpo.getWorld().destroyBody(this.cuerpo);
+		
+		
+		
 		return null;
 	}
 

@@ -50,16 +50,15 @@ public interface IPieza {
 
       public static FixtureDef PROPIEDADES_DEFECTO = PhysicsFactory.createFixtureDef(1.0f, 0.5f, 0.5f);
 
-      public static FixtureDef FIXTUREDEF_DEFECTO = PhysicsFactory.createFixtureDef(0.001f, 0.0f, 0.5f);
+      public static FixtureDef FIXTUREDEF_DEFECTO = PhysicsFactory.createFixtureDef(1.0f, 0.0f, 1.f);
       public void registrarGraficos(IEntity entidad);
       public void desregistrarGraficos();
       public IPieza destruirPieza(List<Fixture> a_borrar);
       public void registrarAreasTactiles(Scene escena);
       public void desregistrarAreasTactiles(Scene escena);
   		public IPieza separarBloques(List<Bloque> list);
-		public List<Bloque> getBloques();
+		public AbstractList getBloques();
 		public Body getCuerpo();
-		public Collection<IPieza> quitarBloqueDesenlazar(Bloque bloque);
 		
 		
 	
