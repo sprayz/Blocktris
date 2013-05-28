@@ -31,10 +31,10 @@ public class PiezaT extends PiezaBase {
 		bdef.type = BodyType.DynamicBody ;
 		
 		cuerpo= mundo.createBody(bdef);
-		bloques.add(new Bloque(mundo,cuerpo,-1,0,tamaño_bloque,ColorBloque.ROJO ,IPieza.FIXTUREDEF_DEFECTO ));
-		bloques.add(new Bloque(mundo,cuerpo,0,0,tamaño_bloque,ColorBloque.ROJO ,IPieza.FIXTUREDEF_DEFECTO ));
-		bloques.add(new Bloque(mundo,cuerpo,1,0,tamaño_bloque,ColorBloque.ROJO ,IPieza.FIXTUREDEF_DEFECTO ));
-		bloques.add(new Bloque(mundo,cuerpo,0,1,tamaño_bloque,ColorBloque.ROJO ,IPieza.FIXTUREDEF_DEFECTO ));
+		bloques.add(new Bloque(mundo,cuerpo,-1,0,tamaño_bloque,ColorBloque.ARENA ,IPieza.FIXTUREDEF_DEFECTO ));
+		bloques.add(new Bloque(mundo,cuerpo,0,0,tamaño_bloque,ColorBloque.ARENA,IPieza.FIXTUREDEF_DEFECTO ));
+		bloques.add(new Bloque(mundo,cuerpo,1,0,tamaño_bloque,ColorBloque.ARENA ,IPieza.FIXTUREDEF_DEFECTO ));
+		bloques.add(new Bloque(mundo,cuerpo,0,1,tamaño_bloque,ColorBloque.ARENA,IPieza.FIXTUREDEF_DEFECTO ));
 		cuerpo.setTransform(xf, yf, 0);
 		 
 		

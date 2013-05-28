@@ -4,7 +4,7 @@ public class PiezaFactory {
 
 	private PiezaFactory() {}
 	
-	
+	//public static IPieza piezaAleatoria()
 	
 
 }

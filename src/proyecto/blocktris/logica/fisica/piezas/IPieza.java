@@ -53,7 +53,7 @@ public interface IPieza {
       public static FixtureDef FIXTUREDEF_DEFECTO = PhysicsFactory.createFixtureDef(0.001f, 0.0f, 0.5f);
       public void registrarGraficos(IEntity entidad);
       public void desregistrarGraficos();
-      public IPieza destruirPieza(List<Fixture> a_borrar);
+      public IPieza destruirPieza();
       public void registrarAreasTactiles(Scene escena);
       public void desregistrarAreasTactiles(Scene escena);
   		public IPieza separarBloques(List<Bloque> list);

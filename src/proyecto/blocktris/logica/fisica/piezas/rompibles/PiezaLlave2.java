@@ -16,9 +16,9 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.JointDef;
 import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 
-public class PiezaCuadrado extends PiezaBase {
+public class PiezaLlave2 extends PiezaBase {
 
-	public PiezaCuadrado(PhysicsWorld mundo, float x, float y, float tamaño_bloque,
+	public PiezaLlave2(PhysicsWorld mundo, float x, float y, float tamaño_bloque,
 			FixtureDef fixturedef) {
 		super(mundo, x, y, tamaño_bloque, fixturedef);
 		
@@ -31,29 +31,27 @@ public class PiezaCuadrado extends PiezaBase {
 		bdef.type = BodyType.DynamicBody ;
 		
 		cuerpo= mundo.createBody(bdef);
-		bloques.add(new Bloque(mundo,cuerpo,-1,0,tamaño_bloque,ColorBloque.MORADO ,IPieza.FIXTUREDEF_DEFECTO ));
-		bloques.add(new Bloque(mundo,cuerpo,0,0,tamaño_bloque,ColorBloque.MORADO ,IPieza.FIXTUREDEF_DEFECTO ));
-		bloques.add(new Bloque(mundo,cuerpo,-1,-1,tamaño_bloque,ColorBloque.MORADO ,IPieza.FIXTUREDEF_DEFECTO ));
-		bloques.add(new Bloque(mundo,cuerpo,0,-1,tamaño_bloque,ColorBloque.MORADO ,IPieza.FIXTUREDEF_DEFECTO ));
+		bloques.add(new Bloque(mundo,cuerpo,-1.5f,-1f,tamaño_bloque,ColorBloque.VERDE ,IPieza.FIXTUREDEF_DEFECTO ));
+		bloques.add(new Bloque(mundo,cuerpo,-0.5f,-1f,tamaño_bloque,ColorBloque.VERDE ,IPieza.FIXTUREDEF_DEFECTO ));
+		bloques.add(new Bloque(mundo,cuerpo,-0.5f,0f,tamaño_bloque,ColorBloque.VERDE ,IPieza.FIXTUREDEF_DEFECTO ));
+		bloques.add(new Bloque(mundo,cuerpo,0.5f,0f,tamaño_bloque,ColorBloque.VERDE ,IPieza.FIXTUREDEF_DEFECTO ));
 		cuerpo.setTransform(xf, yf, 0);
 		 
 		
 		bloques.get(0).getAdjacentes().add(bloques.get(1));
-		bloques.get(0).getAdjacentes().add(bloques.get(2));
 	
 		
 		
+		bloques.get(1).getAdjacentes().add(bloques.get(2));
 		bloques.get(1).getAdjacentes().add(bloques.get(0));
-		bloques.get(1).getAdjacentes().add(bloques.get(3));
 		
 		
 //	bloques.get(0).getCuerpo().destroyFixture();
-		bloques.get(2).getAdjacentes().add(bloques.get(0));
+		bloques.get(2).getAdjacentes().add(bloques.get(1));
 		bloques.get(2).getAdjacentes().add(bloques.get(3));
 		
 		
 		
-		bloques.get(3).getAdjacentes().add(bloques.get(1));
 		bloques.get(3).getAdjacentes().add(bloques.get(2));
 		
 		 

@@ -58,6 +58,7 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 
 		public void setColor(ColorBloque color) {
 			this.color = color;
+			grafico.setCurrentTileIndex(color.ordinal());
 		}
 
 		public static enum ColorBloque{
@@ -467,7 +468,7 @@ public List<Bloque> getBloques() {
 
 
 	@Override
-	public IPieza destruirPieza(List<Fixture> a_borrar) {
+	public IPieza destruirPieza() {
 		for(Bloque b : bloques ){
 			b.destruir();
 		}
