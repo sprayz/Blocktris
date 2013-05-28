@@ -57,8 +57,9 @@ public interface IPieza {
       public void registrarAreasTactiles(Scene escena);
       public void desregistrarAreasTactiles(Scene escena);
   		public IPieza separarBloques(List<Bloque> list);
-		public AbstractList getBloques();
+		public List<Bloque> getBloques();
 		public Body getCuerpo();
+		public Collection<IPieza> quitarBloqueDesenlazar(Bloque bloque);
 		
 		
 	
