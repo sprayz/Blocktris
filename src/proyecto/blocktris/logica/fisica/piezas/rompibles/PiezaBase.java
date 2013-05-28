@@ -11,8 +11,10 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.TiledSprite;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
@@ -40,7 +42,7 @@ import com.badlogic.gdx.physics.box2d.Shape;
 public  class PiezaBase implements IPieza {
 	
 	
-public static	class Bloque extends ObjetoFisico{
+public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 		private ArrayList<Bloque> adjacentes;
 		private Fixture fixtura;
 		private float x;
@@ -74,11 +76,10 @@ public static	class Bloque extends ObjetoFisico{
 		public Bloque (PhysicsWorld  mundo, Body cuerpo_base ,float x,float y, float tamaño_bloque,ColorBloque color ,FixtureDef fixturedef) {
 			this.adjacentes= new ArrayList<Bloque>();
 			this.cuerpo = cuerpo_base;
-			grafico = new TiledSprite(0,0, tamaño_bloque,tamaño_bloque, ManagerRecursos.getInstancia().trBloques.deepCopy(),ManagerRecursos.getInstancia().vbom );
+			grafico = new AnimatedSprite(0,0, tamaño_bloque,tamaño_bloque, ManagerRecursos.getInstancia().trBloques.deepCopy(),ManagerRecursos.getInstancia().vbom );
 			this.color = color;
 			this.mundo=mundo;
 			 float tamaño_bloque_fisico = tamaño_bloque / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT;
-			
 			 this.x=x;
 			 this.y=y;
 			//NO TOCAR
@@ -105,18 +106,13 @@ public static	class Bloque extends ObjetoFisico{
 			return adjacentes;
 		}
 		
-		public float distanciaA(Bloque b){
-			
-			return   Math.abs(this.getX() - b.getX())  +   Math.abs(this.getY() - b.getY());
-		}
 		
 		
 		@Override
 		public void destruir() {
 			//cuerpo.setActive(false);
 			cuerpo.destroyFixture(fixtura);
-			Scene esce =(Scene) grafico.getParent();
-			esce.unregisterTouchArea(grafico);
+			
 			grafico.detachSelf();
 			grafico.dispose();
 		}
@@ -158,8 +154,7 @@ public static	class Bloque extends ObjetoFisico{
 			
 		
 			Bloque actual;		//Bloque  en el que estamos
-			float puntuacionActual;
-			float puntuacionCandidato;
+
 			
 		  	
 			candidatos.addFirst(this);
@@ -209,7 +204,13 @@ public List<Bloque> getBloques() {
 	protected boolean modificada = false;
 	protected ArrayList<Bloque> bloques = new ArrayList<Bloque>();
 	protected Body cuerpo;
+	private Scene escena;
 	
+	
+	public Scene getEscena() {
+		return escena;
+	}
+
 	public boolean isModificada() {
 		return modificada;
 	}
@@ -389,7 +390,10 @@ public List<Bloque> getBloques() {
 				
 				bloque.getAdjacentes().remove(b);	
 			}
+			
 			b.destruir();
+			if(this.escena != null)
+				b.desregistrarAreaTactil(this.escena);
 			return true;
 		}
 		return false;	
@@ -435,21 +439,22 @@ public List<Bloque> getBloques() {
 	
 	
 	public void registrarAreasTactiles(Scene escena){
-		
+		this.escena= escena;
 		for(Bloque b: bloques){
-			escena.registerTouchArea(b.getGrafico());	
+			b.registrarAreaTactil(escena);
+			
 		}
 	}
 	public void desregistrarAreasTactiles(Scene escena){
-		
+		this.escena = escena;
 		for(Bloque b: bloques){
-			escena.unregisterTouchArea(b.getGrafico());	
+			b.desregistrarAreaTactil(escena);
 		}
 	}
 	
 	public void desregistrarGraficos(){
 		for(Bloque b: bloques){
-			b.getGrafico().detachSelf();	
+			b.desregistrarGrafico();
 		}
 	}
 	

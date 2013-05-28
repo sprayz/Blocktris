@@ -3,9 +3,11 @@ package proyecto.blocktris;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.AlphaModifier;
 import org.andengine.entity.particle.BatchedSpriteParticleSystem;
+import org.andengine.entity.particle.Particle;
 import org.andengine.entity.particle.ParticleSystem;
 import org.andengine.entity.particle.SpriteParticleSystem;
 import org.andengine.entity.particle.emitter.BaseParticleEmitter;
@@ -15,6 +17,7 @@ import org.andengine.entity.particle.initializer.AlphaParticleInitializer;
 import org.andengine.entity.particle.initializer.BlendFunctionParticleInitializer;
 import org.andengine.entity.particle.initializer.ColorParticleInitializer;
 import org.andengine.entity.particle.initializer.ExpireParticleInitializer;
+import org.andengine.entity.particle.initializer.IParticleInitializer;
 import org.andengine.entity.particle.initializer.RotationParticleInitializer;
 import org.andengine.entity.particle.initializer.VelocityParticleInitializer;
 import org.andengine.entity.particle.modifier.AlphaParticleModifier;
@@ -71,6 +74,7 @@ import proyecto.blocktris.logica.fisica.ObjetoFisico;
 import proyecto.blocktris.logica.fisica.piezas.IPieza;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaPalo;
+import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaT;
 import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 
 public class EscenaJuego extends EscenaBase implements IAccelerationListener, IOnSceneTouchListener, IOnAreaTouchListener {
@@ -86,25 +90,30 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	static final int COLUMNAS = 8;
 	static final int MAX_MULTITOQUE=8 ;
 	
-	private ParticleSystem[] particulas;
+	private Entity capaBaja ;
+	private Entity capaAlta;
+	private ParticleSystem<Sprite>[] particulas;
 	private MouseJoint[] joints;
 	
 	
 	@Override
 	public void crearEscena() {
 		joints = new MouseJoint[MAX_MULTITOQUE];
-		particulas = new ParticleSystem[MAX_MULTITOQUE];
+		capaBaja= new Entity();
+		capaAlta= new Entity();
+		this.attachChild(capaBaja);
+		this.attachChild(capaAlta);
 		// dejamos  1/10 de el tamaño del bloque  de margen
 		tamaño_bloque = camara.getWidth() /  ( COLUMNAS+0.2f);
 		
-
+		inicializarSistemasParticulas();
 		
 		motor.registerUpdateHandler(new FPSLogger());
 		//fondo
 		setBackground(new Background(Color.RED));
 		
-		//mundo fisico
-		mundo= new FixedStepPhysicsWorld(60,new Vector2(0, -SensorManager.GRAVITY_EARTH), false);
+		//mundo fisico, gravedad hacia abajo :-]
+		mundo= new FixedStepPhysicsWorld(40,new Vector2(0, -SensorManager.GRAVITY_EARTH), false);
 		//activamos le sensor de rientacion para cambiar la gravedad
 		//managerRecursos.actividadJuego.getEngine().enableAccelerationSensor(managerRecursos.actividadJuego,this);
 		 motor .setTouchController(new MultiTouchController());
@@ -120,7 +129,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 				
 				managerRecursos.trBloques.deepCopy() ,vbom);
 		caja.setSize(10, 10);
-		super.attachChild(caja);
+		this.capaBaja.attachChild(caja);
 		caja.setVisible(true);
 		caja.animate(100);
 		
@@ -134,12 +143,17 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		Random rnd = new Random();
 	
 		for(int i =0;i<2;i++){
-			PiezaPalo pieza = new PiezaPalo(mundo, camara.getWidth() * rnd.nextFloat(), camara.getHeight()* rnd. nextFloat()+0.5f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO ); 
+			IPieza pieza = new PiezaT(mundo, camara.getWidth() * rnd.nextFloat(), camara.getHeight()* rnd. nextFloat()+0.5f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO ); 
 			pieza.getCuerpo().setBullet(true);
 			
-			
+			for(IPieza p : pieza.quitarBloqueDesenlazar(pieza.getBloques().get(1))){
+				p.registrarAreasTactiles(this);
+				p.registrarGraficos(this.capaBaja);
+				
+			}
+				
 	
-			pieza.registrarGraficos(this);
+			pieza.registrarGraficos(this.capaBaja);
 			pieza.registrarAreasTactiles(this);
 		}
 		
@@ -157,7 +171,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 						(contact.getFixtureB().getBody()==techo)){
 					//chulo ehh?
 					//sacamos como cuerpo de la pieza aquel que no sea el techo.
-					cuerpoPieza = contact.getFixtureB().getBody() == techo? contact.getFixtureA().getBody():contact.getFixtureB().getBody();
+					cuerpoPieza = contact.getFixtureB().getBody() == techo
+							? contact.getFixtureA().getBody():contact.getFixtureB().getBody();
 					
 				
 					//Log.d("COLISION", "NORMAL Y = " +contact.getWorldManifold().getNormal().y );
@@ -253,6 +268,47 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	//UTILIDAD
 	//*******
 	
+	/**
+	 * Esta función inicializa un  sistema de partículas por cada puntero posible
+	 */
+	private void inicializarSistemasParticulas(){
+		particulas = new SpriteParticleSystem[MAX_MULTITOQUE];
+		
+		
+		for(int i =0; i< particulas.length;i++ ){
+			
+			IParticleEmitter pe = new PointParticleEmitter(0,0);
+			
+		 
+		 particulas[i]=	new SpriteParticleSystem(pe, 10, 50, 300, 
+				     managerRecursos .trAnimBrillo.getTextureRegion(1), vbom);
+				
+		
+		//efectos para cada partícula
+		 particulas[i].addParticleInitializer(new ColorParticleInitializer<Sprite>(1, 0, 0));
+		 particulas[i].addParticleInitializer(new AlphaParticleInitializer<Sprite>(1));
+		 particulas[i].addParticleInitializer(new BlendFunctionParticleInitializer<Sprite>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
+		 particulas[i].addParticleInitializer(new VelocityParticleInitializer<Sprite>(-2, 2, -2, -1));
+		 particulas[i].addParticleInitializer(new RotationParticleInitializer<Sprite>(0.0f, 360.0f));
+		 
+		 //si no ponemos tiempo de expiracion las particulas solo se retiran cuando llegan
+		 //al máximo
+		 particulas[i].addParticleInitializer(new ExpireParticleInitializer<Sprite>(6));
+
+		 particulas[i].addParticleModifier(new ScaleParticleModifier<Sprite>(0, 2, 1f, 3.0f));
+		 particulas[i].addParticleModifier(new ColorParticleModifier<Sprite>(4, 6, 1, 1, 0.5f, 1, 0, 1));
+		 particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0, 0.2f, 0, 1 ));
+		 particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(5, 6, 1, 0));
+		// no queremos que estén  activados desde el principio
+		 particulas[i].setParticlesSpawnEnabled(false);
+		// los añadimos a la escena
+		 this.capaAlta.attachChild( particulas[i]);
+		}
+		
+	}
+	
+	
+	
 	
 	/**
 	 * Sacado del ejemplo de AE  demostrando MouseJoint
@@ -322,7 +378,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 				
 				joints[pSceneTouchEvent.getPointerID()] = this.createMouseJoint(entity, pTouchAreaLocalX, pTouchAreaLocalY);
 			}
-			return true;
+			// 
+			return false;
 		}
 		return false;
 		
@@ -343,29 +400,15 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		if(this.mundo != null && pSceneTouchEvent.getPointerID() <MAX_MULTITOQUE) {
 			switch(pSceneTouchEvent.getAction()) {
 				case TouchEvent.ACTION_DOWN:
-					IParticleEmitter pe = new PointParticleEmitter(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
-					particulas[pSceneTouchEvent.getPointerID()] = new SpriteParticleSystem(pe, 20, 20, 360, 
-						     managerRecursos .trBloques, vbom);
-						
-					particulas[pSceneTouchEvent.getPointerID()].addParticleInitializer(new ColorParticleInitializer<Sprite>(100, 0, 0));
-					particulas[pSceneTouchEvent.getPointerID()].addParticleInitializer(new AlphaParticleInitializer<Sprite>(0));
-					particulas[pSceneTouchEvent.getPointerID()].addParticleInitializer(new BlendFunctionParticleInitializer<Sprite>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
-					particulas[pSceneTouchEvent.getPointerID()].addParticleInitializer(new VelocityParticleInitializer<Sprite>(-20, 20, -20, -10));
-					particulas[pSceneTouchEvent.getPointerID()].addParticleInitializer(new RotationParticleInitializer<Sprite>(0.0f, 360.0f));
-					particulas[pSceneTouchEvent.getPointerID()].addParticleInitializer(new ExpireParticleInitializer<Sprite>(6));
-
-					particulas[pSceneTouchEvent.getPointerID()].addParticleModifier(new ScaleParticleModifier<Sprite>(0, 5, 1.0f, 2.0f));
-					particulas[pSceneTouchEvent.getPointerID()].addParticleModifier(new ColorParticleModifier<Sprite>(40, 6, 1, 1, 0.5f, 1, 0, 1));
-					particulas[pSceneTouchEvent.getPointerID()].addParticleModifier(new AlphaParticleModifier<Sprite>(0, 1, 0, 10));
-					particulas[pSceneTouchEvent.getPointerID()].addParticleModifier(new AlphaParticleModifier<Sprite>(5, 60, 1, 0));
-					EscenaJuego.this.attachChild(particulas[pSceneTouchEvent.getPointerID()]);
+					 particulas[pSceneTouchEvent.getPointerID()].setParticlesSpawnEnabled(true);
+					 ((BaseParticleEmitter) particulas[pSceneTouchEvent.getPointerID()].getParticleEmitter()).setCenter(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
 					return true;
 				case TouchEvent.ACTION_MOVE:
 					((BaseParticleEmitter) particulas[pSceneTouchEvent.getPointerID()].getParticleEmitter()).setCenter(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
 					if(joints[pSceneTouchEvent.getPointerID()]!= null) {
 						final Vector2 vec = Vector2Pool.obtain(pSceneTouchEvent.getX() / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, pSceneTouchEvent.getY() / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
 						joints[pSceneTouchEvent.getPointerID()].setTarget(vec);
-						//joints[pSceneTouchEvent.getPointerID()].getBodyB().applyAngularImpulse(0.5f);
+						//joints[pSceneTouchEvent.getPointerID()].getBodyB().applyAngularImpulse(4.5f);
 						Vector2Pool.recycle(vec);
 					}
 					return true;
@@ -374,7 +417,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 						mundo.destroyJoint(joints[pSceneTouchEvent.getPointerID()]);
 						joints[pSceneTouchEvent.getPointerID()] = null;
 					}
-					particulas[pSceneTouchEvent.getPointerID()].detachSelf();
+					particulas[pSceneTouchEvent.getPointerID()].setParticlesSpawnEnabled(false);
 					return true;
 			}
 			return false;

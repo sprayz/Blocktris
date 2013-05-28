@@ -3,14 +3,15 @@ package proyecto.blocktris.logica.fisica;
 import java.util.ArrayList;
 
 import org.andengine.entity.IEntity;
+import org.andengine.entity.scene.Scene;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 
 import com.badlogic.gdx.physics.box2d.Body;
 
-public abstract class ObjetoFisico {
+public abstract class ObjetoFisico <T extends IEntity> {
 	
 	protected Body cuerpo  ;
-	protected IEntity grafico ;
+	protected T grafico ;
 	protected Object padre; 
 	protected PhysicsWorld mundo;
 	/*
@@ -29,7 +30,7 @@ public abstract class ObjetoFisico {
 	public Body getCuerpo() {
 		return cuerpo;
 	}
-	public IEntity getGrafico() {
+	public T getGrafico() {
 		return grafico;
 	}
 	
@@ -43,6 +44,25 @@ public abstract class ObjetoFisico {
 	public PhysicsWorld getMundo() {
 		return mundo;
 	}
+
+	
+	public void registrarAreaTactil (Scene escena){
+		
+		escena.registerTouchArea(this.grafico); 
+	}
+	public void desregistrarAreaTactil (Scene escena){
+		
+		escena.unregisterTouchArea(this.grafico); 
+	}
+	public void registrarGrafico (IEntity entidad){
+		
+		entidad.attachChild(this.grafico); 
+		}
+	public void desregistrarGrafico (){
+		
+	 this.grafico.detachSelf();
+		}
+		
 	
 	/*
 	 * GETTERS Y SETTERS
