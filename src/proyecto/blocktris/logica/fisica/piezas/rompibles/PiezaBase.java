@@ -40,6 +40,20 @@ import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 
 public  class PiezaBase implements IPieza {
+	public static  BodyDef BODYDEF_DEFECTO;
+	static{
+		BODYDEF_DEFECTO = new BodyDef();
+		
+		BODYDEF_DEFECTO.active = true;
+		BODYDEF_DEFECTO.allowSleep = true;
+		BODYDEF_DEFECTO.angularDamping= 5f;
+		BODYDEF_DEFECTO.awake= true;
+		BODYDEF_DEFECTO.bullet = true;
+		BODYDEF_DEFECTO.fixedRotation= false;
+		BODYDEF_DEFECTO.linearDamping = 0;
+		BODYDEF_DEFECTO.type= BodyType.DynamicBody;
+	}
+	
 	
 	
 public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
@@ -201,11 +215,11 @@ public List<Bloque> getBloques() {
 
 
 
-	private PIEZAS tipo;
+	protected PIEZAS tipo;
 	protected boolean modificada = false;
 	protected ArrayList<Bloque> bloques = new ArrayList<Bloque>();
 	protected Body cuerpo;
-	private Scene escena;
+	protected Scene escena;
 	
 	
 	public Scene getEscena() {
@@ -459,7 +473,7 @@ public List<Bloque> getBloques() {
 		}
 	}
 	
-	public PiezaBase(PhysicsWorld mundo, float x,float y,float tamaño_bloque,FixtureDef fixturedef)	{}
+	public PiezaBase(PhysicsWorld mundo, float x,float y,float tamaño_bloque,FixtureDef fixturedef,BodyDef bodydef)	{}
 
 
 
@@ -469,13 +483,17 @@ public List<Bloque> getBloques() {
 
 	@Override
 	public IPieza destruirPieza() {
+		desregistrarAreasTactiles(escena);
+		desregistrarGraficos();
+		
 		for(Bloque b : bloques ){
 			b.destruir();
 		}
 		bloques.clear();
 		this.cuerpo.setActive(false);
+		
 		this.cuerpo.getWorld().destroyBody(this.cuerpo);
-		return null;
+		return this;
 	}
 
 	

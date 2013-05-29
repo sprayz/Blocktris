@@ -40,17 +40,33 @@ public interface IPieza {
 
 	public static enum PIEZAS {
 		PIEZA_T,
-		PIEZA_ELE,
-		PIEZA_ELE2,
+		PIEZA_L1,
+		PIEZA_L2,
 		PIEZA_CUBO,
 		PIEZA_PALO,
-		PIEZA_LLAVE,
-		PIEZA_LLAVE2,
-		}
+		PIEZA_LLAVE1,
+		PIEZA_LLAVE2;
+		
+	
 
-      public static FixtureDef PROPIEDADES_DEFECTO = PhysicsFactory.createFixtureDef(1.0f, 0.5f, 0.5f);
+		  private static final  List<PIEZAS> VALUES =
+		    Collections.unmodifiableList(Arrays.asList(values()));
+		  private static final int SIZE = VALUES.size();
+		  private static final Random RANDOM = new Random();
 
-      public static FixtureDef FIXTUREDEF_DEFECTO = PhysicsFactory.createFixtureDef(0.001f, 0.0f, 0.5f);
+		  public static PIEZAS random()  {
+		    return VALUES.get(RANDOM.nextInt(SIZE));
+	}
+		  }
+
+      public static FixtureDef PROPIEDADES_DEFECTO = PhysicsFactory.createFixtureDef(1.0f, 0.5f, 0.1f);
+
+      
+      public static FixtureDef FIXTUREDEF_DEFECTO=  PhysicsFactory.createFixtureDef(0.1f, 0.0f, 0.4f);
+     public static BodyDef BODYDEF_DEFECTO= null;
+     
+     
+      
       public void registrarGraficos(IEntity entidad);
       public void desregistrarGraficos();
       public IPieza destruirPieza();
@@ -61,7 +77,7 @@ public interface IPieza {
 		public Body getCuerpo();
 		public Collection<IPieza> quitarBloqueDesenlazar(Bloque bloque);
 		
-		
+		public PIEZAS getTipo();
 	
 	
 

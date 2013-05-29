@@ -97,4 +97,24 @@ public class EscenaMenu extends EscenaBase implements IOnMenuItemClickListener{
 		return false;
 	}
 
+	@Override
+	public void reiniciarEscena() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onPausado() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onReanudado() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+
 }

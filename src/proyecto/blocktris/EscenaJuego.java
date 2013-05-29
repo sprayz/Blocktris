@@ -1,8 +1,11 @@
 package proyecto.blocktris;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Random;
 
+import org.andengine.engine.handler.timer.ITimerCallback;
+import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.AlphaModifier;
@@ -24,6 +27,7 @@ import org.andengine.entity.particle.modifier.AlphaParticleModifier;
 import org.andengine.entity.particle.modifier.ColorParticleModifier;
 import org.andengine.entity.particle.modifier.ScaleParticleModifier;
 import org.andengine.entity.primitive.Gradient;
+import org.andengine.entity.primitive.Line;
 import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.IOnAreaTouchListener;
 import org.andengine.entity.scene.IOnSceneTouchListener;
@@ -35,6 +39,7 @@ import org.andengine.entity.scene.background.IBackground;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.sprite.TiledSprite;
+import org.andengine.entity.sprite.batch.SpriteGroup;
 import org.andengine.entity.util.FPSLogger;
 import org.andengine.extension.debugdraw.DebugRenderer;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
@@ -65,8 +70,10 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
+import com.badlogic.gdx.physics.box2d.RayCastCallback;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 
@@ -75,12 +82,14 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import proyecto.blocktris.logica.EscenaBase;
 import proyecto.blocktris.logica.fisica.ObjetoFisico;
 import proyecto.blocktris.logica.fisica.piezas.IPieza;
+import proyecto.blocktris.logica.fisica.piezas.PiezaFactory;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.*;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
 import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 
-public class EscenaJuego extends EscenaBase implements IAccelerationListener, IOnSceneTouchListener, IOnAreaTouchListener {
+public class EscenaJuego extends EscenaBase implements IAccelerationListener, IOnSceneTouchListener, IOnAreaTouchListener, ITimerCallback {
 
+	public static float MARGENES = 20;
 	public static FixtureDef fdef_muro = PhysicsFactory.createFixtureDef(1.0f, 0, 1.0f);
 	public Body suelo ; 
 	public Body techo; 
@@ -88,49 +97,73 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	public Body pared_derecha ; 
 	PhysicsWorld mundo ; 
 	float tamaño_bloque;
-	static final int FILAS =    12 ;
-	static final int COLUMNAS = 8;
-	static final int MAX_MULTITOQUE=8 ;
+	 public static final int FILAS =    9 ;
+	public static final int COLUMNAS = 6;
+	public static final int MAX_MULTITOQUE=8 ;
 	
+	public static final float intervaloPieza = 6f ;
 	private Entity capaBaja ;
 	private Entity capaAlta;
 	private ParticleSystem<Sprite>[] particulas;
 	private MouseJoint[] joints;
 	private Gradient degradadoFondo;
 	private Background fondo;
+	
+	
+	private TimerHandler timer;
+	/*
+	 * ESTADO DEL  JUEGO
+	 */
+	protected ArrayList<IPieza> piezas;
+	protected IPieza ultimaPieza;
+	protected ArrayList<Bloque> bloquesLinea;
+	protected float puntuacion;
+	protected float intervalo;
+	protected boolean ganador;
+	
 	@Override
 	public void crearEscena() {
-		
+		/*
+		 * VARIABLES
+		 * 
+		 */
+		piezas= new ArrayList<IPieza>();
+		joints = new MouseJoint[MAX_MULTITOQUE];
+		bloquesLinea= new ArrayList<Bloque>();
+		timer =  new TimerHandler(intervaloPieza,true,this);
+		//FONDO
 		
 		degradadoFondo  = new Gradient(camara.getWidth()/2,camara.getHeight()/2,camara.getWidth(), camara.getHeight(), vbom);
-	
-		degradadoFondo.setFromColor(0.5f, 0.0f, 0.5f);
+		degradadoFondo.setFromColor(0.1f, 0.2f, 0.5f);
 		degradadoFondo.setToColor(1, 1, 1);
-		//degradadoFondo.setGradientVector(10, 100);
-		//degradadoFondo.setGradientAngle(40);
 		degradadoFondo.setGradientFitToBounds(true);
 		degradadoFondo.setGradientDitherEnabled(true);
 		
 		fondo = new EntityBackground(degradadoFondo);
+		
 		this.setBackgroundEnabled(true);
 		this.setBackground(fondo);
-		//this.attachChild(degradadoFondo);
-		joints = new MouseJoint[MAX_MULTITOQUE];
+	
+		
+		//CAPAS
 		capaBaja= new Entity();
 		capaAlta= new Entity();
 		this.attachChild(capaBaja);
 		this.attachChild(capaAlta);
+		
+		//CAJA
+		
 		// dejamos  1/10 de el tamaño del bloque  de margen
-		tamaño_bloque = camara.getWidth() /  ( COLUMNAS+0.2f);
+		tamaño_bloque = (camara.getWidth() - MARGENES*2) /  ( COLUMNAS+0.25f);
+		
 		
 		inicializarSistemasParticulas();
-		
 		motor.registerUpdateHandler(new FPSLogger());
-		//fondo
-		//setBackground(new Background(Color.RED));
 		
-		//mundo fisico, gravedad hacia abajo :-]
-		mundo= new FixedStepPhysicsWorld(40,new Vector2(0, -SensorManager.GRAVITY_EARTH), false);
+		//FISICA
+		//gravedad hacia abajo :-]
+		mundo= new FixedStepPhysicsWorld(60,new Vector2(0, -SensorManager.GRAVITY_EARTH),true,20,16);
+		mundo.setContinuousPhysics(true);
 		//activamos le sensor de rientacion para cambiar la gravedad
 		//managerRecursos.actividadJuego.getEngine().enableAccelerationSensor(managerRecursos.actividadJuego,this);
 		 motor .setTouchController(new MultiTouchController());
@@ -150,36 +183,20 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		caja.setVisible(true);
 		caja.animate(100);
 		
-		//creammos las paredes
-		suelo =PhysicsFactory.createLineBody(mundo, 0, 0, camara.getWidth(), 0, fdef_muro);
-		techo=PhysicsFactory.createLineBody(mundo, 0, camara.getHeight()/2,camara.getWidth() , camara.getHeight()/2, fdef_muro);
-		pared_izquierda=PhysicsFactory.createLineBody(mundo, 0, 0,0, camara.getHeight()*1.5f, fdef_muro);
-		pared_derecha=PhysicsFactory.createLineBody(mundo, camara.getWidth(), 0,camara.getWidth() , camara.getHeight()*1.5f, fdef_muro);
+		//PAREDES
+		suelo =PhysicsFactory.createLineBody(mundo, 0, 0+MARGENES, camara.getWidth(), 0+MARGENES, fdef_muro);
+		techo=PhysicsFactory.createLineBody(mundo, 0, camara.getHeight()-MARGENES,camara.getWidth() , camara.getHeight()-MARGENES, fdef_muro);
+		pared_izquierda=PhysicsFactory.createLineBody(mundo, 0, 0-MARGENES,0, camara.getHeight()*1.5f-MARGENES, fdef_muro);
+		pared_derecha=PhysicsFactory.createLineBody(mundo, camara.getWidth(), 0+MARGENES,camara.getWidth(), camara.getHeight()*1.5f-MARGENES, fdef_muro);
+		
+
 		
 		
-		Random rnd = new Random();
-	
-		for(int i =0;i<2;i++){
-			IPieza pieza = new PiezaCuadrado(mundo, camara.getWidth() * rnd.nextFloat(), camara.getHeight()* rnd. nextFloat()+0.5f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO ); 
-			IPieza pieza2 = new PiezaPalo(mundo, camara.getWidth() * rnd.nextFloat(), camara.getHeight()* rnd. nextFloat()+0.5f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO ); 
-		pieza.getCuerpo().setBullet(true);
-		pieza2.getCuerpo().setBullet(true);	
-		
-		
-		
-		for(IPieza p : pieza2.quitarBloqueDesenlazar(pieza2.getBloques().get(2))){
-			p.registrarAreasTactiles(this);
-			p.registrarGraficos(this.capaBaja);
-			p.getCuerpo().setBullet(true);
-		}
-		
-			pieza.registrarGraficos(this.capaBaja);
-			pieza.registrarAreasTactiles(this);
-		
-			pieza2.registrarGraficos(this.capaBaja);
-			pieza2.registrarAreasTactiles(this);
-		}
-		
+		/*
+		 * aquí filtramos las colisiones para permitir que las  piezas entren en la caja
+		 * 
+		 * es decir, puedan atravesar el techo para descender pero no para ascender (^_^)
+		 */
 		
 		mundo.setContactListener(new ContactListener() {
 			
@@ -205,13 +222,13 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					
 					/*
 					 * la alternativa a este método es  usar el vector normal, es decir la  dirección en  que  el
-					 * motor aplicaría la fuerza para compensar   dos cuerpos incrustados
-					 *  el problema es que  cambia de sentido a mitad  de  cada fixtura(lógicamente)
+					 * motor aplicaría la fuerza para compensar   dos fixturas incrustados
+					 *  el problema es que  cambia de sentido a mitad  de  cada fixtura
 					 *  
 					 *  y esto causa que  se reactive al colisión y  que el motor repela los dos cuerpos que 
 					 *  , de repente ,están incrustados  y colisionando.
 					 *  esto hace un efecto  elástico que se incrementa cuantas mas fixturas tenga la  pieza
-					 *  La consecuencia es que  el cuerpo sure una aceleración considerable al atraversar el techo.
+					 *  La consecuencia es que  el cuerpo sufre una aceleración considerable al atraversar el techo.
 					 *  
 					 * 
 					 * 
@@ -219,7 +236,6 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					//por cada punto de colision
 					for(Vector2 p : contact.getWorldManifold().getPoints()){
 						// si resulta que la velocidad lineal  es positiva ( va hacia arriba)
-						
 						if(cuerpoPieza.getLinearVelocityFromWorldPoint(p).y > 0 ) {
 							//activamos la colision y  salimos
 							contact.setEnabled(true);
@@ -261,12 +277,95 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	    debug.setDrawBodies(true);
 	    debug.setDrawJoints(true);
 	    attachChild(debug); 
+	    reiniciarEscena();
+	    iniciarPartida();
 	}
+	
+	/*
+	 * EVENTOS
+	 * 
+	 */
+	/*
+	public boolean onIniciarPartida(){return true;}
+	public void onPartidaIniciada(){}
+	public boolean onFinalizarPartida(){return true;}
+	public void  onPartidaFinalizada(){}
+	public  void onQuitarLinea(Collection<Bloque> bloques){}
+	public void onLineaQuitada(){};
+	public void onPausado(){};
+	public void onReanudado(){};
+	*/
+	
+	public boolean onIniciarPartida(){return true;}
+	public void onPartidaIniciada(){}
+	public boolean onFinalizarPartida(){return true;}
+	public void  onPartidaFinalizada(){}
+	public  void onQuitarLinea(Collection<Bloque> bloques){}
+	public void onLineaQuitada(){};
+	public void onPausado(){};
+	public void onReanudado(){};
+	
+	
+	
+	public void iniciarPartida(){
+		if(!onIniciarPartida())
+			return;
+		
+		
+		motor.registerUpdateHandler(timer);
+		Random rnd = new Random();
+		for(int i =0;i<3;i++){
+			IPieza pieza = PiezaFactory.piezaAleatoria(mundo, camara.getWidth() * rnd.nextFloat(), camara.getHeight()* rnd. nextFloat()+0.5f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
+
+		pieza.getCuerpo().setBullet(true);
+		
+		
+		/*
+		for(IPieza p : pieza2.quitarBloqueDesenlazar(pieza2.getBloques().get(2))){
+			p.registrarAreasTactiles(this);
+			p.registrarGraficos(this.capaBaja);
+			p.getCuerpo().setBullet(true);
+		}
+		*/
+		
+			pieza.registrarGraficos(this.capaBaja);
+			pieza.registrarAreasTactiles(this);
+			piezas.add(pieza);
+			onPartidaIniciada();
+			
+		 
+		}
+		
+		onPartidaIniciada();
+	}
+	
+	@Override
+	public void reiniciarEscena() {
+		for(IPieza p : piezas ){
+			p.destruirPieza();
+		}
+		System.gc();
+		piezas.clear();
+		
+		iniciarPartida();
+		
+		Log.d("REINICIO", "CUERPOS: " + mundo.getBodyCount());
+	}
+	
+	
 
 	@Override
 	public void teclaVolverPreionada() {
 		// TODO Auto-generated method stub
-		System.exit(0);
+		
+		managerRecursos.actividadJuego.runOnUpdateThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				reiniciarEscena();
+			
+			}
+		});
 	}
 
 	@Override
@@ -303,25 +402,25 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			IParticleEmitter pe = new PointParticleEmitter(0,0);
 			
 		 
-		 particulas[i]=	new SpriteParticleSystem(pe, 10, 50, 300, 
+		 particulas[i]=	new SpriteParticleSystem(pe, 100, 100, 300, 
 				     managerRecursos .trAnimBrillo.getTextureRegion(1), vbom);
 				
 		
 		//efectos para cada partícula
-		 particulas[i].addParticleInitializer(new ColorParticleInitializer<Sprite>(1, 0, 0));
-		 particulas[i].addParticleInitializer(new AlphaParticleInitializer<Sprite>(1));
+		 particulas[i].addParticleInitializer(new ColorParticleInitializer<Sprite>(1,1, 0));
+	//	 particulas[i].addParticleInitializer(new AlphaParticleInitializer<Sprite>(1));
 		 particulas[i].addParticleInitializer(new BlendFunctionParticleInitializer<Sprite>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
 		 particulas[i].addParticleInitializer(new VelocityParticleInitializer<Sprite>(-2, 2, -2, -1));
 		 particulas[i].addParticleInitializer(new RotationParticleInitializer<Sprite>(0.0f, 360.0f));
 		 
 		 //si no ponemos tiempo de expiracion las particulas solo se retiran cuando llegan
 		 //al máximo
-		 particulas[i].addParticleInitializer(new ExpireParticleInitializer<Sprite>(2));
+		 particulas[i].addParticleInitializer(new ExpireParticleInitializer<Sprite>(1));
 
-		 particulas[i].addParticleModifier(new ScaleParticleModifier<Sprite>(0, 2, 1f, 3.0f));
-		 particulas[i].addParticleModifier(new ColorParticleModifier<Sprite>(1, 2, 1, 1, 0.5f, 1, 0, 1));
-		 particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0, 0.2f, 0, 1 ));
-		 particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(1, 2, 1, 0));
+		 particulas[i].addParticleModifier(new ScaleParticleModifier<Sprite>(0, 0.25f, 1f, 1.5f));
+		 particulas[i].addParticleModifier(new ColorParticleModifier<Sprite>(0.5f, 1, 1, 1, 0.5f, 1, 0, 1));
+		// particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0, 0.2f, 0, 1 ));
+		// particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0.5f,1 , 1, 0));
 		// no queremos que estén  activados desde el principio
 		 particulas[i].setParticlesSpawnEnabled(false);
 		// los añadimos a la escena
@@ -351,11 +450,11 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		 */
 		mouseJointDef.bodyA = suelo;
 		mouseJointDef.bodyB = body;
-		mouseJointDef.dampingRatio = 0.95f;
+		mouseJointDef.dampingRatio = 0.00f;
 		mouseJointDef.frequencyHz = 20f;
-		mouseJointDef.maxForce = (200.0f * body.getMass()*4);
+		mouseJointDef.maxForce = (200* body.getMass()*4);
 		mouseJointDef.collideConnected = true;
-
+		
 		mouseJointDef.target.set(body.getWorldPoint(localPoint));
 		Vector2Pool.recycle(localPoint);
 
@@ -397,31 +496,11 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		if(pSceneTouchEvent.isActionDown() && pSceneTouchEvent.getPointerID() <MAX_MULTITOQUE) {
 			final IEntity entity = (IEntity) pTouchArea;
 			if(joints[pSceneTouchEvent.getPointerID()]== null) {
+				final IPieza pieza = (IPieza) ((ObjetoFisico)entity.getUserData()).getPadre();
 				
 				joints[pSceneTouchEvent.getPointerID()] = this.createMouseJoint(entity, pTouchAreaLocalX, pTouchAreaLocalY);
 			}
-			/*
-			managerRecursos.actividadJuego.runOnUpdateThread(new Runnable() {
-				
-				
-				@Override
-				public void run() {
-					
-					
-				
-					
-					
-					final IPieza pieza = (IPieza) ((ObjetoFisico)entity.getUserData()).getPadre();
-					
-					for(IPieza p : pieza.quitarBloqueDesenlazar((Bloque)entity.getUserData())){
-						p.registrarAreasTactiles(EscenaJuego.this);
-						p.registrarGraficos(EscenaJuego.this.capaBaja);
-						
-					}
-					
-				}
-			});
-			*/
+			
 			
 			return false;
 		}
@@ -439,18 +518,19 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		
 		
 		
-		
-		
-		if(this.mundo != null && pSceneTouchEvent.getPointerID() <MAX_MULTITOQUE) {
+		if(pSceneTouchEvent.getPointerID()==1){
 			degradadoFondo.setGradientVector(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
 			degradadoFondo.setGradientAngle( (float) (180/ Math.PI * Math.atan2(degradadoFondo.getX() - pSceneTouchEvent.getX(), pSceneTouchEvent.getY() - degradadoFondo.getY())));
+		}
+		if(this.mundo != null && pSceneTouchEvent.getPointerID() <MAX_MULTITOQUE) {
+			
 			switch(pSceneTouchEvent.getAction()) {
 				case TouchEvent.ACTION_DOWN:
 					 particulas[pSceneTouchEvent.getPointerID()].setParticlesSpawnEnabled(true);
-					 ((BaseParticleEmitter) particulas[pSceneTouchEvent.getPointerID()].getParticleEmitter()).setCenter(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
+					// ((BaseParticleEmitter) particulas[pSceneTouchEvent.getPointerID()].getParticleEmitter()).setCenter(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
 					return true;
 				case TouchEvent.ACTION_MOVE:
-					((BaseParticleEmitter) particulas[pSceneTouchEvent.getPointerID()].getParticleEmitter()).setCenter(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
+					//((BaseParticleEmitter) particulas[pSceneTouchEvent.getPointerID()].getParticleEmitter()).setCenter(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
 					if(joints[pSceneTouchEvent.getPointerID()]!= null) {
 						final Vector2 vec = Vector2Pool.obtain(pSceneTouchEvent.getX() / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, pSceneTouchEvent.getY() / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
 						joints[pSceneTouchEvent.getPointerID()].setTarget(vec);
@@ -471,6 +551,51 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		return false;
 		
 	}
+
+	//ha pasado el tiempo  de un timer
+	@Override
+	public void onTimePassed(TimerHandler pTimerHandler) {
+		
+		
+		
+		bloquesLinea.clear();
+		for(int linea =0;linea<1;linea++){
+			Vector2 p1;
+			Vector2 p2;
+			//tiramos una linea  que atraviese la caja sin tocar los muros
+			p1 = Vector2Pool.obtain(0 / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, 
+					(linea*tamaño_bloque+MARGENES+(tamaño_bloque/2))/ PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
+			
+			p2 = Vector2Pool.obtain((camara.getWidth() ) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT,
+					p1.y);
+			//this.capaAlta.attachChild(new Line(p1.x,p1.y,p2.x,p2.y,vbom));
+			
+			mundo.rayCast(new RayCastCallback() {
+				
+				@Override
+				public float reportRayFixture(Fixture fixture, Vector2 point,
+						Vector2 normal, float fraction) {
+					if( !(fixture.getBody().getType()==BodyType.StaticBody) &&
+							Math.toDegrees(fixture.getBody().getAngle()) <10 && Math.toDegrees(fixture.getBody().getAngle()) >-10 ){
+						bloquesLinea.add((Bloque) fixture.getUserData());
+					}
+					return -1;
+				}
+			},p1 ,p2  );
+			
+			for(Bloque b : bloquesLinea){
+				b.getGrafico().animate(10);
+				
+			}
+		Vector2Pool.recycle(p1);
+		Vector2Pool.recycle(p2);
+		}
+		
+		
+		
+	}
+
+	
 
 
 	

@@ -39,9 +39,10 @@ public abstract class EscenaBase extends Scene
     //---------------------------------------------
     // ABSTRACTION
     //---------------------------------------------
-    
+    public abstract void onPausado();
+	public abstract void onReanudado();
     public abstract void crearEscena();
-    
+    public abstract void reiniciarEscena();
     public abstract void teclaVolverPreionada();
     
     public abstract TipoEscena getTipoEscena();
