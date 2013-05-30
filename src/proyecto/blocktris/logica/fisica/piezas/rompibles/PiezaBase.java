@@ -288,10 +288,12 @@ public List<Bloque> getBloques() {
 		this.cuerpo = mundo.createBody(bdef);
 		
 		
-		
+		this.cuerpo.setUserData(this);
 		for(Bloque b : lista_bloques){
 			fdef = Utilidades.fixtureToDef(b.getFixtura());
-			bloques.add(new Bloque(mundo,this.cuerpo,b.getX(),b.getY(),b.getGrafico().getWidth(),b.getColor(),fdef));
+			Bloque nuevo = new Bloque(mundo,this.cuerpo,b.getX(),b.getY(),b.getGrafico().getWidth(),b.getColor(),fdef);
+			nuevo.setPadre(this);
+			bloques.add(nuevo);
 			
 			
 		}

@@ -35,7 +35,7 @@ public class PiezaLlave1 extends PiezaBase {
 		bloques.add(new Bloque(mundo,cuerpo,-1.5f,0f,tamaño_bloque,ColorBloque.VERDE ,fixturedef ));
 		cuerpo.setTransform(xf, yf, 0);
 		 
-		
+		cuerpo.setUserData(this); 
 		bloques.get(0).getAdjacentes().add(bloques.get(1));
 	
 		

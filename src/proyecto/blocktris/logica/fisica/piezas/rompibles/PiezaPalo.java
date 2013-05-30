@@ -33,7 +33,7 @@ public class PiezaPalo extends PiezaBase {
 		bloques.add(new Bloque(mundo,cuerpo,-1,0,tamaño_bloque,ColorBloque.ROJO ,fixturedef ));
 		bloques.add(new Bloque(mundo,cuerpo,-1,1,tamaño_bloque,ColorBloque.ROJO ,fixturedef ));
 		cuerpo.setTransform(xf, yf, 0);
-		 
+		cuerpo.setUserData(this); 
 		bloques.get(0).getAdjacentes().add(bloques.get(1));
 		bloques.get(1).getAdjacentes().add(bloques.get(0));
 		

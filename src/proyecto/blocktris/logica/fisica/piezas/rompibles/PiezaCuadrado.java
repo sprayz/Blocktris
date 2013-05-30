@@ -34,7 +34,7 @@ public class PiezaCuadrado extends PiezaBase {
 		bloques.add(new Bloque(mundo,cuerpo,-1,-1,tamaño_bloque,ColorBloque.MORADO ,fixturedef ));
 		bloques.add(new Bloque(mundo,cuerpo,0,-1,tamaño_bloque,ColorBloque.MORADO ,fixturedef ));
 		cuerpo.setTransform(xf, yf, 0);
-		 
+		cuerpo.setUserData(this); 
 		
 		bloques.get(0).getAdjacentes().add(bloques.get(1));
 		bloques.get(0).getAdjacentes().add(bloques.get(2));
