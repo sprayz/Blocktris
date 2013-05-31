@@ -114,7 +114,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	public static final float intervaloComprobarLinea = 0.3f ;
 	private Entity capaBaja ;
 	private Entity capaAlta;
-	private ParticleSystem<Sprite>[] particulasPuntero;
+	private BatchedSpriteParticleSystem[] particulasPuntero;
 	private MouseJoint[] joints;
 	private Gradient degradadoFondo;
 	private Background fondo;
@@ -392,7 +392,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	 * Esta función inicializa un  sistema de partículas por cada puntero posible
 	 */
 	private void inicializarSistemasParticulas(){
-		particulasPuntero = new SpriteParticleSystem[MAX_MULTITOQUE];
+		particulasPuntero = new BatchedSpriteParticleSystem[MAX_MULTITOQUE];
 		
 		
 		for(int i =0; i< particulasPuntero.length;i++ ){
@@ -400,23 +400,23 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			IParticleEmitter pe = new RectangleOutlineParticleEmitter(tamaño_bloque/2,tamaño_bloque/2,tamaño_bloque*0.9f,tamaño_bloque*0.9f);
 			
 		 
-		 particulasPuntero[i]=	new SpriteParticleSystem(pe, 100, 250, 500, 
+		 particulasPuntero[i]=	new BatchedSpriteParticleSystem(pe, 100, 250, 500, 
 				     managerRecursos .trAnimBrillo.getTextureRegion(1), vbom);
 				
 		
 		//efectos para cada partícula
-		 particulasPuntero[i].addParticleInitializer(new ColorParticleInitializer<Sprite>(1,1, 0));
+		 particulasPuntero[i].addParticleInitializer(new ColorParticleInitializer<UncoloredSprite>(1,1, 0));
 		// particulas[i].addParticleInitializer(new  );
-		 particulasPuntero[i].addParticleInitializer(new BlendFunctionParticleInitializer<Sprite>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
+		 particulasPuntero[i].addParticleInitializer(new BlendFunctionParticleInitializer<UncoloredSprite>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
 		// particulas[i].addParticleInitializer(new VelocityParticleInitializer<Sprite>(120, 0, 12, 0));
-		 particulasPuntero[i].addParticleInitializer(new RotationParticleInitializer<Sprite>(0.0f, 360.0f));
+		 particulasPuntero[i].addParticleInitializer(new RotationParticleInitializer<UncoloredSprite>(0.0f, 360.0f));
 		 
 		 //si no ponemos tiempo de expiracion las particulas solo se retiran cuando llegan
 		 //al máximo
-		 particulasPuntero[i].addParticleInitializer(new ExpireParticleInitializer<Sprite>(0.4f));
+		 particulasPuntero[i].addParticleInitializer(new ExpireParticleInitializer<UncoloredSprite>(0.4f));
 
-		 particulasPuntero[i].addParticleModifier(new ScaleParticleModifier<Sprite>(0, 0.4f, 0.5f, 0.5f));
-		 particulasPuntero[i].addParticleModifier(new ColorParticleModifier<Sprite>(0.0f, 0.4f, 1, 1, 0.5f, 1, 0, 1));
+		 particulasPuntero[i].addParticleModifier(new ScaleParticleModifier<UncoloredSprite>(0, 0.4f, 0.5f, 0.5f));
+		 particulasPuntero[i].addParticleModifier(new ColorParticleModifier<UncoloredSprite>(0.0f, 0.4f, 1, 1, 0.5f, 1, 0, 1));
 		// particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0, 0.2f, 0, 1 ));
 		// particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0.5f,1 , 1, 0));
 		// no queremos que estén  activados desde el principio
@@ -760,7 +760,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					
 					@Override
 					public void run() {
-						 ((SpriteParticleSystem)pItem).detachSelf();
+						 ((BatchedSpriteParticleSystem)pItem).detachSelf();
 						
 					}
 				});
