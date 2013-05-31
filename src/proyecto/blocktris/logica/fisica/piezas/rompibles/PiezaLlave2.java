@@ -2,11 +2,13 @@ package proyecto.blocktris.logica.fisica.piezas.rompibles;
 
 import java.util.List;
 
+import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.extension.physics.box2d.util.constants.PhysicsConstants;
 
 import proyecto.blocktris.logica.fisica.piezas.IPieza;
 import proyecto.blocktris.logica.fisica.piezas.IPieza.PIEZAS;
+import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque.ColorBloque;
 
 import com.badlogic.gdx.physics.box2d.Body;
@@ -55,9 +57,10 @@ public class PiezaLlave2 extends PiezaBase {
 		 
 		 for(Bloque b: bloques){
 			 b.setPadre(this);
-			 
+			 this.contenedor.attachChild(b.getGrafico());
 		 }
 		
+		 mundo.registerPhysicsConnector(new PhysicsConnector(contenedor, cuerpo));
 		 
 	}
 	

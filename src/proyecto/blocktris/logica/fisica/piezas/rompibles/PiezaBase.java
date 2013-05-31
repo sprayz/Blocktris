@@ -62,7 +62,11 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 		private float x;
 		private float y;
 		
-		
+
+
+
+
+
 
 		private ColorBloque color;
 		
@@ -97,7 +101,12 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 			 float tamaño_bloque_fisico = tamaño_bloque / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT;
 			 this.x=x;
 			 this.y=y;
-			//NO TOCAR
+			
+			 
+			 //añadimos  el offset por defecto apra que el posicionamiento sea el acostumbrado
+			 //aunque para el propositoi de  las piezas sigamos considerando el centro en  la esquina izquierda inferior
+			
+			 //NO TOCAR
 			//Yo futuro, puede que creas que sabes lo que haces, TE EQUIVOCAS.
 			Vector2 centro ;
 			centro =Vector2Pool.obtain((x*tamaño_bloque_fisico) + tamaño_bloque_fisico /2 ,
@@ -109,12 +118,18 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 			fixtura= this.cuerpo.createFixture(fixturedef);
 			fixturedef.shape.dispose();
 			fixtura.setUserData(this);
-			grafico.setAnchorCenter(-x  ,
-					-y);
+			
+			
+			grafico.setAnchorCenter(0, 0);
+			
+		
+			grafico.setPosition(x* tamaño_bloque, y*tamaño_bloque);
 				Vector2Pool.recycle(centro);
+				
 			grafico.setUserData(this);
 			((TiledSprite)grafico).setCurrentTileIndex(color.ordinal());
-			mundo.registerPhysicsConnector(new PhysicsConnector(this.grafico ,this.cuerpo));
+			//grafico.setAnchorCenter(, );
+			
 		}
 
 		public ArrayList<Bloque> getAdjacentes() {
@@ -129,7 +144,7 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 			cuerpo.destroyFixture(fixtura);
 			
 			grafico.detachSelf();
-			grafico.dispose();
+			//grafico.dispose();
 		}
 
 		public Fixture getFixtura() {
@@ -222,6 +237,13 @@ public List<Bloque> getBloques() {
 	protected Scene escena;
 	
 	
+	protected IEntity contenedor = new Entity();
+	
+
+	public IEntity getContenedor() {
+		return contenedor;
+	}
+	
 	public Scene getEscena() {
 		return escena;
 	}
@@ -242,43 +264,7 @@ public List<Bloque> getBloques() {
 		FixtureDef fdef;
 		Body cuerpo_antiguo = lista_bloques.get(0).getCuerpo();
 	
-		//Las figuras originales pueden ser  de tantos bloques cómo quieran
-		//teneos que sacar la distancia entre  los bloques para la nueva 
-		//para poder centrar el cuerpo y posicionar las fixturas adecuadamente.
 		
-		/*
-		float maxDimX= lista_bloques.get(0).getX();
-		float minDimX= lista_bloques.get(0).getX();
-		float maxDimY= lista_bloques.get(0).getY();
-		float minDimY= lista_bloques.get(0).getY();
-		
-		for(Bloque b : lista_bloques){
-			//para las X
-			if(b.getX() > maxDimX){
-				maxDimX = b.getX();
-			}
-			if(b.getX() < minDimX){
-				minDimX = b.getX();
-			}
-			
-			//para las Y
-			if(b.getY() > maxDimY){
-				maxDimY = b.getY();
-			} 
-			if(b.getY() < minDimY){
-				minDimY = b.getY();
-			} 
-			
-			
-		}
-		
-		//nuestra nueva pieza ocupa una cuadrícula virtual de (dimX+1) por (dimY+1) 
-	
-		 float dimX =(maxDimX - minDimX);
-		 float dimY=(maxDimY - minDimY);
-		 */
-		 //TODO: reajustar el centro(anchor) del cuerpo
-		 
 		
 		
 		//sacamos la definicion del cuerpo anterior
@@ -294,7 +280,7 @@ public List<Bloque> getBloques() {
 			Bloque nuevo = new Bloque(mundo,this.cuerpo,b.getX(),b.getY(),b.getGrafico().getWidth(),b.getColor(),fdef);
 			nuevo.setPadre(this);
 			bloques.add(nuevo);
-			
+			contenedor.attachChild( nuevo.getGrafico());
 			
 		}
 		List<Bloque> adyacentes_nuevos;
@@ -315,6 +301,7 @@ public List<Bloque> getBloques() {
 			
 			
 		}
+		 mundo.registerPhysicsConnector(new PhysicsConnector(contenedor, cuerpo));
 	
 	}
 	
@@ -374,12 +361,87 @@ public List<Bloque> getBloques() {
 			
 		
 			
+
+	 		for(Set<Bloque> bloques : listaPieza){
+				if(bloques.size() == this.getBloques().size()){
+					break;
+				}
+					
+	 			resultado.add(separarBloques(new ArrayList<Bloque>(bloques)));
+				
+			}
+	 			}
+					
+					
+			return resultado;
+			}
 			
 			
 			
 			
-			
-		}
+		
+ 		
+ 		public List<IPieza> quitarBloqueDesenlazar(Collection<Bloque> lista){
+ 			List<IPieza> resultado = new ArrayList<IPieza>();
+ 			
+ 			for (Bloque b : lista){
+ 			boolean division = true;
+ 			
+ 			//matriz de matrices (una para cada pieza resultado
+ 			ArrayList<Set<Bloque>> listaPieza = new ArrayList<Set<Bloque>>();
+ 			
+ 			//representa todos los bloques a los que se puede llegar desde  uno
+ 			//siguiendo los adyacentes.
+ 			Set<Bloque> isla ; 
+ 			
+ 			ArrayList<Bloque> aSaltarse = new ArrayList<Bloque>();
+ 			quitarBloque(b);
+ 			//por cada uno de los adyacente s al que bvvamos a quitar
+ 	 		for(Bloque adyacente : b.getAdjacentes()){
+ 				
+ 				//quitamos el bloque que vamos a eliminar de sus adyacentes
+ 				adyacente.getAdjacentes().remove(b);
+ 				
+ 				//si el bloque se queda solo no hace falta seguir calculando
+ 				//ya sabemos que  es parte de una pieza a separar
+ 				if(adyacente.getAdjacentes().isEmpty()){
+ 					Set<Bloque> temp = new HashSet<Bloque>();
+ 					temp.add(adyacente);
+ 					listaPieza.add(temp);
+ 					continue;
+ 				}
+ 					//si ya está incluido en otro conjunto nos lo saltamos
+ 				if(!aSaltarse.contains(adyacente)){
+ 					//en caso contrario sacamos todos sus adyacentes
+ 					isla = adyacente.getAdyacentesRecursivo();
+ 					//si sus adyacentes contienen alguno de los adyacentes del bloque a quitar
+ 					//siginifica que están en el mismo fragmento
+ 					for(Bloque c : isla){
+ 						if(b.getAdjacentes().contains(c)){
+ 							aSaltarse.add(c);
+ 						}
+ 						
+ 					}
+ 					//añadimos la "isla a la lista para mas tarde hacer una pieza con ella
+ 					listaPieza.add(isla);
+ 					
+ 					
+ 					
+ 					
+ 					
+ 					
+ 				}
+ 				
+ 				
+ 			
+ 				
+ 	 		}
+ 				
+ 				
+ 				
+ 				
+ 			
+ 		
  		
  		for(Set<Bloque> bloques : listaPieza){
 			if(bloques.size() == this.getBloques().size()){
@@ -389,7 +451,7 @@ public List<Bloque> getBloques() {
  			resultado.add(separarBloques(new ArrayList<Bloque>(bloques)));
 			
 		}
-		
+ 			}
 				
 				
 		return resultado;
@@ -449,9 +511,7 @@ public List<Bloque> getBloques() {
 	
 	
 	public void registrarGraficos(IEntity entidad){
-		for(Bloque b: bloques){
-			entidad.attachChild(b.getGrafico());	
-		}
+		entidad.attachChild(contenedor);
 	}
 	
 	
@@ -472,9 +532,7 @@ public List<Bloque> getBloques() {
 	}
 	
 	public void desregistrarGraficos(){
-		for(Bloque b: bloques){
-			b.desregistrarGrafico();
-		}
+		contenedor.detachSelf();
 	}
 	
 	public PiezaBase(PhysicsWorld mundo, float x,float y,float tamaño_bloque,FixtureDef fixturedef,BodyDef bodydef)	{}

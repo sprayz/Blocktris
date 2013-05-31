@@ -2,6 +2,7 @@ package proyecto.blocktris.logica.fisica.piezas.rompibles;
 
 import java.util.List;
 
+import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.extension.physics.box2d.util.constants.PhysicsConstants;
 
@@ -57,10 +58,10 @@ public class PiezaCuadrado extends PiezaBase {
 		 
 		 for(Bloque b: bloques){
 			 b.setPadre(this);
-			 
+			 this.contenedor.attachChild(b.getGrafico());
 		 }
 		
-		 
+		 mundo.registerPhysicsConnector(new PhysicsConnector(contenedor, cuerpo));
 	}
 	
 

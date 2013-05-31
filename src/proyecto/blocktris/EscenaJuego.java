@@ -44,6 +44,7 @@ import org.andengine.entity.scene.background.IBackground;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.sprite.TiledSprite;
+import org.andengine.entity.sprite.UncoloredSprite;
 import org.andengine.entity.sprite.batch.SpriteGroup;
 import org.andengine.entity.util.FPSLogger;
 import org.andengine.extension.debugdraw.DebugRenderer;
@@ -110,7 +111,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	public static final int COLUMNAS = 6;
 	public static final int MAX_MULTITOQUE=8 ;
 	
-	public static final float intervaloComprobarLinea = 5f ;
+	public static final float intervaloComprobarLinea = 0.3f ;
 	private Entity capaBaja ;
 	private Entity capaAlta;
 	private ParticleSystem<Sprite>[] particulasPuntero;
@@ -139,7 +140,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		piezas= new ArrayList<IPieza>();
 		joints = new MouseJoint[MAX_MULTITOQUE];
 		bloquesLinea= new ArrayList<Bloque>();
-		timerLinea =  new TimerHandler(intervaloComprobarLinea,true,this);
+		timerLinea =  new TimerHandler(intervaloComprobarLinea,false,this);
 		
 		//FONDO
 		
@@ -308,7 +309,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		motor.registerUpdateHandler(timerLinea);
 		Random rnd = new Random();
 		for(int i =0;i<3;i++){
-			IPieza pieza = PiezaFactory.piezaAleatoria(mundo, camara.getWidth() * rnd.nextFloat(), camara.getHeight()* rnd. nextFloat()+0.5f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
+			IPieza pieza = new PiezaT(mundo, camara.getWidth() * rnd.nextFloat(), camara.getHeight()* rnd. nextFloat()+0.5f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
 
 		pieza.getCuerpo().setBullet(true);
 		
@@ -439,8 +440,9 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		final Body body = ((ObjetoFisico)entidad.getUserData()).getCuerpo();
 		final MouseJointDef mouseJointDef = new MouseJointDef();
 
-		final Vector2 localPoint = Vector2Pool.obtain((pTouchAreaLocalX - entidad.getWidth() * entidad.getOffsetCenterX()) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, 
-				(pTouchAreaLocalY - entidad.getHeight() * entidad.getOffsetCenterY()) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
+		final float [] coordsEscena = entidad.convertLocalCoordinatesToSceneCoordinates(pTouchAreaLocalX, pTouchAreaLocalY);
+		final Vector2 localPoint = Vector2Pool.obtain((coordsEscena[0] - (entidad.getWidth() * entidad.getOffsetCenterX())) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, 
+				(coordsEscena[1] - (entidad.getHeight() * entidad.getOffsetCenterY())) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
 		
 
 		/*
@@ -455,7 +457,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		mouseJointDef.maxForce = (200* body.getMass()*4);
 		mouseJointDef.collideConnected = true;
 		
-		mouseJointDef.target.set(body.getWorldPoint(localPoint));
+		mouseJointDef.target.set(localPoint);
 		Vector2Pool.recycle(localPoint);
 
 		return (MouseJoint) mundo.createJoint(mouseJointDef);
@@ -471,7 +473,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			Vector2 p2;
 			//tiramos una linea  que atraviese la caja sin tocar los muros
 			p1 = Vector2Pool.obtain(0 / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, 
-					(linea*tamaño_bloque+MARGENES+(tamaño_bloque/2))/ PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
+					(linea*tamaño_bloque+(tamaño_bloque/2))/ PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
 			
 			p2 = Vector2Pool.obtain((camara.getWidth() ) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT,
 					p1.y);
@@ -489,7 +491,6 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					if( !(fixture.getBody().getType()==BodyType.StaticBody) ){
 						double diferencia = Math.abs(Math.toDegrees(fixture.getBody().getAngle()) % 90 );
 						if( diferencia <10 || Math.abs(diferencia -90) <10){
-							
 							bloquesLinea.add((Bloque) fixture.getUserData());
 						}
 						//lo añadimos a la linea
@@ -497,19 +498,16 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					
 					}
 					//continuamos  hasta el final aunque hayamos encontrado algo
-					return -1;
+					return 1;
 				}
 			},p1 ,p2  );
 			// si  hemos encontrado COLUMNAS bloques  alineados tenemos una línea completa
 			for(Bloque b : bloquesLinea){
 				b.getGrafico().animate(100);
 			}
-			if(bloquesLinea.size() >= COLUMNAS-5 && onQuitarLinea(bloquesLinea) ){
+			if(bloquesLinea.size() >= COLUMNAS -5 && onQuitarLinea(bloquesLinea) ){
 				
-				motor.runOnUpdateThread(new Runnable() {
-					
-					@Override
-					public void run() {
+				
 						// TODO Auto-generated method stub
 						for(Bloque b : bloquesLinea){
 							
@@ -530,10 +528,10 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 							}
 						}
 					}
-				});
 				
 				
-			}
+				
+			
 			
 		Vector2Pool.recycle(p1);
 		Vector2Pool.recycle(p2);
@@ -621,9 +619,31 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					}
 					return true;
 				case TouchEvent.ACTION_UP:
-					if(joints[pSceneTouchEvent.getPointerID()] != null) {
+					if(joints[pSceneTouchEvent.getPointerID()] != null ) {
+					
+						
+					/* !!
+					 * 
+					 * Básicamente  ocurre que al destruir un cuerpo también se destruyen sus  enlaces(joints)
+					 * pero cómo la extensión de box2d no es mucho mas que unos bindings cutres no  gestiona los objetos nativos 
+					 * de la manera deseable( invlidándolos también)
+					 * 
+					 * en resumen si se acaba de destruir una pieza mientras estaba  sujeta, al soltar el dedo 
+					 * estoy intentando destruir un enlace(joint) que solo existe en el lado Java.
+					 * Por lo tanto cuando las llamadas JNI  hacen su magia  intentan acceder a un puntero  inválido
+					 * y dan  sigsev (segmentation fault)  a nivel de libc.
+					 * 
+					 * Probablemente intentando hacer un doble free() (dado que la memoria de la estructura enlace ya fue liberada
+					 * cuando se destruyó el cuerpo. 
+					 * 
+					 * //confirmado
+					 *  
+					 * 
+					
+					 */
+					if( joints[pSceneTouchEvent.getPointerID()].isActive()){
 						mundo.destroyJoint(joints[pSceneTouchEvent.getPointerID()]);
-							
+					}
 						joints[pSceneTouchEvent.getPointerID()] = null;
 						 particulasPuntero[pSceneTouchEvent.getPointerID()].detachSelf();
 					}
@@ -638,13 +658,18 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 
 	//ha pasado el tiempo  de un timer
 	@Override
-	public void onTimePassed(TimerHandler pTimerHandler) {
+	public void onTimePassed(final TimerHandler pTimerHandler) {
 		
 		
 		
 		 Log.d("TIMER", ""+pTimerHandler.getTimerSeconds());
-		comprobarLineas();
-		
+		 motor.runOnUpdateThread(new Runnable() {
+				
+				@Override
+				public void run() {
+		 comprobarLineas();
+		 pTimerHandler.reset();
+				}});
 		
 		
 		
@@ -683,42 +708,45 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		 */
 		
 		CircleOutlineParticleEmitter pe = new CircleOutlineParticleEmitter(0,0,tamaño_bloque*0.2f,tamaño_bloque*0.2f);
-		SpriteParticleSystem ps =  new SpriteParticleSystem(pe, 50, 300, 300, managerRecursos.trBloques, vbom);
+		BatchedSpriteParticleSystem ps =  new BatchedSpriteParticleSystem(pe, 200, 200, 200, managerRecursos.trBloques, vbom);
 		
 		
 		 
-		 ps=	new SpriteParticleSystem(pe, 100, 250, 500, 
-				     managerRecursos .trAnimBrillo.getTextureRegion(1), vbom);
-				
+		 
 		
 		//efectos para cada partícula
-		 ps.addParticleInitializer(new ColorParticleInitializer<Sprite>(1,1, 0));
+		 ps.addParticleInitializer(new ColorParticleInitializer<UncoloredSprite>(1,1, 0));
 		// particulas[i].addParticleInitializer(new  );
-		 ps.addParticleInitializer(new BlendFunctionParticleInitializer<Sprite>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
-		// particulas[i].addParticleInitializer(new VelocityParticleInitializer<Sprite>(120, 0, 12, 0));
-		 ps.addParticleInitializer(new RotationParticleInitializer<Sprite>(0.0f, 360.0f));
+		 ps.addParticleInitializer(new BlendFunctionParticleInitializer<UncoloredSprite>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
+		
+		 
+		 ps.addParticleInitializer(new VelocityParticleInitializer<UncoloredSprite>(-20, 20, -100, -100));
+		 ps.addParticleInitializer(new RotationParticleInitializer<UncoloredSprite>(0.0f, 360.0f));
 		 
 		 //si no ponemos tiempo de expiracion las particulas solo se retiran cuando llegan
 		 //al máximo
-		 ps.addParticleInitializer(new ExpireParticleInitializer<Sprite>(0.4f));
+		 ps.addParticleInitializer(new ExpireParticleInitializer<UncoloredSprite>(0.4f));
 
-		 ps.addParticleModifier(new ScaleParticleModifier<Sprite>(0, 0.4f, 0.5f, 0.5f));
-		 ps.addParticleModifier(new ColorParticleModifier<Sprite>(0.0f, 0.4f, 1, 1, 0.5f, 1, 0, 1));
+		 ps.addParticleModifier(new ScaleParticleModifier<UncoloredSprite>(0, 0.4f, 0.5f, 0.5f));
+		 ps.addParticleModifier(new ColorParticleModifier<UncoloredSprite>(0.0f, 0.4f, 1, 1, 0.5f, 1, 0, 1));
 		// particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0, 0.2f, 0, 1 ));
 		// particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0.5f,1 , 1, 0));
 		// no queremos que estén  activados desde el principio
 		 
 		
+		 final float[] coords =  new float[2]; 
+		  bloque.getGrafico().getSceneCenterCoordinates(coords);
+		 pe.setCenterX(coords[0]);
 		 
-		 
-		 pe.setCenterX(bloque.getGrafico().getX()-bloque.getGrafico().getOffsetCenterX()* bloque.getGrafico().getWidth()+bloque.getGrafico().getWidth()/2);
-		 
-		 pe.setCenterY(bloque.getGrafico().getY() - bloque.getGrafico().getOffsetCenterY()* bloque.getGrafico().getHeight() + bloque.getGrafico().getHeight()/2);
+		 pe.setCenterY(coords[1]);
 		 
 		 this.capaAlta.attachChild(ps);
 		 ps.setParticlesSpawnEnabled(true);
 		 
-		 ps.registerEntityModifier( new DelayModifier(3, new IEntityModifier.IEntityModifierListener() {
+		 //la añadimos un  modificador de retraso (haha)
+		 //cuando  termina, se autodesengancha y se queda pendiente de GC
+		 //lo ideal sería reutilizar los objetos, pero va a haber muy pocos
+		 ps.registerEntityModifier( new DelayModifier(0.5f, new IEntityModifier.IEntityModifierListener() {
 			
 			@Override
 			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
