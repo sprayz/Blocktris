@@ -10,7 +10,7 @@ public interface IEscenaJuegoEventos {
 	public void onPartidaIniciada();
 	public boolean onFinalizarPartida();
 	public void  onPartidaFinalizada();
-	public boolean onQuitarBloque(bloque) ;
+	public boolean onQuitarBloque(final Bloque bloque) ;
 	public  boolean onQuitarLinea(Collection<Bloque> bloques);
 	public void onLineaQuitada();
 	

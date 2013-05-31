@@ -297,22 +297,6 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	 */
 
 	
-	public boolean onIniciarPartida(){return true;}
-	public void onPartidaIniciada(){}
-	public boolean onFinalizarPartida(){return true;}
-	public void  onPartidaFinalizada(){}
-	
-	public  boolean onQuitarLinea(Collection<Bloque> bloques){
-		return true;
-	}
-	public boolean onQuitarBloque() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	public void onLineaQuitada(){};
-	
-	public void onPausado(){};
-	public void onReanudado(){};
 	
 	
 	
@@ -520,27 +504,35 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			for(Bloque b : bloquesLinea){
 				b.getGrafico().animate(100);
 			}
-			if(bloquesLinea.size() >= COLUMNAS && onQuitarLinea(bloquesLinea) ){
+			if(bloquesLinea.size() >= COLUMNAS-5 && onQuitarLinea(bloquesLinea) ){
 				
-				for(Bloque b : bloquesLinea){
+				motor.runOnUpdateThread(new Runnable() {
 					
-					if(!onQuitarBloque())
-						continue;
-					IPieza pieza = (IPieza)b.getPadre();
-					
-					for(IPieza p: pieza.quitarBloqueDesenlazar(b)){
-						p.registrarAreasTactiles(this);
-						p.registrarGraficos(this.capaBaja);
-						piezas.add(p);
-						
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						for(Bloque b : bloquesLinea){
+							
+							if(!onQuitarBloque(b))
+								continue;
+							IPieza pieza = (IPieza)b.getPadre();
+							
+							for(IPieza p: pieza.quitarBloqueDesenlazar(b)){
+								p.registrarAreasTactiles(EscenaJuego.this);
+								p.registrarGraficos(EscenaJuego.this.capaBaja);
+								piezas.add(p);
+								
+							}
+							if (pieza.getBloques().isEmpty() ){
+								pieza.destruirPieza();
+								piezas.remove(pieza);
+							
+							}
+						}
 					}
-					if (pieza.getBloques().isEmpty() ){
-						pieza.destruirPieza();
-						piezas.remove(pieza);
-					
-					}
-				}
-				onLineaQuitada();
+				});
+				
+				
 			}
 			
 		Vector2Pool.recycle(p1);
@@ -660,7 +652,96 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 
 	
 
+	@Override
+	public boolean onIniciarPartida(){return true;}
+	@Override
+	public void onPartidaIniciada(){}
+	@Override
+	public boolean onFinalizarPartida(){return true;}
+	@Override
+	public void  onPartidaFinalizada(){}
+	
+	@Override
+	public  boolean onQuitarLinea(Collection<Bloque> bloques){
+		return true;
+	}
+	
+	public void onLineaQuitada(){};
+	@Override
+	public void onPausado(){};
+	@Override
+	public void onReanudado(){}
 
+	@Override
+	public boolean onQuitarBloque(final Bloque bloque) {
+		//creamos un sistema de paículas para cada bloque que se elimina
+		
+		
+		/*
+		 * 
+		 * el problema es que los modificadores  son asíncronos 
+		 */
+		
+		CircleOutlineParticleEmitter pe = new CircleOutlineParticleEmitter(0,0,tamaño_bloque*0.2f,tamaño_bloque*0.2f);
+		SpriteParticleSystem ps =  new SpriteParticleSystem(pe, 50, 300, 300, managerRecursos.trBloques, vbom);
+		
+		
+		 
+		 ps=	new SpriteParticleSystem(pe, 100, 250, 500, 
+				     managerRecursos .trAnimBrillo.getTextureRegion(1), vbom);
+				
+		
+		//efectos para cada partícula
+		 ps.addParticleInitializer(new ColorParticleInitializer<Sprite>(1,1, 0));
+		// particulas[i].addParticleInitializer(new  );
+		 ps.addParticleInitializer(new BlendFunctionParticleInitializer<Sprite>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
+		// particulas[i].addParticleInitializer(new VelocityParticleInitializer<Sprite>(120, 0, 12, 0));
+		 ps.addParticleInitializer(new RotationParticleInitializer<Sprite>(0.0f, 360.0f));
+		 
+		 //si no ponemos tiempo de expiracion las particulas solo se retiran cuando llegan
+		 //al máximo
+		 ps.addParticleInitializer(new ExpireParticleInitializer<Sprite>(0.4f));
+
+		 ps.addParticleModifier(new ScaleParticleModifier<Sprite>(0, 0.4f, 0.5f, 0.5f));
+		 ps.addParticleModifier(new ColorParticleModifier<Sprite>(0.0f, 0.4f, 1, 1, 0.5f, 1, 0, 1));
+		// particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0, 0.2f, 0, 1 ));
+		// particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0.5f,1 , 1, 0));
+		// no queremos que estén  activados desde el principio
+		 
+		
+		 
+		 
+		 pe.setCenterX(bloque.getGrafico().getX()-bloque.getGrafico().getOffsetCenterX()* bloque.getGrafico().getWidth()+bloque.getGrafico().getWidth()/2);
+		 
+		 pe.setCenterY(bloque.getGrafico().getY() - bloque.getGrafico().getOffsetCenterY()* bloque.getGrafico().getHeight() + bloque.getGrafico().getHeight()/2);
+		 
+		 this.capaAlta.attachChild(ps);
+		 ps.setParticlesSpawnEnabled(true);
+		 
+		 ps.registerEntityModifier( new DelayModifier(3, new IEntityModifier.IEntityModifierListener() {
+			
+			@Override
+			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
+				motor.runOnUpdateThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						 ((SpriteParticleSystem)pItem).detachSelf();
+						
+					}
+				});
+				
+			}
+		}));
+		return true;
+	}
+	
 	
 	
 

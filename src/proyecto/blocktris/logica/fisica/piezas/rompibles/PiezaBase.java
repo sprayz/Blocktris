@@ -420,6 +420,8 @@ public List<Bloque> getBloques() {
 	
 	
 	public IPieza separarBloques(List<Bloque> list){
+		
+		
 		if(list.size()== bloques.size())
 			return this;
 		Iterator<Bloque> it =list.iterator();
