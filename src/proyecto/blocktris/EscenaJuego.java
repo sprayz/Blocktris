@@ -92,7 +92,9 @@ import proyecto.blocktris.logica.fisica.piezas.IPieza;
 import proyecto.blocktris.logica.fisica.piezas.PiezaFactory;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.*;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
+import proyecto.blocktris.recursos.EstadoJuego;
 import proyecto.blocktris.recursos.ManagerEscenas;
+import proyecto.blocktris.recursos.EstadoJuego.EstadoPieza;
 import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 
 public class EscenaJuego extends EscenaBase implements IAccelerationListener, IOnSceneTouchListener, IOnAreaTouchListener, ITimerCallback,IEscenaTetrisEventos {
@@ -112,7 +114,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	public static final int COLUMNAS = 9;
 	public static final int MAX_MULTITOQUE=8 ;
 	
-	public static final float intervaloPonerPieza= 10f ;
+	public static final float intervaloPonerPieza= 5f ;
 	public static final float intervaloComprobarLinea = 0.3f ;
 	private Entity capaBaja ;
 	private Entity capaAlta;
@@ -126,7 +128,9 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	/*
 	 * ESTADO DEL  JUEGO
 	 */
+	protected EstadoJuego estadoGuardado;
 	protected ArrayList<IPieza> piezas;
+
 	protected IPieza ultimaPieza;
 	protected ArrayList<Bloque> bloquesLinea;
 	protected float puntuacion;
@@ -140,8 +144,11 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		 * 
 		 */
 		
-		this.setChildScene(ManagerEscenas.getInstancia().escenaMenu);
+		
+		this.setChildSceneModal(ManagerEscenas.getInstancia().escenaMenu);
 		piezas= new ArrayList<IPieza>();
+		estadoGuardado = new EstadoJuego();
+		estadoGuardado.piezas =  new ArrayList<EstadoJuego.EstadoPieza>();
 		joints = new MouseJoint[MAX_MULTITOQUE];
 		bloquesLinea= new ArrayList<Bloque>();
 		timerLinea =  new TimerHandler(intervaloComprobarLinea,false,this);
@@ -292,8 +299,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	    debug.setDrawBodies(true);
 	    debug.setDrawJoints(true);
 	    attachChild(debug); 
-	    reiniciarEscena();
-	    iniciarPartida();
+	   // reiniciarEscena();
+	   // iniciarPartida();
 	}
 	
 	/*
@@ -331,6 +338,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		piezas.clear();
 		motor.unregisterUpdateHandler(timerLinea);
 		motor.unregisterUpdateHandler(timerPieza);
+		
 		iniciarPartida();
 		
 		Log.d("REINICIO", "CUERPOS: " + mundo.getBodyCount());
@@ -666,25 +674,32 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			
 		}
 		if(pTimerHandler == timerPieza){
-			onPonerPieza();
-			IPieza pieza = PiezaFactory.piezaAleatoria(mundo, camara.getWidth() /2, camara.getHeight()* 1.2f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
-			pieza.registrarAreasTactiles(this);
-			pieza.registrarGraficos(this.capaBaja);
-			pTimerHandler.reset();
-			piezas.add(pieza);
-			 Log.d("TIMER", ""+pTimerHandler.getTimerSecondsElapsed());
+
+			 motor.runOnUpdateThread(new Runnable() {
+					@Override
+					public void run() {
+						onPonerPieza();
+						pTimerHandler.reset();
+						
+				
+					}});
+			
 		}
 		
-		pTimerHandler.setTimerCallbackTriggered(false);
+		//pTimerHandler.setTimerCallbackTriggered(false);
 		
 	}
 
 	
 
 	@Override
-	public boolean onIniciarPartida(){return true;}
+	public boolean onIniciarPartida(){
+		Log.w("FLUJO" , "PARTIDA INICIANDO PARTIDA");
+		return true;}
 	@Override
-	public void onPartidaIniciada(){}
+	public void onPartidaIniciada(){
+		Log.w("FLUJO" , "PARTIDA INICIADA");
+	}
 	@Override
 	public boolean onFinalizarPartida(boolean ganado){return true;}
 	@Override
@@ -697,9 +712,33 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	
 	public void onLineaQuitada(){};
 	@Override
-	public void onPausado(){};
+	public void onPausado(){
+		for(IPieza p : piezas){
+			
+			
+			estadoGuardado.piezas .add( EstadoJuego.EstadoPieza.empaquetar(p));	
+		}
+		
+		Log.w("FLUJO" , "ESCENA JUEGO PAUSADA");
+	};
 	@Override
-	public void onReanudado(){}
+	public void onReanudado(){
+		for(IPieza p : piezas ){
+			p.destruirPieza();
+		}
+		System.gc();
+		piezas.clear();
+		for (EstadoPieza ep : estadoGuardado.piezas){
+			IPieza pieza;
+			pieza = EstadoJuego.EstadoPieza.desempaquetar(mundo, ep);
+			pieza.registrarAreasTactiles(this);
+			pieza.registrarGraficos(this.capaBaja);
+		}
+		
+		estadoGuardado.piezas.clear();
+		Log.w("FLUJO" , "ESCENA JUEGO REANUDADA");
+		
+	}
 
 	@Override
 	public boolean onQuitarBloque(final Bloque bloque) {
@@ -775,7 +814,23 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		*/
 	}
 	
-	public void onPonerPieza(){};
+	public void onPonerPieza(){
+		
+		IPieza pieza = PiezaFactory.piezaAleatoria(mundo, camara.getWidth() /2, camara.getHeight()* 1.2f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
+		pieza.registrarAreasTactiles(this);
+		pieza.registrarGraficos(this.capaBaja);
+		
+		piezas.add(pieza);
+		
+		
+	}
+
+	@Override
+	public void teclaMenuPresionada() {
+
+		this.setChildSceneModal(ManagerEscenas.getInstancia().escenaMenu);
+	
+	};
 	
 	
 	

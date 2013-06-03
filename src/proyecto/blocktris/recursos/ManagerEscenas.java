@@ -16,7 +16,7 @@ public class ManagerEscenas
 {
  
 
-    public EscenaBase escenaJuego;
+    public EscenaJuego escenaJuego;
    public EscenaBase escenaMenu;
     
  

@@ -3,4 +3,11 @@
     <string name="actividadBluetooth_refrescar">Refrescar</string>
     <string name="title_activity_actividad_bluetooth">Selecciona un Dispositivo</string>
      <string name="actividadBluetooth_conectar">Conectar</string>
+     
+     
+      <string name="menu_continuar">Continuar</string>
+	 <string name="menu_nuevaPartida">Nueva Partida</string>
+	 <string name="menu_multijugador">Multijugador</string>
+	 <string name="menu_instrucciones">Instrucciones</string>
+	 <string name="menu_salir">Salir</string>
 </resources>

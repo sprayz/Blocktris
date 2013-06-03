@@ -7,4 +7,14 @@
     <string name="title_activity_actividad_bluetooth">Select a Device</string>
 	<string name="actividadBluetooth_refrescar">Scan</string>
 	 <string name="actividadBluetooth_conectar">Connect</string>
+	 
+	 
+	 
+	 <string name="menu_continuar">Continue</string>
+	 <string name="menu_nuevaPartida">New Game</string>
+	 <string name="menu_multijugador">Multiplayer</string>
+	 <string name="menu_instrucciones">Instructions</string>
+	 <string name="menu_salir">Quit</string>
+	 
+	 
 </resources>

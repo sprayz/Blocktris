@@ -37,26 +37,43 @@ public class MainActivity extends BaseGameActivity{
 	@Override
 	public Engine onCreateEngine(EngineOptions pEngineOptions) 
 	{
+		pEngineOptions.getRenderOptions().setDithering(true); //para el degradado del fondo
 	    return new Engine(pEngineOptions);
 	}
 	
+	
 	@Override
-	protected void onPause()
-	{
-	    super.onPause();
-	    if (this.isGameLoaded());
+	public void onPauseGame()
+	{ 
+	    super.onPauseGame();
+	    
+	    if (this.isGameLoaded()){
+	    	
+	    	if (escenas.getEscenaActual() != null)
+			{
+	    		escenas.getEscenaActual().onPausado();
+			}
+	    }
+	    
 	    	
 	    	
 	        
 	}
 
 	@Override
-	protected synchronized void onResume()
+	public
+	synchronized void onResumeGame()
 	{
-	    super.onResume();
+	    super.onResumeGame();
 	    System.gc();
-	    if (this.isGameLoaded());
-	    
+	    if (this.isGameLoaded()){
+	    	
+	    	if (escenas.getEscenaActual() != null)
+			{
+	    		escenas.getEscenaActual().onReanudado();
+			}
+	    }
+	   
 	}
 
 
@@ -71,20 +88,28 @@ public class MainActivity extends BaseGameActivity{
 
 
 	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
 		if (escenas.getEscenaActual() != null)
 		{
 			
-		if (keyCode == KeyEvent.KEYCODE_BACK)
+			if (keyCode == KeyEvent.KEYCODE_BACK)
+		    {
+		        escenas.getEscenaActual().teclaVolverPreionada();
+		    }
+			
+			if (keyCode == KeyEvent.KEYCODE_MENU)
 		    {
 		        escenas.getEscenaActual().teclaVolverPreionada();
 		    }
 		
+		
 		}
 		 //no queremos que el evento se propague
-		    return true; 
-		
+		    return true;
 	}
+
+
+
 
 
 	public EngineOptions onCreateEngineOptions()
@@ -110,7 +135,7 @@ public class MainActivity extends BaseGameActivity{
 	    	escenas.crearEscenaMenu();
 	    	escenas.crearEscenaJuego();
 	    	
-	        escenas.setEscena(TipoEscena.ESCENA_MENU );
+	        escenas.setEscena(TipoEscena.ESCENA_JUEGO );
 	        pOnCreateSceneCallback.onCreateSceneFinished(escenas.getEscenaActual());
 	    }
 

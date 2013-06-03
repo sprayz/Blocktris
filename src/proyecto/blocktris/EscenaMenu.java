@@ -28,16 +28,18 @@ public class EscenaMenu extends EscenaBase implements IOnMenuItemClickListener{
 		setBackground(new Background(Color.BLUE));
 		setBackgroundEnabled(false);
 		  menuScene = new MenuScene(camara);
-		  final IMenuItem botonSingle = new ScaleMenuItemDecorator(new TextMenuItem(1, managerRecursos.fGlobal , "Single", vbom) , 1.1f, 1);
-		  final IMenuItem botonMulti = new ScaleMenuItemDecorator(new TextMenuItem(2, managerRecursos.fGlobal , "Multi", vbom) , 1.1f, 1);
-		  final IMenuItem botonPuntuaciones = new ScaleMenuItemDecorator(new TextMenuItem(3, managerRecursos.fGlobal , "Salir", vbom) , 1.1f, 1);
-		  final IMenuItem botonSalir = new ScaleMenuItemDecorator(new TextMenuItem(4, managerRecursos.fGlobal , "Salir", vbom) , 1.1f, 1);
+		  final IMenuItem botonSingle = new ScaleMenuItemDecorator(new TextMenuItem(1, managerRecursos.fGlobal , actividadJuego.getText(R.string.menu_continuar), vbom) , 1.1f, 1);
+		  final IMenuItem botonMulti = new ScaleMenuItemDecorator(new TextMenuItem(2, managerRecursos.fGlobal , actividadJuego.getText(R.string.menu_multijugador), vbom) , 1.1f, 1);
+		  final IMenuItem botonNuevaPartida = new ScaleMenuItemDecorator(new TextMenuItem(3, managerRecursos.fGlobal , actividadJuego.getText(R.string.menu_nuevaPartida), vbom) , 1.1f, 1);
+		  final IMenuItem botonInstrucciones = new ScaleMenuItemDecorator(new TextMenuItem(4, managerRecursos.fGlobal , actividadJuego.getText(R.string.menu_instrucciones), vbom) , 1.1f, 1);
+		  final IMenuItem botonSalir = new ScaleMenuItemDecorator(new TextMenuItem(5, managerRecursos.fGlobal , actividadJuego.getText(R.string.menu_salir), vbom) , 1.1f, 1);
 			 
 		
 		 
 		  menuScene.addMenuItem(botonSingle);
 		menuScene.addMenuItem(botonMulti);
-		menuScene.addMenuItem(botonPuntuaciones);
+		menuScene.addMenuItem(botonNuevaPartida);
+		menuScene.addMenuItem(botonInstrucciones);
 		menuScene.addMenuItem(botonSalir);
 		  menuScene.buildAnimations();
 		 
@@ -82,10 +84,25 @@ public class EscenaMenu extends EscenaBase implements IOnMenuItemClickListener{
 		
 		case 1:
 			ManagerEscenas.getInstancia().setEscena(TipoEscena.ESCENA_JUEGO );
+			ManagerEscenas.getInstancia().escenaJuego.iniciarPartida();
+			this.back();
 			return true;
 		case 2:
 			ActividadBluetooth.lanzar(managerRecursos.actividadJuego);
 			return true;
+		
+		case 3:
+			ManagerEscenas.getInstancia().setEscena(TipoEscena.ESCENA_JUEGO );
+			return true;
+		case 4:
+			ActividadBluetooth.lanzar(managerRecursos.actividadJuego);
+			return true;
+		case 5:
+			this.back();
+			return true;
+		
+		
+		
 		default:
 		
 		}
@@ -111,6 +128,12 @@ public class EscenaMenu extends EscenaBase implements IOnMenuItemClickListener{
 
 	@Override
 	public void onReanudado() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void teclaMenuPresionada() {
 		// TODO Auto-generated method stub
 		
 	}

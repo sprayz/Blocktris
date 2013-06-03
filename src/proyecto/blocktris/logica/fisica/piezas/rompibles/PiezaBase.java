@@ -235,7 +235,7 @@ public List<Bloque> getBloques() {
 	protected ArrayList<Bloque> bloques = new ArrayList<Bloque>();
 	protected Body cuerpo;
 	protected Scene escena;
-	
+	protected float tamaño_bloque;
 	
 	protected IEntity contenedor = new Entity();
 	

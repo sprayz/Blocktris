@@ -62,7 +62,12 @@ public class ManagerRecursos {
 				.createTiledFromAsset(taBloques, actividadJuego, "clear.png",
 						8, 1);
 
-		try {
+		try {// Magia negra
+			/*
+			 * Parece que esto es para  cuadrar las regiones en la textura del  atlas.
+			 * 
+			 * 
+			 */
 			taBloques
 					.build(new BlackPawnTextureAtlasBuilder<IBitmapTextureAtlasSource, BitmapTextureAtlas>(
 							0, 0, 1));
