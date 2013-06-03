@@ -92,9 +92,10 @@ import proyecto.blocktris.logica.fisica.piezas.IPieza;
 import proyecto.blocktris.logica.fisica.piezas.PiezaFactory;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.*;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
+import proyecto.blocktris.recursos.ManagerEscenas;
 import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 
-public class EscenaJuego extends EscenaBase implements IAccelerationListener, IOnSceneTouchListener, IOnAreaTouchListener, ITimerCallback,IEscenaJuegoEventos {
+public class EscenaJuego extends EscenaBase implements IAccelerationListener, IOnSceneTouchListener, IOnAreaTouchListener, ITimerCallback,IEscenaTetrisEventos {
 
 	public static float MARGENES = 20;
 	public static float ANGULO_MAX =10;
@@ -107,10 +108,11 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	public Body pared_derecha ; 
 	PhysicsWorld mundo ; 
 	float tamaño_bloque;
-	 public static final int FILAS =    9 ;
-	public static final int COLUMNAS = 6;
+	 public static final int FILAS =    12;
+	public static final int COLUMNAS = 9;
 	public static final int MAX_MULTITOQUE=8 ;
 	
+	public static final float intervaloPonerPieza= 10f ;
 	public static final float intervaloComprobarLinea = 0.3f ;
 	private Entity capaBaja ;
 	private Entity capaAlta;
@@ -119,7 +121,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	private Gradient degradadoFondo;
 	private Background fondo;
 	
-	
+	private TimerHandler timerPieza;
 	private TimerHandler timerLinea;
 	/*
 	 * ESTADO DEL  JUEGO
@@ -137,11 +139,13 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		 * VARIABLES
 		 * 
 		 */
+		
+		this.setChildScene(ManagerEscenas.getInstancia().escenaMenu);
 		piezas= new ArrayList<IPieza>();
 		joints = new MouseJoint[MAX_MULTITOQUE];
 		bloquesLinea= new ArrayList<Bloque>();
 		timerLinea =  new TimerHandler(intervaloComprobarLinea,false,this);
-		
+		timerPieza =  new TimerHandler(intervaloPonerPieza,false,this);
 		//FONDO
 		
 		degradadoFondo  = new Gradient(camara.getWidth()/2,camara.getHeight()/2,camara.getWidth(), camara.getHeight(), vbom);
@@ -307,28 +311,9 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		
 		
 		motor.registerUpdateHandler(timerLinea);
-		Random rnd = new Random();
-		for(int i =0;i<3;i++){
-			IPieza pieza = new PiezaT(mundo, camara.getWidth() * rnd.nextFloat(), camara.getHeight()* rnd. nextFloat()+0.5f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
-
-		pieza.getCuerpo().setBullet(true);
+		motor.registerUpdateHandler(timerPieza);
 		
-		
-		/*
-		for(IPieza p : pieza2.quitarBloqueDesenlazar(pieza2.getBloques().get(2))){
-			p.registrarAreasTactiles(this);
-			p.registrarGraficos(this.capaBaja);
-			p.getCuerpo().setBullet(true);
-		}
-		*/
-		
-			pieza.registrarGraficos(this.capaBaja);
-			pieza.registrarAreasTactiles(this);
-			piezas.add(pieza);
-			onPartidaIniciada();
-			
-		 
-		}
+	
 		
 		onPartidaIniciada();
 	}
@@ -345,6 +330,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		System.gc();
 		piezas.clear();
 		motor.unregisterUpdateHandler(timerLinea);
+		motor.unregisterUpdateHandler(timerPieza);
 		iniciarPartida();
 		
 		Log.d("REINICIO", "CUERPOS: " + mundo.getBodyCount());
@@ -467,18 +453,26 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	
 	public void comprobarLineas(){
 		
-		bloquesLinea.clear();
-		for(int linea =0;linea<1;linea++){
+		
+		for(int linea =0;linea<2;linea++){
+			bloquesLinea.clear();
 			Vector2 p1;
 			Vector2 p2;
 			//tiramos una linea  que atraviese la caja sin tocar los muros
 			p1 = Vector2Pool.obtain(0 / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, 
-					(linea*tamaño_bloque+(tamaño_bloque/2))/ PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
+					(linea*tamaño_bloque+(tamaño_bloque/2) +MARGENES) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
 			
 			p2 = Vector2Pool.obtain((camara.getWidth() ) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT,
 					p1.y);
-			//this.capaAlta.attachChild(new Line(p1.x,p1.y,p2.x,p2.y,vbom));
+		
+			/*Line lin = new Line(p1.x*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT,
+					p1.y*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT
+					,p2.x*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT
+				,p2.y*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT
+					,vbom);
 			
+			this.capaAlta.attachChild(lin);
+			*/
 			//tiramos el  rayo
 			mundo.rayCast(new RayCastCallback() {
 				
@@ -505,7 +499,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			for(Bloque b : bloquesLinea){
 				b.getGrafico().animate(100);
 			}
-			if(bloquesLinea.size() >= COLUMNAS -5 && onQuitarLinea(bloquesLinea) ){
+			if(bloquesLinea.size() >= COLUMNAS  && onQuitarLinea(bloquesLinea) ){
 				
 				
 						// TODO Auto-generated method stub
@@ -660,18 +654,28 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	@Override
 	public void onTimePassed(final TimerHandler pTimerHandler) {
 		
+		if(pTimerHandler == timerLinea){
+			
+			
+			 motor.runOnUpdateThread(new Runnable() {
+					@Override
+					public void run() {
+			 comprobarLineas();
+			 pTimerHandler.reset();
+					}});
+			
+		}
+		if(pTimerHandler == timerPieza){
+			onPonerPieza();
+			IPieza pieza = PiezaFactory.piezaAleatoria(mundo, camara.getWidth() /2, camara.getHeight()* 1.2f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
+			pieza.registrarAreasTactiles(this);
+			pieza.registrarGraficos(this.capaBaja);
+			pTimerHandler.reset();
+			piezas.add(pieza);
+			 Log.d("TIMER", ""+pTimerHandler.getTimerSecondsElapsed());
+		}
 		
-		
-		 Log.d("TIMER", ""+pTimerHandler.getTimerSeconds());
-		 motor.runOnUpdateThread(new Runnable() {
-				
-				@Override
-				public void run() {
-		 comprobarLineas();
-		 pTimerHandler.reset();
-				}});
-		
-		
+		pTimerHandler.setTimerCallbackTriggered(false);
 		
 	}
 
@@ -682,7 +686,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	@Override
 	public void onPartidaIniciada(){}
 	@Override
-	public boolean onFinalizarPartida(){return true;}
+	public boolean onFinalizarPartida(boolean ganado){return true;}
 	@Override
 	public void  onPartidaFinalizada(){}
 	
@@ -699,13 +703,10 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 
 	@Override
 	public boolean onQuitarBloque(final Bloque bloque) {
+		return true;
 		//creamos un sistema de paículas para cada bloque que se elimina
 		
-		
 		/*
-		 * 
-		 * el problema es que los modificadores  son asíncronos 
-		 */
 		
 		CircleOutlineParticleEmitter pe = new CircleOutlineParticleEmitter(0,0,tamaño_bloque*0.2f,tamaño_bloque*0.2f);
 		BatchedSpriteParticleSystem ps =  new BatchedSpriteParticleSystem(pe, 200, 200, 200, managerRecursos.trBloques, vbom);
@@ -717,11 +718,12 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		//efectos para cada partícula
 		 ps.addParticleInitializer(new ColorParticleInitializer<UncoloredSprite>(1,1, 0));
 		// particulas[i].addParticleInitializer(new  );
-		 ps.addParticleInitializer(new BlendFunctionParticleInitializer<UncoloredSprite>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
+		ps.addParticleInitializer(new BlendFunctionParticleInitializer<UncoloredSprite>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
 		
-		 
-		 ps.addParticleInitializer(new VelocityParticleInitializer<UncoloredSprite>(-20, 20, -100, -100));
+		 //
+		 ps.addParticleInitializer(new VelocityParticleInitializer<UncoloredSprite>(20, 20, 100, 100));
 		 ps.addParticleInitializer(new RotationParticleInitializer<UncoloredSprite>(0.0f, 360.0f));
+		 
 		 
 		 //si no ponemos tiempo de expiracion las particulas solo se retiran cuando llegan
 		 //al máximo
@@ -729,7 +731,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 
 		 ps.addParticleModifier(new ScaleParticleModifier<UncoloredSprite>(0, 0.4f, 0.5f, 0.5f));
 		 ps.addParticleModifier(new ColorParticleModifier<UncoloredSprite>(0.0f, 0.4f, 1, 1, 0.5f, 1, 0, 1));
-		// particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0, 0.2f, 0, 1 ));
+		 ps.addParticleModifier(new AlphaParticleModifier<UncoloredSprite>(0, 0.2f, 0, 1 ));
+		 
 		// particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0.5f,1 , 1, 0));
 		// no queremos que estén  activados desde el principio
 		 
@@ -768,7 +771,11 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			}
 		}));
 		return true;
+		
+		*/
 	}
+	
+	public void onPonerPieza(){};
 	
 	
 	

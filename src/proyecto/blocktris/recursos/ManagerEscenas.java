@@ -16,8 +16,8 @@ public class ManagerEscenas
 {
  
 
-    private EscenaBase escenaJuego;
-    private EscenaBase escenaMenu;
+    public EscenaBase escenaJuego;
+   public EscenaBase escenaMenu;
     
  
     private static  ManagerEscenas INSTANCIA= null;

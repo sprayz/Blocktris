@@ -26,7 +26,7 @@ public class EscenaMenu extends EscenaBase implements IOnMenuItemClickListener{
 		  MenuScene menuScene;
 		// TODO Auto-generated method stub
 		setBackground(new Background(Color.BLUE));
-		 
+		setBackgroundEnabled(false);
 		  menuScene = new MenuScene(camara);
 		  final IMenuItem botonSingle = new ScaleMenuItemDecorator(new TextMenuItem(1, managerRecursos.fGlobal , "Single", vbom) , 1.1f, 1);
 		  final IMenuItem botonMulti = new ScaleMenuItemDecorator(new TextMenuItem(2, managerRecursos.fGlobal , "Multi", vbom) , 1.1f, 1);
