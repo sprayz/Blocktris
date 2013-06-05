@@ -22,7 +22,9 @@ import org.andengine.input.touch.detector.PinchZoomDetector;
 import org.andengine.input.touch.detector.PinchZoomDetector.IPinchZoomDetectorListener;
 import org.andengine.ui.activity.BaseGameActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.os.PowerManager;
 import android.view.KeyEvent;
 
 import proyecto.blocktris.recursos.ManagerEscenas;
@@ -34,6 +36,7 @@ public class MainActivity extends BaseGameActivity{
 	private ManagerRecursos recursos = ManagerRecursos.getInstancia();
 	private ManagerEscenas  escenas = ManagerEscenas.getInstancia();
 	private Camera camara;
+	private  boolean pausado = false;
 	@Override
 	public Engine onCreateEngine(EngineOptions pEngineOptions) 
 	{
@@ -42,16 +45,26 @@ public class MainActivity extends BaseGameActivity{
 	}
 	
 	
+	
+	/*
+	 * 
+	 * Aparentemente Android considera necesario llamar a onpause y onresume inmediatamente despues de 
+	 *  bloquear la pantalla.
+	 *  
+	 *  Extremadamente apropiado.
+	 */
 	@Override
 	public void onPauseGame()
 	{ 
 	    super.onPauseGame();
 	    
-	    if (this.isGameLoaded()){
+	    if (this.isGameLoaded()&& !pausado){
 	    	
 	    	if (escenas.getEscenaActual() != null)
 			{
+	    		pausado= true;
 	    		escenas.getEscenaActual().onPausado();
+	    		
 			}
 	    }
 	    
@@ -64,12 +77,14 @@ public class MainActivity extends BaseGameActivity{
 	public
 	synchronized void onResumeGame()
 	{
+		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+    
 	    super.onResumeGame();
-	    System.gc();
-	    if (this.isGameLoaded()){
+	    if (this.isGameLoaded() &&   pm.isScreenOn()){
 	    	
 	    	if (escenas.getEscenaActual() != null)
 			{
+	    		pausado = false;
 	    		escenas.getEscenaActual().onReanudado();
 			}
 	    }
@@ -80,7 +95,7 @@ public class MainActivity extends BaseGameActivity{
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
-		super.onDestroy();
+		//super.onDestroy();
 		 if (this.isGameLoaded()){
 		        System.exit(0);    
 		  }
@@ -99,7 +114,7 @@ public class MainActivity extends BaseGameActivity{
 			
 			if (keyCode == KeyEvent.KEYCODE_MENU)
 		    {
-		        escenas.getEscenaActual().teclaVolverPreionada();
+		        escenas.getEscenaActual().teclaMenuPresionada();
 		    }
 		
 		

@@ -6,8 +6,13 @@ import java.util.List;
 
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 
+
+import android.util.Log;
+
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.google.gson.Gson;
 
 import proyecto.blocktris.logica.fisica.Utilidades;
 import proyecto.blocktris.logica.fisica.piezas.IPieza;
@@ -26,6 +31,8 @@ import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque.ColorB
  *   
  * 
  */
+
+
 public class EstadoJuego implements Serializable {
 		
 	int puntuacion;
@@ -33,7 +40,7 @@ public class EstadoJuego implements Serializable {
 	
 	 public static class EstadoPieza implements Serializable {
 		 
-		 public static class EstadoBloque{
+		 public static class EstadoBloque implements Serializable {
 			
 			public ColorBloque color;
 			public float x;
@@ -42,6 +49,13 @@ public class EstadoJuego implements Serializable {
 			
 			
 		}
+
+
+	
+			
+			
+		
+		
 		 
 		public float tamaño_bloque;
 		public BodyDef bodydef;
@@ -55,7 +69,10 @@ public class EstadoJuego implements Serializable {
 		public static  EstadoPieza empaquetar(IPieza pieza ){
 			EstadoPieza estado = new EstadoPieza();
 			
-			estado.bodydef =  Utilidades.bodyToDef(pieza.getCuerpo());
+			
+			
+			
+			estado.bodydef =   Utilidades.bodyToDef(pieza.getCuerpo());
 			estado.fixturedef =  Utilidades.fixtureToDef(pieza.getBloques().get(0).getFixtura());
 			estado.tipo = pieza.getTipo();
 			estado.tamaño_bloque = pieza.getBloques().get(0).getGrafico().getHeight();

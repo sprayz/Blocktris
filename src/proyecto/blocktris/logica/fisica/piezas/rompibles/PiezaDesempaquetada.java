@@ -23,6 +23,7 @@ import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 public class PiezaDesempaquetada extends PiezaBase {
 
 	public PiezaDesempaquetada(PhysicsWorld mundo, EstadoJuego.EstadoPieza estado) {
+		
 		super(mundo, 
 				estado.bodydef.position.x* PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, 
 				estado.bodydef.position.y* PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, 
@@ -31,11 +32,12 @@ public class PiezaDesempaquetada extends PiezaBase {
 		
 	
 		
-		cuerpo= mundo.createBody(estado.bodydef);
-		cuerpo.setTransform(estado.bodydef.position.x, estado.bodydef.position.y, 0);
+		BodyDef bodydef = estado.bodydef;
+		cuerpo= mundo.createBody(bodydef);
+		cuerpo.setTransform(bodydef.position.x, bodydef.position.y, bodydef.angle);
 		 
 		cuerpo.setUserData(this); 
-		
+		cuerpo.setFixedRotation(false);
 		for(EstadoBloque eb : estado.bloques){
 			this.bloques.add( new Bloque(mundo, 
 										cuerpo, 

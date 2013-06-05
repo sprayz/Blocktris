@@ -1,5 +1,14 @@
 package proyecto.blocktris;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
@@ -66,6 +75,7 @@ import org.andengine.util.adt.color.Color;
 import org.andengine.util.adt.list.ListUtils;
 import org.andengine.util.modifier.IModifier;
 
+import android.content.Context;
 import android.hardware.SensorManager;
 import android.opengl.GLES20;
 import android.util.Log;
@@ -83,11 +93,13 @@ import com.badlogic.gdx.physics.box2d.Manifold;
 import com.badlogic.gdx.physics.box2d.RayCastCallback;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.google.gson.Gson;
 
 
 
 import proyecto.blocktris.logica.EscenaBase;
 import proyecto.blocktris.logica.fisica.ObjetoFisico;
+import proyecto.blocktris.logica.fisica.Utilidades;
 import proyecto.blocktris.logica.fisica.piezas.IPieza;
 import proyecto.blocktris.logica.fisica.piezas.PiezaFactory;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.*;
@@ -99,6 +111,7 @@ import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 
 public class EscenaJuego extends EscenaBase implements IAccelerationListener, IOnSceneTouchListener, IOnAreaTouchListener, ITimerCallback,IEscenaTetrisEventos {
 
+	public static final String ARCHIVO_ESTADO = "estado.dat"; 
 	public static float MARGENES = 20;
 	public static float ANGULO_MAX =10;
 	public static  double  SEN_ANGULO_MIN = Math.sin(Math.toRadians(ANGULO_MAX)); 
@@ -110,11 +123,13 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	public Body pared_derecha ; 
 	PhysicsWorld mundo ; 
 	float tamaño_bloque;
-	 public static final int FILAS =    12;
-	public static final int COLUMNAS = 9;
-	public static final int MAX_MULTITOQUE=8 ;
 	
-	public static final float intervaloPonerPieza= 5f ;
+	
+	 public static final int FILAS =    9;
+	public static final int COLUMNAS = 6;
+	public static final int MAX_MULTITOQUE=8 ;
+
+	public static final float intervaloPonerPieza= 8f ;
 	public static final float intervaloComprobarLinea = 0.3f ;
 	private Entity capaBaja ;
 	private Entity capaAlta;
@@ -145,7 +160,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		 */
 		
 		
-		this.setChildSceneModal(ManagerEscenas.getInstancia().escenaMenu);
+		actividadJuego.deleteFile(ARCHIVO_ESTADO);
 		piezas= new ArrayList<IPieza>();
 		estadoGuardado = new EstadoJuego();
 		estadoGuardado.piezas =  new ArrayList<EstadoJuego.EstadoPieza>();
@@ -292,6 +307,9 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 				
 			}
 		});
+
+		this.registerUpdateHandler(timerLinea);
+		this.registerUpdateHandler(timerPieza);
 		
 		
 		registerUpdateHandler(mundo); 
@@ -299,8 +317,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	    debug.setDrawBodies(true);
 	    debug.setDrawJoints(true);
 	    attachChild(debug); 
-	   // reiniciarEscena();
-	   // iniciarPartida();
+	    
 	}
 	
 	/*
@@ -310,15 +327,122 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 
 	
 	
+
+	public void guardarEstado(){
+		
+
+		for(IPieza p : piezas){
+			
+			
+			estadoGuardado.piezas .add( EstadoJuego.EstadoPieza.empaquetar(p));	
+		}
+		
+		
+		try
+	      {
+			
+	         FileOutputStream fileOut =actividadJuego.openFileOutput(ARCHIVO_ESTADO,Context.MODE_PRIVATE);
+	         Gson  gson=  new Gson();
+	         BufferedOutputStream bos = new BufferedOutputStream(fileOut);
+	         
+	         bos.write(gson.toJson(estadoGuardado).getBytes());
+	         Log.w("SERIALIZANDO",gson.toJson(estadoGuardado) );
+	         bos.close();
+	          fileOut.close();
+	      }catch(IOException f)
+	      {
+	          Log.e("SERIALIZADO",f.getMessage());
+	          
+	          
+	      }
+		
+		
+		
+	}
 	
+	public void cargarEstado(){
+		 
+	
+				
+		 
+			
+		FileInputStream fileIn =  null;
+		
+		
+		StringBuilder sb = new StringBuilder();
+		
+		 BufferedReader reader =null;
+		 
+		try{
+			fileIn = actividadJuego. openFileInput(ARCHIVO_ESTADO);
+	        reader =  new BufferedReader(new InputStreamReader(fileIn, "UTF-8"));       
+	            String linea = null;
+	            while ((linea = reader.readLine()) != null) {
+	                sb.append(linea).append("\n");
+
+	            }
+	       
+			
+			
+	        String resultado = sb.toString();
+			 Gson  gson=  new Gson();
+	         BufferedInputStream bis = new BufferedInputStream(fileIn);
+	          
+	         
+	         estadoGuardado = gson.fromJson(resultado, EstadoJuego.class);
+	         
+		} 
+		catch(Exception i)
+		{ 
+		  Log.e("SERIALIZADO",i.getMessage());
+		}
+		finally{
+			if (reader !=null)
+			{
+				
+				try {
+					reader.close();
+				} catch (IOException e) {
+				
+				}
+			}
+			
+		}
+		
+		
+		
+		
+		
+			for(IPieza p : piezas ){
+				p.destruirPieza();
+			}
+			System.gc();
+			piezas.clear();
+			for (EstadoPieza ep : estadoGuardado.piezas){
+				IPieza pieza;
+				pieza = EstadoJuego.EstadoPieza.desempaquetar(mundo, ep);
+				pieza.registrarAreasTactiles(this);
+				pieza.registrarGraficos(this.capaBaja);
+				piezas.add(pieza);
+				
+			}
+
+			
+			
+					
+			estadoGuardado.piezas.clear();
+		
+		
+	}
 	
 	public void iniciarPartida(){
+		
 		if(!onIniciarPartida())
 			return;
 		
 		
-		motor.registerUpdateHandler(timerLinea);
-		motor.registerUpdateHandler(timerPieza);
+		this.registerUpdateHandler(timerLinea);
+		this.registerUpdateHandler(timerPieza);
 		
 	
 		
@@ -336,8 +460,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		}
 		System.gc();
 		piezas.clear();
-		motor.unregisterUpdateHandler(timerLinea);
-		motor.unregisterUpdateHandler(timerPieza);
+		this.unregisterUpdateHandler(timerLinea);
+		this.unregisterUpdateHandler(timerPieza);
 		
 		iniciarPartida();
 		
@@ -694,6 +818,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 
 	@Override
 	public boolean onIniciarPartida(){
+		onReanudado();
 		Log.w("FLUJO" , "PARTIDA INICIANDO PARTIDA");
 		return true;}
 	@Override
@@ -713,29 +838,23 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	public void onLineaQuitada(){};
 	@Override
 	public void onPausado(){
-		for(IPieza p : piezas){
-			
-			
-			estadoGuardado.piezas .add( EstadoJuego.EstadoPieza.empaquetar(p));	
-		}
+		guardarEstado();
 		
 		Log.w("FLUJO" , "ESCENA JUEGO PAUSADA");
-	};
+	}; 
 	@Override
 	public void onReanudado(){
-		for(IPieza p : piezas ){
-			p.destruirPieza();
-		}
-		System.gc();
-		piezas.clear();
-		for (EstadoPieza ep : estadoGuardado.piezas){
-			IPieza pieza;
-			pieza = EstadoJuego.EstadoPieza.desempaquetar(mundo, ep);
-			pieza.registrarAreasTactiles(this);
-			pieza.registrarGraficos(this.capaBaja);
-		}
 		
-		estadoGuardado.piezas.clear();
+		cargarEstado();
+		this.registerUpdateHandler(new TimerHandler(1, false, new ITimerCallback() {
+			
+			@Override
+			public void onTimePassed(TimerHandler pTimerHandler) {
+				EscenaJuego.this.setChildScene(ManagerEscenas.getInstancia().escenaMenu,false,true,true);
+				EscenaJuego.this.unregisterUpdateHandler(pTimerHandler);
+			}
+		}));
+		
 		Log.w("FLUJO" , "ESCENA JUEGO REANUDADA");
 		
 	}
@@ -821,16 +940,18 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		pieza.registrarGraficos(this.capaBaja);
 		
 		piezas.add(pieza);
-		
+		Log.d("PIEZA " , "PUESTA PIEZA : " +pieza.getTipo().toString());
 		
 	}
 
 	@Override
 	public void teclaMenuPresionada() {
-
-		this.setChildSceneModal(ManagerEscenas.getInstancia().escenaMenu);
+		
+				
+		
+		
 	
-	};
+	}
 	
 	
 	

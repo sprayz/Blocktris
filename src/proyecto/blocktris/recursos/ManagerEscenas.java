@@ -2,6 +2,7 @@ package proyecto.blocktris.recursos;
 
 import org.andengine.engine.Engine;
 import org.andengine.entity.scene.Scene;
+import org.andengine.entity.scene.menu.MenuScene;
 
 import proyecto.blocktris.EscenaJuego;
 import proyecto.blocktris.EscenaMenu;
@@ -17,7 +18,7 @@ public class ManagerEscenas
  
 
     public EscenaJuego escenaJuego;
-   public EscenaBase escenaMenu;
+   public MenuScene escenaMenu;
     
  
     private static  ManagerEscenas INSTANCIA= null;
@@ -45,7 +46,7 @@ public class ManagerEscenas
      }
      public void crearEscenaMenu(){
     	 
-    	 escenaMenu = new EscenaMenu();
+    	 escenaMenu = new EscenaMenu(ManagerRecursos.getInstancia().camara);
     	 
      }
   
@@ -65,10 +66,7 @@ public class ManagerEscenas
                 tipoEscenaActual =tipoEscena;
               break;
               
-            case ESCENA_MENU:
-                setEscena(escenaMenu);
-                tipoEscenaActual =tipoEscena;
-              break;
+            
             default:
                 break;
         }

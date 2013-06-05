@@ -1,5 +1,6 @@
 package proyecto.blocktris.logica.fisica.piezas.rompibles;
 
+import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -79,7 +80,7 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 			grafico.setCurrentTileIndex(color.ordinal());
 		}
 
-		public static enum ColorBloque{
+		public static enum ColorBloque implements Serializable{
 			AZUL,VERDE,GRIS,MORADO,ROJO,ARENA
 			
 		}

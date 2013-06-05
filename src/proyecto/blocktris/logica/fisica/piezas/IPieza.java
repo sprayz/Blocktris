@@ -2,6 +2,7 @@ package proyecto.blocktris.logica.fisica.piezas;
 
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 
+import java.io.Serializable;
 import java.util.*;
 
 import org.andengine.entity.Entity;
@@ -38,7 +39,7 @@ import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 
 public interface IPieza {
 
-	public static enum PIEZAS {
+	public static enum PIEZAS implements Serializable{
 		PIEZA_T,
 		PIEZA_L1,
 		PIEZA_L2,
