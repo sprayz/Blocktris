@@ -6,6 +6,7 @@ import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.menu.*;
 import org.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
+import org.andengine.entity.scene.menu.animator.AlphaMenuSceneAnimator;
 import org.andengine.entity.scene.menu.item.*;
 import org.andengine.entity.scene.menu.item.decorator.*;
 import org.andengine.util.adt.color.Color;
@@ -27,11 +28,26 @@ public class EscenaMenu extends MenuScene implements IOnMenuItemClickListener{
 	public EscenaMenu(Camera camara){
 		super(camara);
 		
-		// TODO Auto-generated method stub
-		//setBackground(new Background(Color.BLUE));
-		setBackgroundEnabled(true);
+		/*
+		 * Aparentemente es imposible hacer una escena semitransparente o aplicar el mismo efecto a su  fondo
+		 * 
+		 * La manera recomendad es crear manualmente  un fondo  con un grafico que ocupe toda la escena
+		 * 
+		 *  y ponerle a este ultimo su transaparencia.
+		 *  
+		 *  NOTA: Puede ser  inceficiente  en escenas con muchos graficos por encima del fondo DUH...
+		 */
+		Rectangle fondo = new Rectangle(camara.getCenterX(),
+										camara.getCenterY(),
+										camara.getWidth(),
+										camara.getHeight(),
+										ManagerRecursos.getInstancia().vbom	);
 	
-		  
+		fondo.setColor(0, 0, 0, 0.3f);
+		this.attachChild(fondo);
+		// entrada con transaparencia
+		this.setMenuSceneAnimator(new AlphaMenuSceneAnimator() ) ;
+		
 		  
 		  
 		  final IMenuItem botonSingle = new ScaleMenuItemDecorator(new TextMenuItem(1, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_continuar), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
@@ -50,6 +66,7 @@ public class EscenaMenu extends MenuScene implements IOnMenuItemClickListener{
 		buildAnimations();
 		 
 		setBackgroundEnabled(false);
+		
 		 setOnMenuItemClickListener(this);
 	
 		  
@@ -66,7 +83,7 @@ public class EscenaMenu extends MenuScene implements IOnMenuItemClickListener{
 		switch(pMenuItem.getID()){
 	
 		case 1:
-			this.back();
+			this.back(true);
 			
 			return false;
 		case 2:
@@ -74,13 +91,15 @@ public class EscenaMenu extends MenuScene implements IOnMenuItemClickListener{
 			return true;
 		
 		case 3:
-			ManagerEscenas.getInstancia().setEscena(TipoEscena.ESCENA_JUEGO );
+			ManagerEscenas.getInstancia().escenaJuego.finalizarPartida();
+			ManagerEscenas.getInstancia().escenaJuego.iniciarPartida();
+			this.back(true);
 			return true;
 		case 4:
 			ActividadBluetooth.lanzar(ManagerRecursos.getInstancia().actividadJuego);
 			return true;
 		case 5:
-			this.back();
+			System.exit(0);
 			return true;
 		
 		

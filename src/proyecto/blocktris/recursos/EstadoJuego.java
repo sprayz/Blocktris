@@ -35,8 +35,12 @@ import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque.ColorB
 
 public class EstadoJuego implements Serializable {
 		
+	
+	
+	
+	
 	int puntuacion;
-	public ArrayList<EstadoPieza> piezas ;
+	public ArrayList<EstadoPieza> piezas = new ArrayList<EstadoJuego.EstadoPieza>() ;
 	
 	 public static class EstadoPieza implements Serializable {
 		 
@@ -45,7 +49,10 @@ public class EstadoJuego implements Serializable {
 			public ColorBloque color;
 			public float x;
 			public float y;
-			public ArrayList<EstadoBloque> adyacentes;
+			//para eveiutar referencias circulares al serializar a JSON
+			// guardamos los adyacentes en forma de índices  destro del mismo array
+			// en lugar de  referencias.
+			public ArrayList<Integer> adyacentes = new ArrayList<Integer>();
 			
 			
 		}
@@ -54,7 +61,7 @@ public class EstadoJuego implements Serializable {
 	
 			
 			
-		
+		private EstadoPieza (){};
 		
 		 
 		public float tamaño_bloque;
@@ -84,31 +91,26 @@ public class EstadoJuego implements Serializable {
 				eb.color = b.getColor();
 				eb.x = b.getX();
 				eb.y = b.getY();
-				eb.adyacentes = new ArrayList<EstadoJuego.EstadoPieza.EstadoBloque>();
 				estado.bloques.add(eb);
 				
 				
 			}
 			
-			int indice ;
-			List<EstadoBloque> adyacentes_nuevos;
-			for(int i = 0;i <pieza.getBloques().size();i++ )
-					//por cada adyacente del antiguo
-					for(Bloque adj : pieza.getBloques().get(i).getAdjacentes()){
+			
+		//por cada bloque
+			
+			
+			for(int i = 0;i <pieza.getBloques().size();i++){
+				Bloque b =  pieza.getBloques().get(i);
+				
+				// por cada adyacente de ese bloque
+				for(Bloque ad: b.getAdjacentes()){
+					estado.bloques.get(i).adyacentes.add(pieza.getBloques().indexOf(ad));
 					
-						adyacentes_nuevos = estado.bloques.get(i).adyacentes;
-						//añadimos los adyacentes del nuevo que tengan el mismo indice que los adyacentes del viejo
-						indice = pieza.getBloques().indexOf(adj);
-						if(indice <0)
-							break;
-						adyacentes_nuevos.add(estado.bloques.get(indice));
-						
-				
-				
+				}
 				
 				
 			}
-			
 			
 			
 			

@@ -44,8 +44,7 @@ public class PiezaT extends PiezaBase {
 		bloques.get(1).getAdjacentes().add(bloques.get(2));
 		bloques.get(1).getAdjacentes().add(bloques.get(3));
 		bloques.get(1).getAdjacentes().add(bloques.get(0));
-		
-//	bloques.get(0).getCuerpo().destroyFixture();
+
 		bloques.get(2).getAdjacentes().add(bloques.get(1));
 
 		

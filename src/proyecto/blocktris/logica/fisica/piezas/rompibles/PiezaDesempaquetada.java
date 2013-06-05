@@ -52,22 +52,14 @@ public class PiezaDesempaquetada extends PiezaBase {
 		}
 		
 		//reestablecemos los adyacentes
-
-		int indice ;
-		List<Bloque> adyacentes_nuevos;
-		for(int i = 0;i <this.getBloques().size();i++ )
-				//por cada adyacente del antiguo
-				for(EstadoBloque adj : estado.bloques.get(i).adyacentes){
+		for(int i = 0;i <estado.bloques.size();i++){
+			EstadoBloque b =  estado.bloques.get(i);
+			
+			// por cada adyacente de ese bloque
+			for(Integer ad: b.adyacentes){
+				this.bloques.get(i).getAdjacentes().add(this.bloques.get(ad));
 				
-					adyacentes_nuevos = bloques.get(i).getAdjacentes();
-					//añadimos los adyacentes del nuevo que tengan el mismo indice que los adyacentes del viejo
-					indice =estado.bloques.indexOf(adj);
-					if(indice <0)
-						break;
-					adyacentes_nuevos.add(this.getBloques().get(indice));
-					
-			
-			
+			}
 			
 			
 		}
