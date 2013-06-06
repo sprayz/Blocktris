@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.Random;
 
 import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.entity.Entity;
@@ -132,7 +133,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	public static final int MAX_MULTITOQUE=8 ;
 
 	public static final float intervaloPonerPieza= 4f ;
-	public static final float intervaloComprobarLinea = 1f ;
+	public static final float intervaloComprobarLinea = 0.2f ;
 	private Entity capaBaja ;
 	private Entity capaAlta;
 	private BatchedSpriteParticleSystem[] particulasPuntero;
@@ -319,9 +320,9 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	    debug.setDrawBodies(true);
 	    debug.setDrawJoints(true);
 	    attachChild(debug); 
-	    
 	}
 	
+
 	/*
 	 * EVENTOS
 	 * 
@@ -440,6 +441,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 				p.destruirPieza();
 			}
 			System.gc();
+		if(estadoGuardado!=null){	
 			piezas.clear();
 			for (EstadoPieza ep : estadoGuardado.piezas){
 				IPieza pieza;
@@ -449,11 +451,13 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 				piezas.add(pieza);
 				
 			}
-
+			estadoGuardado.piezas.clear();
+		}
+		
 			
 			
 					
-			estadoGuardado.piezas.clear();
+			
 		
 		
 	}
@@ -568,16 +572,9 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		// no queremos que estén  activados desde el principio
 		 particulasPuntero[i].setParticlesSpawnEnabled(false);
 		
-		 
-		 
-		 
-		 
+	
 		}
-		
 	}
-	
-	
-	
 	
 	/**
 	 * Sacado del ejemplo de AE  demostrando MouseJoint
@@ -612,9 +609,10 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	
 	
 	public void comprobarLineas(){
-		final ArrayList<Bloque> bloquesLinea= new ArrayList<Bloque>();
+		 final ArrayList<Bloque> bloquesLinea= new ArrayList<Bloque>();
 		
-		for(int linea =0;linea<FILAS;linea++){
+		for(int linea =0;linea<1;linea++){
+			
 			bloquesLinea.clear();
 			Vector2 p1;
 			Vector2 p2;
@@ -632,8 +630,13 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					,vbom);
 			
 			this.capaAlta.attachChild(lin);
-			
+			Log.d("RAYCAST","RAYO LINEA");
 			//tiramos el  rayo
+			
+			/* El botor (Box2d) no garantiza que el orden en el que se reportan las intersecciones sea 
+			 *  el de proximidad al origen del rayo.
+			 *  Por lo tanto hay que ordenar  en base al parametro
+			 */
 			mundo.rayCast(new RayCastCallback() {
 				
 				@Override
@@ -642,49 +645,78 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					//cada vez que encuentre una fixture
 					// si  no pertenece a  un cuerpo estático(muro)
 					
+					Log.d("RAYCAST","RAYO bloque " + bloquesLinea.size());
+					//if(fixture.getBody()==pared_derecha)
+					//	return 0;
 					if( !(fixture.getBody().getType()==BodyType.StaticBody ) ){
+						Vector2 velocidad = fixture.getBody().getLinearVelocity();
 						
+						if(Math.abs(velocidad.x) <0.2 && Math.abs(velocidad.y) <0.2){
+							
 						// y además  se encuentra alineado con los ejes( con un margen de 10 grados arriba o abajo)
 						double diferencia = Math.abs(Math.toDegrees(fixture.getBody().getAngle()) % 90 );
-						if( diferencia <10 || Math.abs(diferencia -90) <10){
+						if( diferencia <10 || Math.abs(diferencia -90) <5){
 							//lo añadimos a la linea
+							
 							if(!bloquesLinea.contains((Bloque) fixture.getUserData())){
-								bloquesLinea.add((Bloque) fixture.getUserData());
-							}
-						}
 						
+								bloquesLinea.add((Bloque) fixture.getUserData());
+								
+							}
+								
+						}
+						}
 						
 					
 					}
 					//continuamos  hasta el final aunque hayamos encontrado algo
+					
 					return 1;
 				}
 			},p1 ,p2  );
 			// si  hemos encontrado COLUMNAS bloques  alineados tenemos una línea completa
-			
+
+			 float cont =1.0f;
+				for(Bloque b : bloquesLinea){
+					
+					b.getGrafico().setAlpha(cont);
+					cont -= 0.08;
+				}
 			if(bloquesLinea.size() >= COLUMNAS  && onQuitarLinea(bloquesLinea) ){
+			
 				
 				
-						// TODO Auto-generated method stub
-						for(Bloque b : bloquesLinea){
+				
+				
+					for(Bloque b : bloquesLinea){
+						
+						if(!onQuitarBloque(b))
+							continue;
+						IPieza pieza = (IPieza)b.getPadre();
+						//Log.d("QUITANDO LINEA","PIEZA PADRE :" +pieza);
+					//	Log.d("QUITANDO LINEA","Bloque Indice:" +pieza.getBloques().indexOf(b));
+						
+						
+						for(IPieza p: pieza.quitarBloqueDesenlazar(b)){
+							p.registrarAreasTactiles(EscenaJuego.this);
+							p.registrarGraficos(EscenaJuego.this.capaBaja);
+							piezas.add(p);
 							
-							if(!onQuitarBloque(b))
-								continue;
-							IPieza pieza = (IPieza)b.getPadre();
 							
-							for(IPieza p: pieza.quitarBloqueDesenlazar(b)){
-								p.registrarAreasTactiles(EscenaJuego.this);
-								p.registrarGraficos(EscenaJuego.this.capaBaja);
-								piezas.add(p);
-								
-							}
-							if (pieza.getBloques().isEmpty() ){
-								pieza.destruirPieza();
-								piezas.remove(pieza);
-							
-							}
+						}
+						if (pieza.getBloques().isEmpty() ){
+							pieza.destruirPieza();
+							piezas.remove(pieza);
+						
 						}
 					}
+				}
+			
+				
+				
+						
+					
+						
 				
 				
 				
@@ -739,15 +771,25 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					
 					@Override
 					public void run() {
+					for(Bloque b: new ArrayList<Bloque>(pieza.getBloques())){
 						// TODO Auto-generated method stub
-						for (IPieza p : pieza.quitarBloqueDesenlazar(bloque)){
+						for (IPieza p : pieza.quitarBloqueDesenlazar(b)){
 							 p.registrarAreasTactiles(EscenaJuego.this);
 							 p.registrarGraficos(EscenaJuego.this.capaBaja);
+							 piezas.add(p);
 						 }
+						if (pieza.getBloques().isEmpty()){
+							
+							pieza.destruirPieza();
+							piezas.remove(pieza);
+							
+						}
 					}
+					}
+						
 				});
-			
-				 */
+			*/
+				 
 			}
 			
 			
@@ -834,12 +876,13 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		
 		if(pTimerHandler == timerLinea){
 			
-			
 			 motor.runOnUpdateThread(new Runnable() {
 					@Override
 					public void run() {
-			 comprobarLineas();
-			 pTimerHandler.reset();
+						comprobarLineas();
+						pTimerHandler.reset();
+						
+				
 					}});
 			
 		}
