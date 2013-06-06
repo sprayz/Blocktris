@@ -21,12 +21,20 @@ public abstract class EscenaBase extends Scene
     protected ManagerRecursos managerRecursos;
     protected VertexBufferObjectManager vbom;
     protected Camera camara;
-    
+    protected  boolean pausado =false;
     //---------------------------------------------
     // CONSTRUCTOR
     //---------------------------------------------
     
-    public EscenaBase()
+    public boolean isPausado() {
+		return pausado;
+	}
+
+	public void setPausado(boolean pausado) {
+		this.pausado = pausado;
+	}
+
+	public EscenaBase()
     {
         this.managerRecursos = ManagerRecursos.getInstancia();
         this.motor = managerRecursos.motor;
@@ -39,10 +47,13 @@ public abstract class EscenaBase extends Scene
     //---------------------------------------------
     // ABSTRACTION
     //---------------------------------------------
-    public abstract void onPausado();
-	public abstract void onReanudado();
+   
     public abstract void crearEscena();
     public abstract void reiniciarEscena();
+    public abstract void onEscenaPausada();
+    public abstract void onEscenaReanudada();
+    public abstract void pausarEscena();
+    public abstract void  reanudarEscena();
     public abstract void teclaVolverPreionada();
     public abstract void teclaMenuPresionada();
     

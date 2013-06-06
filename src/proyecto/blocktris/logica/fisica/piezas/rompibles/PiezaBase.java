@@ -46,12 +46,12 @@ public  class PiezaBase implements IPieza {
 		BODYDEF_DEFECTO = new BodyDef();
 		
 		BODYDEF_DEFECTO.active = true;
-		BODYDEF_DEFECTO.allowSleep = false;
+		BODYDEF_DEFECTO.allowSleep = true;
 		BODYDEF_DEFECTO.angularDamping= 5f;
 		BODYDEF_DEFECTO.awake= true;
-		BODYDEF_DEFECTO.bullet = true;
+		BODYDEF_DEFECTO.bullet = false;
 		BODYDEF_DEFECTO.fixedRotation= false;
-		BODYDEF_DEFECTO.linearDamping = 0;
+		BODYDEF_DEFECTO.linearDamping = 1.5f;
 		BODYDEF_DEFECTO.type= BodyType.DynamicBody;
 	}
 	

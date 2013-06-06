@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Random;
+import java.util.TreeMap;
 
 import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.engine.handler.IUpdateHandler;
@@ -40,6 +41,7 @@ import org.andengine.entity.particle.initializer.RotationParticleInitializer;
 import org.andengine.entity.particle.initializer.VelocityParticleInitializer;
 import org.andengine.entity.particle.modifier.AlphaParticleModifier;
 import org.andengine.entity.particle.modifier.ColorParticleModifier;
+import org.andengine.entity.particle.modifier.RotationParticleModifier;
 import org.andengine.entity.particle.modifier.ScaleParticleModifier;
 import org.andengine.entity.primitive.Gradient;
 import org.andengine.entity.primitive.Line;
@@ -59,6 +61,7 @@ import org.andengine.entity.sprite.batch.SpriteGroup;
 import org.andengine.entity.util.FPSLogger;
 import org.andengine.extension.debugdraw.DebugRenderer;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
+import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.extension.physics.box2d.util.Vector2Pool;
@@ -130,9 +133,10 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	
 	 public static final int FILAS =    12;
 	public static final int COLUMNAS = 9;
+	public static final int MAX_BLOQUES = FILAS * COLUMNAS;
 	public static final int MAX_MULTITOQUE=8 ;
 
-	public static final float intervaloPonerPieza= 4f ;
+	public static final float intervaloPonerPieza= 2f ;
 	public static final float intervaloComprobarLinea = 0.2f ;
 	private Entity capaBaja ;
 	private Entity capaAlta;
@@ -149,6 +153,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	protected EstadoJuego estadoGuardado;
 	protected ArrayList<IPieza> piezas;
 
+	private boolean  primerCargado=true;
 	protected IPieza ultimaPieza;
 	
 	protected float puntuacion;
@@ -174,7 +179,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		//FONDO
 		
 		degradadoFondo  = new Gradient(camara.getWidth()/2,camara.getHeight()/2,camara.getWidth(), camara.getHeight(), vbom);
-		degradadoFondo.setFromColor(0.1f, 0.2f, 0.5f);
+		degradadoFondo.setFromColor(0.0f, 0.5f, 1.0f);
 		degradadoFondo.setToColor(1, 1, 1);
 		degradadoFondo.setGradientFitToBounds(true);
 		degradadoFondo.setGradientDitherEnabled(true);
@@ -225,9 +230,9 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		
 		//PAREDES
 		suelo =PhysicsFactory.createLineBody(mundo, 0, 0+MARGENES, camara.getWidth(), 0+MARGENES, fdef_muro);
-		techo=PhysicsFactory.createLineBody(mundo, 0, camara.getHeight()-MARGENES,camara.getWidth() , camara.getHeight()-MARGENES, fdef_muro);
-		pared_izquierda=PhysicsFactory.createLineBody(mundo, 0, 0-MARGENES,0, camara.getHeight()*1.5f-MARGENES, fdef_muro);
-		pared_derecha=PhysicsFactory.createLineBody(mundo, camara.getWidth(), 0+MARGENES,camara.getWidth(), camara.getHeight()*1.5f-MARGENES, fdef_muro);
+		techo=PhysicsFactory.createLineBody(mundo, 0, camara.getHeight()*1.5f,camara.getWidth() , camara.getHeight()*1.5f, fdef_muro);
+		pared_izquierda=PhysicsFactory.createLineBody(mundo, 0, 0-MARGENES,0, camara.getHeight()*2f-MARGENES, fdef_muro);
+		pared_derecha=PhysicsFactory.createLineBody(mundo, camara.getWidth(), 0+MARGENES,camara.getWidth(), camara.getHeight()*2f-MARGENES, fdef_muro);
 		
 
 		
@@ -362,7 +367,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	         BufferedOutputStream bos = new BufferedOutputStream(fileOut);
 	         
 	         bos.write(gson.toJson(estadoGuardado).getBytes());
-	         Log.w("SERIALIZANDO",gson.toJson(estadoGuardado) );
+	        // Log.w("SERIALIZANDO",gson.toJson(estadoGuardado) );
 	         bos.flush();
 	         bos.close();
 	         fileOut.close();
@@ -411,7 +416,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			 Gson  gson=  new Gson();
 	         BufferedInputStream bis = new BufferedInputStream(fileIn);
 	          
-	         Log.e("DESERIALIZANDO","" + resultado );
+	         //Log.e("DESERIALIZANDO","" + resultado );
 	         estadoGuardado = gson.fromJson(resultado, EstadoJuego.class);
 	         
 	         
@@ -454,6 +459,11 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			estadoGuardado.piezas.clear();
 		}
 		
+		for(PhysicsConnector  pc :  mundo.getPhysicsConnectorManager()){
+			
+			pc.onUpdate(0);
+			
+		}
 			
 			
 					
@@ -508,13 +518,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	
 	
 
-	@Override
-	public void teclaVolverPreionada() {
-		// TODO Auto-generated method stub
-		
-		guardarEstado();		
-		EscenaJuego.this.setChildScene(ManagerEscenas.getInstancia().escenaMenu,false,true,true);
-	}
+	
 
 	@Override
 	public TipoEscena getTipoEscena() {
@@ -609,9 +613,16 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	
 	
 	public void comprobarLineas(){
-		 final ArrayList<Bloque> bloquesLinea= new ArrayList<Bloque>();
+		/* El motor (Box2d) no garantiza que el orden en el que se reportan las intersecciones sea 
+		 *  el de proximidad al origen del rayo.
+		 *  Por lo tanto hay que ordenar  en base al parametro fraction, que representa con un decimal
+		 *  de 0.0f  a 1.0f  en que  fraccion de la distancia del origen al objetivo nos encontramos al colisionar.
+		 */
+	
+		//TreeMap para ordenar las fixturas por  su proximidad al origen según insertamos
+		final TreeMap<Float,Bloque> bloquesLinea= new TreeMap<Float,Bloque>();
 		
-		for(int linea =0;linea<1;linea++){
+		for(int linea =0;linea<FILAS;linea++){
 			
 			bloquesLinea.clear();
 			Vector2 p1;
@@ -623,7 +634,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			p2 = Vector2Pool.obtain((camara.getWidth() ) / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT,
 					p1.y);
 		
-			Line lin = new Line(p1.x*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT,
+			/*Line lin = new Line(p1.x*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT,
 					p1.y*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT
 					,p2.x*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT
 				,p2.y*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT
@@ -632,11 +643,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			this.capaAlta.attachChild(lin);
 			Log.d("RAYCAST","RAYO LINEA");
 			//tiramos el  rayo
-			
-			/* El botor (Box2d) no garantiza que el orden en el que se reportan las intersecciones sea 
-			 *  el de proximidad al origen del rayo.
-			 *  Por lo tanto hay que ordenar  en base al parametro
-			 */
+			*/
 			mundo.rayCast(new RayCastCallback() {
 				
 				@Override
@@ -645,9 +652,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					//cada vez que encuentre una fixture
 					// si  no pertenece a  un cuerpo estático(muro)
 					
-					Log.d("RAYCAST","RAYO bloque " + bloquesLinea.size());
-					//if(fixture.getBody()==pared_derecha)
-					//	return 0;
+					//Log.d("RAYCAST","RAYO bloque " + bloquesLinea.size());
+					
 					if( !(fixture.getBody().getType()==BodyType.StaticBody ) ){
 						Vector2 velocidad = fixture.getBody().getLinearVelocity();
 						
@@ -658,11 +664,11 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 						if( diferencia <10 || Math.abs(diferencia -90) <5){
 							//lo añadimos a la linea
 							
-							if(!bloquesLinea.contains((Bloque) fixture.getUserData())){
 						
-								bloquesLinea.add((Bloque) fixture.getUserData());
+						
+								bloquesLinea.put(fraction,(Bloque) fixture.getUserData());
 								
-							}
+							
 								
 						}
 						}
@@ -677,18 +683,18 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			// si  hemos encontrado COLUMNAS bloques  alineados tenemos una línea completa
 
 			 float cont =1.0f;
-				for(Bloque b : bloquesLinea){
+				for(Bloque b : bloquesLinea.values()){
 					
 					b.getGrafico().setAlpha(cont);
 					cont -= 0.08;
 				}
-			if(bloquesLinea.size() >= COLUMNAS  && onQuitarLinea(bloquesLinea) ){
+			if(bloquesLinea.size() >= COLUMNAS  && onQuitarLinea(bloquesLinea.values()) ){
 			
 				
 				
 				
 				
-					for(Bloque b : bloquesLinea){
+					for(Bloque b : bloquesLinea.values()){
 						
 						if(!onQuitarBloque(b))
 							continue;
@@ -809,9 +815,10 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		
 		
 		
-		if(pSceneTouchEvent.getPointerID()==1){
-			degradadoFondo.setGradientVector(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
+		if(pSceneTouchEvent.getPointerID()==0){
+			
 			degradadoFondo.setGradientAngle( (float) (180/ Math.PI * Math.atan2(degradadoFondo.getX() - pSceneTouchEvent.getX(), pSceneTouchEvent.getY() - degradadoFondo.getY())));
+			//degradadoFondo.setGradientVector(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
 		}
 		if(this.mundo != null && pSceneTouchEvent.getPointerID() <MAX_MULTITOQUE) {
 			
@@ -929,62 +936,43 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	}
 	
 	public void onLineaQuitada(){};
-	@Override
-	public void onPausado(){
-		guardarEstado();
-		
-		Log.w("FLUJO" , "ESCENA JUEGO PAUSADA");
-	}; 
-	@Override
-	public void onReanudado(){
-		
-		
-		
-		motor.runOnUpdateThread(new Runnable() {
-			@Override
-			public void run() {
-				//EscenaJuego.this.unregisterUpdateHandler(pTimerHandler);
-				cargarEstado();
-				EscenaJuego.this.setChildScene(ManagerEscenas.getInstancia().escenaMenu,false,true,true);
-			}});
-		Log.w("FLUJO" , "ESCENA JUEGO REANUDADA");
-		
-	}
+
 
 	@Override
 	public boolean onQuitarBloque(final Bloque bloque) {
-		return true;
+		
 		//creamos un sistema de paículas para cada bloque que se elimina
 		
-		/*
 		
-		CircleOutlineParticleEmitter pe = new CircleOutlineParticleEmitter(0,0,tamaño_bloque*0.2f,tamaño_bloque*0.2f);
-		BatchedSpriteParticleSystem ps =  new BatchedSpriteParticleSystem(pe, 200, 200, 200, managerRecursos.trBloques, vbom);
+		
+		PointParticleEmitter pe = new PointParticleEmitter(tamaño_bloque*0.5f,tamaño_bloque*0.5f);
+		
+		//ponemos comom color el color del bloque que se esta quitando
+		
+		//el 100 es necesario apra que empiece a emitir inmediatamente aunque solo halla un sprite
+		BatchedSpriteParticleSystem ps =  new BatchedSpriteParticleSystem(pe, 1,100 , 1, 
+																			managerRecursos.trBloques.getTextureRegion(bloque.getGrafico().getCurrentTileIndex())
+																			, vbom);
 		
 		
 		 
 		 
-		
-		//efectos para cada partícula
-		 ps.addParticleInitializer(new ColorParticleInitializer<UncoloredSprite>(1,1, 0));
-		// particulas[i].addParticleInitializer(new  );
 		ps.addParticleInitializer(new BlendFunctionParticleInitializer<UncoloredSprite>(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
 		
-		 //
-		 ps.addParticleInitializer(new VelocityParticleInitializer<UncoloredSprite>(20, 20, 100, 100));
-		 ps.addParticleInitializer(new RotationParticleInitializer<UncoloredSprite>(0.0f, 360.0f));
-		 
+		
 		 
 		 //si no ponemos tiempo de expiracion las particulas solo se retiran cuando llegan
 		 //al máximo
-		 ps.addParticleInitializer(new ExpireParticleInitializer<UncoloredSprite>(0.4f));
+		 ps.addParticleInitializer(new ExpireParticleInitializer<UncoloredSprite>(1.3f));
 
-		 ps.addParticleModifier(new ScaleParticleModifier<UncoloredSprite>(0, 0.4f, 0.5f, 0.5f));
-		 ps.addParticleModifier(new ColorParticleModifier<UncoloredSprite>(0.0f, 0.4f, 1, 1, 0.5f, 1, 0, 1));
-		 ps.addParticleModifier(new AlphaParticleModifier<UncoloredSprite>(0, 0.2f, 0, 1 ));
 		 
-		// particulas[i].addParticleModifier(new AlphaParticleModifier<Sprite>(0.5f,1 , 1, 0));
-		// no queremos que estén  activados desde el principio
+		 //desgraciadamente  no se puede  especificar el tamaño absoluto de cada sprite
+		 // por lo tanto hay que sacar la proporción entre  el tamaño del sprite del bloque  y el tamaño original de la textura
+		 //dado que  el parametro scale del sprite no se  ajusta si asignamos directamente el tamaño(que es el  caso)
+		 //y por lo tanto es  1.0f permanentemente
+		 ps.addParticleModifier(new ScaleParticleModifier<UncoloredSprite>(0, 1.0f, 0.5f, bloque.getGrafico().getHeight()/managerRecursos.trBloques.getHeight()*2));
+		 ps.addParticleModifier(new AlphaParticleModifier<UncoloredSprite>(0, 1.0f, 1, 0 ));
+		 ps.addParticleModifier(new RotationParticleModifier<UncoloredSprite>(0, 1.6f, 0, 360));
 		 
 		
 		 final float[] coords =  new float[2]; 
@@ -999,7 +987,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		 //la añadimos un  modificador de retraso (haha)
 		 //cuando  termina, se autodesengancha y se queda pendiente de GC
 		 //lo ideal sería reutilizar los objetos, pero va a haber muy pocos
-		 ps.registerEntityModifier( new DelayModifier(0.5f, new IEntityModifier.IEntityModifierListener() {
+		 ps.registerEntityModifier( new DelayModifier(1.3f, new IEntityModifier.IEntityModifierListener() {
 			
 			@Override
 			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
@@ -1013,6 +1001,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					
 					@Override
 					public void run() {
+						//pasado el tiempo nos desenganchamos de la escena
 						 ((BatchedSpriteParticleSystem)pItem).detachSelf();
 						
 					}
@@ -1022,7 +1011,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		}));
 		return true;
 		
-		*/
+		
 	}
 	
 	public void onPonerPieza(){
@@ -1031,7 +1020,19 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		pieza.registrarAreasTactiles(this);
 		pieza.registrarGraficos(this.capaBaja);
 		
+		
+		
+		
 		piezas.add(pieza);
+		//contabilizamos los bloques que hay en escena
+		float bloques =0;
+		for(IPieza p : piezas){
+			bloques += p.getBloques().size();
+			
+		}
+		//degradadoFondo.setGradientFitToBounds(false);
+		//degradadoFondo.setFromRed(bloques/(MAX_BLOQUES/5) );
+		
 		Log.d("PIEZA " , "PUESTA PIEZA : " +pieza.getTipo().toString());
 		
 	}
@@ -1039,14 +1040,84 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	@Override
 	public void teclaMenuPresionada() {
 		
+		pausarEscena();
+		
+		
+		
+	
+	}
+
+	@Override
+	public void teclaVolverPreionada() {
+		// TODO Auto-generated method stub
+		pausarEscena();
+	}
+
+	@Override
+	public void pausarEscena() {
+		Log.w("FLUJO" , "ESCENA JUEGO PAUSADA");
+		/*
+	motor.runOnUpdateThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				//EscenaJuego.this.unregisterUpdateHandler(pTimerHandler);
+				cargarEstado();
+
+				pausado = false;
+				
+				
+			}});
+		*/
 		motor.runOnUpdateThread(new Runnable() {
 			@Override
 			public void run() {
-		guardarEstado();		
+		guardarEstado();
+		pausado=true;
 		EscenaJuego.this.setChildScene(ManagerEscenas.getInstancia().escenaMenu,false,true,true);
-			}});
+			}},true);
 		
-	
+	}
+
+
+	@Override
+	public void reanudarEscena() {
+		Log.w("FLUJO" , "ESCENA JUEGO REANUDADA");
+		
+		motor.runOnUpdateThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				cargarEstado();
+
+				pausado = false;
+				
+				
+			}});
+		/*
+		 * 
+		 * Si es el primer cargado
+		 */
+		if(primerCargado){
+			primerCargado= false;
+			pausarEscena();
+		}
+		
+		
+	}
+
+
+	@Override
+	public void onEscenaPausada() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void onEscenaReanudada() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

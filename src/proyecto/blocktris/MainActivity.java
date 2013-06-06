@@ -36,7 +36,7 @@ public class MainActivity extends BaseGameActivity{
 	private ManagerRecursos recursos = ManagerRecursos.getInstancia();
 	private ManagerEscenas  escenas = ManagerEscenas.getInstancia();
 	private Camera camara;
-	private  boolean pausado = false;
+	private boolean primerCargado = true;
 	@Override
 	public Engine onCreateEngine(EngineOptions pEngineOptions) 
 	{
@@ -51,19 +51,23 @@ public class MainActivity extends BaseGameActivity{
 	 * Aparentemente Android considera necesario llamar a onpause y onresume inmediatamente despues de 
 	 *  bloquear la pantalla.
 	 *  
-	 *  Extremadamente apropiado.
+	 *  Porque evidentemente cuando una actividad  pierde visibilidad significa que
+	 *  
+	 *   se vuelve INvisble, inmediatamente visible  e inmediatamente INvisible de nuevo.
+	 *  
+	 *  Extremadamente intuitivo.
 	 */
 	@Override
 	public void onPauseGame()
 	{ 
 	    super.onPauseGame();
 	    
-	    if (this.isGameLoaded()&& !pausado){
+	    if (this.isGameLoaded()){
 	    	
 	    	if (escenas.getEscenaActual() != null)
 			{
-	    		pausado= true;
-	    		escenas.getEscenaActual().onPausado();
+	    		
+	    		escenas.getEscenaActual().pausarEscena();
 	    		
 			}
 	    }
@@ -80,12 +84,13 @@ public class MainActivity extends BaseGameActivity{
 		PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
     
 	    super.onResumeGame();
-	    if (this.isGameLoaded() &&   pm.isScreenOn()){
+	    if (this.isGameLoaded() &&   pm.isScreenOn() ){
 	    	
 	    	if (escenas.getEscenaActual() != null)
 			{
-	    		pausado = false;
-	    		escenas.getEscenaActual().onReanudado();
+	    		
+	    			escenas.getEscenaActual().reanudarEscena();
+	    		
 			}
 	    }
 	   
