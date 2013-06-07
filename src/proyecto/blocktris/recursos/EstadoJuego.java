@@ -38,8 +38,8 @@ public class EstadoJuego implements Serializable {
 	
 	
 	
-	
-	int puntuacion;
+	public boolean acabada;
+	public int puntuacion;
 	public ArrayList<EstadoPieza> piezas = new ArrayList<EstadoJuego.EstadoPieza>() ;
 	
 	 public static class EstadoPieza implements Serializable {

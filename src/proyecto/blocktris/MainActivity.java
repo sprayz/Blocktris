@@ -152,7 +152,7 @@ public class MainActivity extends BaseGameActivity{
 
 	    public void onCreateScene(OnCreateSceneCallback pOnCreateSceneCallback) throws IOException
 	    {
-	    	escenas.crearEscenaMenu();
+	    
 	    	escenas.crearEscenaJuego();
 	    	
 	        escenas.setEscena(TipoEscena.ESCENA_JUEGO );

@@ -32,8 +32,7 @@ public class ManagerEscenas
     
     public enum TipoEscena
     {
-        ESCENA_JUEGO,
-        ESCENA_MENU
+        ESCENA_JUEGO
         
     }
     
@@ -44,12 +43,7 @@ public class ManagerEscenas
     	 escenaJuego = new EscenaJuego();
     	 
      }
-     public void crearEscenaMenu(){
-    	 
-    	 escenaMenu = new EscenaMenu(ManagerRecursos.getInstancia().camara);
-    	 
-     }
-  
+     
     public void setEscena(EscenaBase escena)
     {
     	ManagerRecursos.getInstancia().motor.setScene(escena);

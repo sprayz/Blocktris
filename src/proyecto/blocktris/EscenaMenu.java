@@ -20,14 +20,25 @@ import proyecto.blocktris.recursos.ManagerEscenas;
 import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 import proyecto.blocktris.recursos.ManagerRecursos;
 
-public class EscenaMenu extends MenuScene implements IOnMenuItemClickListener{
+public class EscenaMenu extends MenuScene {
 
 	
 	final static int ACTIVIDAD_BLUETOOTH = 6;
-
-	public EscenaMenu(Camera camara){
+	 IMenuItem botonContinuar = null;
+	  IMenuItem botonMulti;
+	  IMenuItem botonNuevaPartida;
+	  IMenuItem botonInstrucciones;
+	  IMenuItem botonSalir;
+	 
+	 public static final int ID_CONTINUAR=0;
+	 public static final int ID_NUEVAPARTIDA=1;
+	 public static final int ID_MULTIJUGADOR=2;
+	 public static final int ID_INSTRUCCIONES=3;
+	 public static final int ID_SALIR=4;
+	 
+	public EscenaMenu(Camera camara,boolean juegoAcabado,IOnMenuItemClickListener listener ){
 		super(camara);
-		
+		 this.setOnMenuItemClickListener(listener);
 		/*
 		 * Aparentemente es imposible hacer una escena semitransparente o aplicar el mismo efecto a su  fondo
 		 * 
@@ -48,72 +59,34 @@ public class EscenaMenu extends MenuScene implements IOnMenuItemClickListener{
 		// entrada con transaparencia
 		this.setMenuSceneAnimator(new AlphaMenuSceneAnimator() ) ;
 		
+
 		  
-		  
-		  final IMenuItem botonSingle = new ScaleMenuItemDecorator(new TextMenuItem(1, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_continuar), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
-		  final IMenuItem botonMulti = new ScaleMenuItemDecorator(new TextMenuItem(2, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_multijugador), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
-		  final IMenuItem botonNuevaPartida = new ScaleMenuItemDecorator(new TextMenuItem(3, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_nuevaPartida), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
-		  final IMenuItem botonInstrucciones = new ScaleMenuItemDecorator(new TextMenuItem(4, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_instrucciones), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
-		  final IMenuItem botonSalir = new ScaleMenuItemDecorator(new TextMenuItem(5, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_salir), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
-			 
 		
-		 
-		  addMenuItem(botonSingle);
-		addMenuItem(botonMulti);
-		addMenuItem(botonNuevaPartida);
+		   botonMulti = new ScaleMenuItemDecorator(new TextMenuItem(ID_MULTIJUGADOR, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_multijugador), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
+		  botonNuevaPartida = new ScaleMenuItemDecorator(new TextMenuItem(ID_NUEVAPARTIDA, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_nuevaPartida), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
+		  botonInstrucciones = new ScaleMenuItemDecorator(new TextMenuItem(ID_INSTRUCCIONES, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_instrucciones), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
+		   botonSalir = new ScaleMenuItemDecorator(new TextMenuItem(ID_SALIR, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_salir), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
+			 
+		if(!juegoAcabado){
+		   botonContinuar = new ScaleMenuItemDecorator(new TextMenuItem(ID_CONTINUAR, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_continuar), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
+		  addMenuItem(botonContinuar);
+		}
+		  addMenuItem(botonNuevaPartida);
+		  addMenuItem(botonMulti);
 		addMenuItem(botonInstrucciones);
 		addMenuItem(botonSalir);
 		buildAnimations();
 		 
 		setBackgroundEnabled(false);
 		
-		 setOnMenuItemClickListener(this);
+		 
 	
 		  
 		  Log.d("MENU", "MEMNU CREADO");
 	}
 
 	
-	@Override
-	public boolean onMenuItemClicked(MenuScene pMenuScene, IMenuItem pMenuItem,
-			float pMenuItemLocalX, float pMenuItemLocalY) {
-		Log.d("MENU", "CLICK REGISTRADO");
-		
-		
-		switch(pMenuItem.getID()){
-	
-		case 1:
-			this.back(true);
-			
-			return false;
-		case 2:
-			ActividadBluetooth.lanzar(ManagerRecursos.getInstancia().actividadJuego);
-			return true;
-		
-		case 3:
-			ManagerEscenas.getInstancia().escenaJuego.finalizarPartida(false);
-			ManagerEscenas.getInstancia().escenaJuego.iniciarPartida();
-			this.back(true);
-			return true;
-		case 4:
-			ActividadBluetooth.lanzar(ManagerRecursos.getInstancia().actividadJuego);
-			return true;
-		case 5:
-			System.exit(0);
-			return true;
-		
-		
 
-		default:
-		
-		}
-		
-		
-		
-		
-		
-		return false;
-	}
 
 	
 	

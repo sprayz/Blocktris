@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
 
-public interface IEscenaTetrisEventos {
+public interface IEscenaTetris {
 	
 	public boolean onIniciarPartida();
 	public void onPartidaIniciada();
@@ -13,6 +13,7 @@ public interface IEscenaTetrisEventos {
 	public boolean onQuitarBloque(final Bloque bloque) ;
 	public  boolean onQuitarLinea(Collection<Bloque> bloques);
 	public void onLineaQuitada();
+	public boolean isPartidaAcabada();
 	
 	
 }

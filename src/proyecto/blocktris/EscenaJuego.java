@@ -37,7 +37,10 @@ import org.andengine.entity.scene.ITouchArea;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.EntityBackground;
+import org.andengine.entity.scene.menu.MenuScene;
+import org.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
 import org.andengine.entity.scene.menu.animator.SlideMenuSceneAnimator;
+import org.andengine.entity.scene.menu.item.IMenuItem;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.UncoloredSprite;
 import org.andengine.entity.util.FPSLogger;
@@ -85,10 +88,11 @@ import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
 import proyecto.blocktris.recursos.EstadoJuego;
 import proyecto.blocktris.recursos.ExclStrat;
 import proyecto.blocktris.recursos.ManagerEscenas;
+import proyecto.blocktris.recursos.ManagerRecursos;
 import proyecto.blocktris.recursos.EstadoJuego.EstadoPieza;
 import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 
-public class EscenaJuego extends EscenaBase implements IAccelerationListener, IOnSceneTouchListener, IOnAreaTouchListener, ITimerCallback,IEscenaTetrisEventos {
+public class EscenaJuego extends EscenaBase implements IAccelerationListener, IOnSceneTouchListener, IOnAreaTouchListener, ITimerCallback,IEscenaTetris ,IOnMenuItemClickListener {
 
 	public static final String ARCHIVO_ESTADO = "estado.dat"; 
 	public static float MARGENES = 20;
@@ -123,15 +127,15 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	/*
 	 * ESTADO DEL  JUEGO
 	 */
+	protected boolean acabada = false;
 	protected EstadoJuego estadoGuardado;
 	protected ArrayList<IPieza> piezasEscena;
 
 	private boolean  primerCargado=true;
 	protected IPieza ultimaPieza;
 	
-	protected float puntuacion;
-	protected float intervalo;
-	protected boolean ganador;
+	protected int puntuacion;
+	
 	
 	@Override
 	public void crearEscena() {
@@ -312,6 +316,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	public void guardarEstado(){
 		
 		estadoGuardado = new EstadoJuego();
+		estadoGuardado.puntuacion=puntuacion;
+		estadoGuardado.acabada=acabada;
 		for(IPieza p : piezasEscena){
 			
 			
@@ -418,6 +424,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			reiniciarEscena();
 		if(estadoGuardado!=null){	
 			piezasEscena.clear();
+			puntuacion = estadoGuardado.puntuacion;
+			acabada= estadoGuardado.acabada;
 			for (EstadoPieza ep : estadoGuardado.piezas){
 				IPieza pieza;
 				pieza = EstadoJuego.EstadoPieza.desempaquetar(mundo, ep);
@@ -455,12 +463,13 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		this.unregisterUpdateHandler(timerLinea);
 		this.unregisterUpdateHandler(timerPieza);
 		puntuacion=0;
-		
+		acabada = true;
+		onPartidaFinalizada();
 		
 		
 	}
 	public void iniciarPartida(){
-		
+		acabada = false;
 		if(!onIniciarPartida())
 			return;
 		
@@ -788,10 +797,10 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		
 		
 		
-		
 		if(pSceneTouchEvent.getPointerID()==0){
 			
-			degradadoFondo.setGradientAngle( (float) (180/ Math.PI * Math.atan2(degradadoFondo.getX() - pSceneTouchEvent.getX(), pSceneTouchEvent.getY() - degradadoFondo.getY())));
+			//degradadoFondo.setGradientAngle( (float) (180/ Math.PI * Math.atan2(degradadoFondo.getX() - pSceneTouchEvent.getX(), pSceneTouchEvent.getY() - degradadoFondo.getY())));
+			degradadoFondo.setGradientVector(pSceneTouchEvent.getX()- camara.getWidth()/2, pSceneTouchEvent.getY() - camara.getHeight()/2);
 			//degradadoFondo.setGradientVector(pSceneTouchEvent.getX(), pSceneTouchEvent.getY());
 		}
 		if(this.mundo != null && pSceneTouchEvent.getPointerID() <MAX_MULTITOQUE) {
@@ -880,7 +889,6 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			
 		}
 		
-		//pTimerHandler.setTimerCallbackTriggered(false);
 		
 	}
 
@@ -899,13 +907,13 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	}
 	@Override
 	public boolean onFinalizarPartida(boolean ganado){
-		actividadJuego.deleteFile(ARCHIVO_ESTADO);
+		
 		
 		
 		return true;}
 	@Override
 	public void  onPartidaFinalizada(){
-		
+	
 	}
 	
 	@Override
@@ -993,7 +1001,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	
 	public void onPonerPieza(){
 		
-		IPieza pieza = new PiezaPalo(mundo, camara.getWidth() /2, camara.getHeight()* 1.2f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
+		IPieza pieza = PiezaFactory.piezaAleatoria(mundo, camara.getWidth() /2, camara.getHeight()* 2f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
 		pieza.registrarAreasTactiles(this);
 		pieza.registrarGraficos(this.capaBaja);
 		
@@ -1007,12 +1015,18 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			bloques += p.getBloques().size();
 			
 		}
+		
 		if( bloques >= MAX_BLOQUES){
 			
-			finalizarPartida(false);
+			acabada=true;
+			pausarEscena();
+			
+		}else if (bloques >= MAX_BLOQUES/3){
+		
+			
+			
 		}
-		//degradadoFondo.setGradientFitToBounds(false);
-		//degradadoFondo.setFromRed(bloques/(MAX_BLOQUES/5) );
+	
 		
 		Log.d("PIEZA " , "PUESTA PIEZA : " +pieza.getTipo().toString());
 		
@@ -1043,13 +1057,14 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		 * 
 		 * Encargamos  el abrir el menú  a la siguiente actualización/fotograma
 		 */
+		
 		motor.runOnUpdateThread(new Runnable() {
-			@Override
+		@Override
 			public void run() {
 		
 		pausado=true;
-		EscenaJuego.this.setChildScene(ManagerEscenas.getInstancia().escenaMenu,false,true,true);
-			}},true);
+		EscenaJuego.this.setChildScene(new EscenaMenu(camara,acabada,EscenaJuego.this),false,true,true);
+			}},false);
 		
 	}
 
@@ -1096,18 +1111,67 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 
 	@Override
 	public void onEscenaPausada() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 
 	@Override
 	public void onEscenaReanudada() {
-		// TODO Auto-generated method stub
 		
+		
+	}
+
+
+	@Override
+	public boolean isPartidaAcabada() {
+	
+		return acabada;
 	}
 	
 	
-	
 
+	@Override
+	public boolean onMenuItemClicked(MenuScene pMenuScene, IMenuItem pMenuItem,
+			float pMenuItemLocalX, float pMenuItemLocalY) {
+		
+		
+		switch(pMenuItem.getID()){
+	
+		case EscenaMenu.ID_CONTINUAR:
+			pMenuScene.back(true);
+			
+			return false;
+		case EscenaMenu.ID_MULTIJUGADOR:
+			ActividadBluetooth.lanzar(ManagerRecursos.getInstancia().actividadJuego);
+			return true;
+		
+		case EscenaMenu.ID_NUEVAPARTIDA:
+			finalizarPartida(false);
+			iniciarPartida();
+			pMenuScene.back(true);
+			return true;
+		case EscenaMenu.ID_INSTRUCCIONES:
+			ActividadBluetooth.lanzar(ManagerRecursos.getInstancia().actividadJuego);
+			return true;
+		case EscenaMenu.ID_SALIR:
+			System.exit(0);
+			return true;
+		
+		
+
+		default:
+		
+		}
+		
+		
+		
+		
+		
+		return false;
+	}
+
+
+	
+	
 }
