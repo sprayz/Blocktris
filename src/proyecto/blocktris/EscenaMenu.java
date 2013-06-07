@@ -84,7 +84,7 @@ public class EscenaMenu extends MenuScene implements IOnMenuItemClickListener{
 	
 		case 1:
 			this.back(true);
-			ManagerEscenas.getInstancia().escenaJuego.reanudarEscena();
+			
 			return false;
 		case 2:
 			ActividadBluetooth.lanzar(ManagerRecursos.getInstancia().actividadJuego);

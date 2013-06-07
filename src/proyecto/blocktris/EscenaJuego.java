@@ -131,7 +131,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	float tamaño_bloque;
 	
 	
-	 public static final int FILAS =    12;
+	 public static final int FILAS =    9;
 	public static final int COLUMNAS = 9;
 	public static final int MAX_BLOQUES = FILAS * COLUMNAS;
 	public static final int MAX_MULTITOQUE=8 ;
@@ -367,7 +367,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	         BufferedOutputStream bos = new BufferedOutputStream(fileOut);
 	         
 	         bos.write(gson.toJson(estadoGuardado).getBytes());
-	        // Log.w("SERIALIZANDO",gson.toJson(estadoGuardado) );
+	         Log.w("SERIALIZANDO"," GUARDANDO ESTADO");
 	         bos.flush();
 	         bos.close();
 	         fileOut.close();
@@ -416,7 +416,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			 Gson  gson=  new Gson();
 	         BufferedInputStream bis = new BufferedInputStream(fileIn);
 	          
-	         //Log.e("DESERIALIZANDO","" + resultado );
+	         Log.w("DESSERIALIZANDO"," CARGANDO ESTADO");
 	         estadoGuardado = gson.fromJson(resultado, EstadoJuego.class);
 	         
 	         
@@ -459,12 +459,17 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			estadoGuardado.piezas.clear();
 		}
 		
+		/*
+		 * Actualizamos manualmente los PhysicsConnector para que posicionen correctamente  los graficos
+		 * respecto a los cuerpos, sin esperar al siguiente fotograma
+		 */
 		for(PhysicsConnector  pc :  mundo.getPhysicsConnectorManager()){
 			
 			pc.onUpdate(0);
 			
 		}
-			
+		
+		
 			
 					
 			
@@ -1016,7 +1021,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	
 	public void onPonerPieza(){
 		
-		IPieza pieza = new PiezaPalo(mundo, camara.getWidth() /2, camara.getHeight()* 1.2f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
+		IPieza pieza = PiezaFactory.piezaAleatoria(mundo, camara.getWidth() /2, camara.getHeight()* 1.2f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
 		pieza.registrarAreasTactiles(this);
 		pieza.registrarGraficos(this.capaBaja);
 		
@@ -1029,6 +1034,10 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		for(IPieza p : piezas){
 			bloques += p.getBloques().size();
 			
+		}
+		if( bloques >= MAX_BLOQUES){
+			
+			finalizarPartida();
 		}
 		//degradadoFondo.setGradientFitToBounds(false);
 		//degradadoFondo.setFromRed(bloques/(MAX_BLOQUES/5) );
@@ -1056,6 +1065,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	@Override
 	public void pausarEscena() {
 		Log.w("FLUJO" , "ESCENA JUEGO PAUSADA");
+		guardarEstado();
 		/*
 	motor.runOnUpdateThread(new Runnable() {
 			
@@ -1072,7 +1082,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		motor.runOnUpdateThread(new Runnable() {
 			@Override
 			public void run() {
-		guardarEstado();
+		
 		pausado=true;
 		EscenaJuego.this.setChildScene(ManagerEscenas.getInstancia().escenaMenu,false,true,true);
 			}},true);
@@ -1094,6 +1104,12 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 				
 				
 			}});
+		try {
+			motor.onUpdate(1);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		/*
 		 * 
 		 * Si es el primer cargado
