@@ -73,10 +73,12 @@ public interface IPieza {
       public IPieza destruirPieza();
       public void registrarAreasTactiles(Scene escena);
       public void desregistrarAreasTactiles(Scene escena);
-  		public IPieza separarBloques(List<Bloque> list);
+  		
 		public List<Bloque> getBloques();
 		public Body getCuerpo();
-		public Collection<IPieza> quitarBloqueDesenlazar(Bloque bloque);
+		public boolean quitarBloque(Bloque b);
+		public Collection<IPieza> Desenlazar();
+		public IPieza separarBloques(List<Bloque> list);
 		
 		public PIEZAS getTipo();
 	

@@ -311,55 +311,51 @@ public List<Bloque> getBloques() {
 	 * Divide la pieza en varias si fuese necesario.
 	 * @return Esta función retorna una  lista de piezas que se divide la original 
 	 */
-	public List<IPieza> quitarBloqueDesenlazar(Bloque b){
+	public List<IPieza> Desenlazar(){
+		
+		
 		boolean division = true;
+		
 		List<IPieza> resultado = new ArrayList<IPieza>();
 		//matriz de matrices (una para cada pieza resultado
 		ArrayList<Set<Bloque>> listaPieza = new ArrayList<Set<Bloque>>();
 		
-		//representa todos los bloques a los que se puede llegar desde  uno
-		//siguiendo los adyacentes.
-		Set<Bloque> isla ; 
+		for(int i=0;i<bloques.size();i++){
+			//representa todos los bloques a los que se puede llegar desde  uno
+			//siguiendo los adyacentes.
+			Set<Bloque> isla ; 
+			
+			ArrayList<Bloque> aSaltarse = new ArrayList<Bloque>();
+			Bloque b = bloques.get(i);
 		
-		ArrayList<Bloque> aSaltarse = new ArrayList<Bloque>();
-		quitarBloque(b);
-		//por cada uno de los adyacente s al que bvvamos a quitar
- 		for(Bloque adyacente : b.getAdjacentes()){
-			
-			//quitamos el bloque que vamos a eliminar de sus adyacentes
-			adyacente.getAdjacentes().remove(b);
-			
-			//si el bloque se queda solo no hace falta seguir calculando
-			//ya sabemos que  es parte de una pieza a separar
-			if(adyacente.getAdjacentes().isEmpty()){
-				Set<Bloque> temp = new HashSet<Bloque>();
-				temp.add(adyacente);
-				listaPieza.add(temp);
-				continue;
-			}
-				//si ya está incluido en otro conjunto nos lo saltamos
-			if(!aSaltarse.contains(adyacente)){
-				//en caso contrario sacamos todos sus adyacentes
-				isla = adyacente.getAdyacentesRecursivo();
-				//si sus adyacentes contienen alguno de los adyacentes del bloque a quitar
-				//siginifica que están en el mismo fragmento
-				for(Bloque c : isla){
-					if(b.getAdjacentes().contains(c)){
-						aSaltarse.add(c);
+				if(b.getAdjacentes().isEmpty()){
+					Set<Bloque> temp = new HashSet<Bloque>();
+					temp.add(b);
+					listaPieza.add(temp);
+					continue;
+				}
+					//si ya está incluido en otro conjunto nos lo saltamos
+				if(!aSaltarse.contains(b)){
+					//en caso contrario sacamos todos sus adyacentes
+					isla = b.getAdyacentesRecursivo();
+					//si sus adyacentes contienen alguno de los adyacentes del bloque a quitar
+					//siginifica que están en el mismo fragmento
+					for(Bloque c : isla){
+						if(bloques.contains(c)){
+							aSaltarse.add(c);
+						}			
 					}
+					//añadimos la "isla a la lista para mas tarde hacer una pieza con ella
+					listaPieza.add(isla);
+					
+					
+					
+					
+					
 					
 				}
-				//añadimos la "isla a la lista para mas tarde hacer una pieza con ella
-				listaPieza.add(isla);
 				
-				
-				
-				
-				
-				
-			}
-			
- 		}
+	 		}
 		
 			
 

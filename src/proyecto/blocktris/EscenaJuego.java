@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.TreeMap;
 
 import org.andengine.entity.modifier.IEntityModifier;
@@ -123,7 +124,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	 * ESTADO DEL  JUEGO
 	 */
 	protected EstadoJuego estadoGuardado;
-	protected ArrayList<IPieza> piezas;
+	protected ArrayList<IPieza> piezasEscena;
 
 	private boolean  primerCargado=true;
 	protected IPieza ultimaPieza;
@@ -141,7 +142,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		
 		
 		//
-		piezas= new ArrayList<IPieza>();
+		piezasEscena= new ArrayList<IPieza>();
 		estadoGuardado = new EstadoJuego();
 		 
 		joints = new MouseJoint[MAX_MULTITOQUE];
@@ -311,7 +312,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	public void guardarEstado(){
 		
 		estadoGuardado = new EstadoJuego();
-		for(IPieza p : piezas){
+		for(IPieza p : piezasEscena){
 			
 			
 			estadoGuardado.piezas .add( EstadoJuego.EstadoPieza.empaquetar(p));	
@@ -416,13 +417,13 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		
 			reiniciarEscena();
 		if(estadoGuardado!=null){	
-			piezas.clear();
+			piezasEscena.clear();
 			for (EstadoPieza ep : estadoGuardado.piezas){
 				IPieza pieza;
 				pieza = EstadoJuego.EstadoPieza.desempaquetar(mundo, ep);
 				pieza.registrarAreasTactiles(this);
 				pieza.registrarGraficos(this.capaBaja);
-				piezas.add(pieza);
+				piezasEscena.add(pieza);
 				
 			}
 			estadoGuardado.piezas.clear();
@@ -478,11 +479,11 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	
 	@Override
 	public void reiniciarEscena() {
-		for(IPieza p : piezas ){
+		for(IPieza p : piezasEscena ){
 			p.destruirPieza();
 		}
 		System.gc();
-		piezas.clear();
+		piezasEscena.clear();
 		
 		
 		
@@ -651,7 +652,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					}
 					//continuamos  hasta el final aunque hayamos encontrado algo
 					
-					return fraction;
+					return 1;
 				}
 			},p1 ,p2  );
 			// si  hemos encontrado COLUMNAS bloques  alineados tenemos una línea completa
@@ -666,30 +667,50 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 			
 				
 				
+				/*
+				 * Por cada bloque en la linea 
+				 */
 				
-				
-					for(Bloque b : bloquesLinea.values()){
+				//Las piezas que hemos tocado
+				HashSet<IPieza> piezasTocadas = new HashSet<IPieza>();
+					
+				for(Bloque b : bloquesLinea.values()){
 						
+						//si el evento dice que este bloque no se toca  no lo destruimos
 						if(!onQuitarBloque(b))
 							continue;
+						//saco la pieza  y la añado a la colección
 						IPieza pieza = (IPieza)b.getPadre();
-						//Log.d("QUITANDO LINEA","PIEZA PADRE :" +pieza);
-					//	Log.d("QUITANDO LINEA","Bloque Indice:" +pieza.getBloques().indexOf(b));
+						piezasTocadas.add(pieza);
+						
+
 						
 						
-						for(IPieza p: pieza.quitarBloqueDesenlazar(b)){
-							p.registrarAreasTactiles(EscenaJuego.this);
-							p.registrarGraficos(EscenaJuego.this.capaBaja);
-							piezas.add(p);
-							
-							
-						}
+						pieza.quitarBloque(b);
+						
+						
 						if (pieza.getBloques().isEmpty() ){
 							pieza.destruirPieza();
-							piezas.remove(pieza);
+							piezasEscena.remove(pieza);
 						
 						}
 					}
+				
+				for(IPieza tocada : piezasTocadas){
+					
+					for(IPieza p: tocada.Desenlazar()){
+						p.registrarAreasTactiles(EscenaJuego.this);
+						p.registrarGraficos(EscenaJuego.this.capaBaja);
+						piezasEscena.add(p);
+						
+						
+					}
+					
+				}
+				
+				
+				
+				
 				}
 			
 				
@@ -889,9 +910,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	
 	@Override
 	public  boolean onQuitarLinea(Collection<Bloque> bloques){
-		EscenaCartel cartel = new EscenaCartel(camara,new SlideMenuSceneAnimator(EaseCubicInOut.getInstance()),"HOLA MUNDO",5);
-		cartel.setBackgroundEnabled(false);
-		this.setChildScene(cartel);
+		
+		
 		return true;
 	}
 	
@@ -901,7 +921,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	@Override
 	public boolean onQuitarBloque(final Bloque bloque) {
 		
-		//creamos un sistema de paículas para cada bloque que se elimina
+		//creamos un sistema de partículas para cada bloque que se elimina
 		
 		
 		
@@ -973,17 +993,17 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	
 	public void onPonerPieza(){
 		
-		IPieza pieza = new PiezaT(mundo, camara.getWidth() /2, camara.getHeight()* 1.2f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
+		IPieza pieza = new PiezaPalo(mundo, camara.getWidth() /2, camara.getHeight()* 1.2f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
 		pieza.registrarAreasTactiles(this);
 		pieza.registrarGraficos(this.capaBaja);
 		
 		
 		
 		
-		piezas.add(pieza);
+		piezasEscena.add(pieza);
 		//contabilizamos los bloques que hay en escena
 		float bloques =0;
-		for(IPieza p : piezas){
+		for(IPieza p : piezasEscena){
 			bloques += p.getBloques().size();
 			
 		}
