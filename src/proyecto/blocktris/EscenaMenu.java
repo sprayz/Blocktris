@@ -91,7 +91,7 @@ public class EscenaMenu extends MenuScene implements IOnMenuItemClickListener{
 			return true;
 		
 		case 3:
-			ManagerEscenas.getInstancia().escenaJuego.finalizarPartida();
+			ManagerEscenas.getInstancia().escenaJuego.finalizarPartida(false);
 			ManagerEscenas.getInstancia().escenaJuego.iniciarPartida();
 			this.back(true);
 			return true;

@@ -7,57 +7,38 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Random;
 import java.util.TreeMap;
 
 import org.andengine.entity.modifier.IEntityModifier;
-import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
-import org.andengine.entity.modifier.AlphaModifier;
 import org.andengine.entity.modifier.DelayModifier;
 import org.andengine.entity.particle.BatchedSpriteParticleSystem;
-import org.andengine.entity.particle.Particle;
-import org.andengine.entity.particle.ParticleSystem;
-import org.andengine.entity.particle.SpriteParticleSystem;
-import org.andengine.entity.particle.emitter.BaseParticleEmitter;
-import org.andengine.entity.particle.emitter.CircleOutlineParticleEmitter;
 import org.andengine.entity.particle.emitter.IParticleEmitter;
 import org.andengine.entity.particle.emitter.PointParticleEmitter;
 import org.andengine.entity.particle.emitter.RectangleOutlineParticleEmitter;
-import org.andengine.entity.particle.emitter.RectangleParticleEmitter;
-import org.andengine.entity.particle.initializer.AlphaParticleInitializer;
 import org.andengine.entity.particle.initializer.BlendFunctionParticleInitializer;
 import org.andengine.entity.particle.initializer.ColorParticleInitializer;
 import org.andengine.entity.particle.initializer.ExpireParticleInitializer;
-import org.andengine.entity.particle.initializer.IParticleInitializer;
 import org.andengine.entity.particle.initializer.RotationParticleInitializer;
-import org.andengine.entity.particle.initializer.VelocityParticleInitializer;
 import org.andengine.entity.particle.modifier.AlphaParticleModifier;
 import org.andengine.entity.particle.modifier.ColorParticleModifier;
 import org.andengine.entity.particle.modifier.RotationParticleModifier;
 import org.andengine.entity.particle.modifier.ScaleParticleModifier;
 import org.andengine.entity.primitive.Gradient;
-import org.andengine.entity.primitive.Line;
-import org.andengine.entity.primitive.Rectangle;
 import org.andengine.entity.scene.IOnAreaTouchListener;
 import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.ITouchArea;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.EntityBackground;
-import org.andengine.entity.scene.background.IBackground;
+import org.andengine.entity.scene.menu.animator.SlideMenuSceneAnimator;
 import org.andengine.entity.sprite.AnimatedSprite;
-import org.andengine.entity.sprite.Sprite;
-import org.andengine.entity.sprite.TiledSprite;
 import org.andengine.entity.sprite.UncoloredSprite;
-import org.andengine.entity.sprite.batch.SpriteGroup;
 import org.andengine.entity.util.FPSLogger;
 import org.andengine.extension.debugdraw.DebugRenderer;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
@@ -69,22 +50,14 @@ import org.andengine.extension.physics.box2d.util.constants.PhysicsConstants;
 import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.input.touch.TouchEvent;
-import org.andengine.input.touch.controller.ITouchController;
-import org.andengine.input.touch.controller.ITouchEventCallback;
-import org.andengine.input.touch.controller.MultiTouch;
 import org.andengine.input.touch.controller.MultiTouchController;
-import org.andengine.opengl.texture.region.*;
-import org.andengine.util.adt.array.ArrayUtils;
-import org.andengine.util.adt.color.Color;
-import org.andengine.util.adt.list.ListUtils;
 import org.andengine.util.modifier.IModifier;
+import org.andengine.util.modifier.ease.EaseCubicInOut;
 
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.opengl.GLES20;
 import android.util.Log;
-import android.view.MotionEvent;
-
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
@@ -104,7 +77,6 @@ import com.google.gson.GsonBuilder;
 
 import proyecto.blocktris.logica.EscenaBase;
 import proyecto.blocktris.logica.fisica.ObjetoFisico;
-import proyecto.blocktris.logica.fisica.Utilidades;
 import proyecto.blocktris.logica.fisica.piezas.IPieza;
 import proyecto.blocktris.logica.fisica.piezas.PiezaFactory;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.*;
@@ -442,10 +414,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		
 		
 		
-			for(IPieza p : piezas ){
-				p.destruirPieza();
-			}
-			System.gc();
+			reiniciarEscena();
 		if(estadoGuardado!=null){	
 			piezas.clear();
 			for (EstadoPieza ep : estadoGuardado.piezas){
@@ -478,14 +447,14 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	}
 	
 	
-	public void finalizarPartida(){
-		if(! onFinalizarPartida(true))
+	public void finalizarPartida(boolean ganado){
+		if(! onFinalizarPartida(ganado))
 				return;
 		reiniciarEscena();
 		this.unregisterUpdateHandler(timerLinea);
 		this.unregisterUpdateHandler(timerPieza);
 		puntuacion=0;
-		estadoGuardado = new EstadoJuego();
+		
 		
 		
 	}
@@ -589,7 +558,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	 * Sacado del ejemplo de AE  demostrando MouseJoint
 	 */
 	private MouseJoint createMouseJoint(final IEntity entidad, final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
-		final Body body = ((ObjetoFisico)entidad.getUserData()).getCuerpo();
+		final Body body = ((ObjetoFisico<?>)entidad.getUserData()).getCuerpo();
 		final MouseJointDef mouseJointDef = new MouseJointDef();
 
 		final float [] coordsEscena = entidad.convertLocalCoordinatesToSceneCoordinates(pTouchAreaLocalX, pTouchAreaLocalY);
@@ -682,7 +651,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 					}
 					//continuamos  hasta el final aunque hayamos encontrado algo
 					
-					return 1;
+					return fraction;
 				}
 			},p1 ,p2  );
 			// si  hemos encontrado COLUMNAS bloques  alineados tenemos una línea completa
@@ -773,33 +742,12 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		if(pSceneTouchEvent.isActionDown() && pSceneTouchEvent.getPointerID() <MAX_MULTITOQUE) {
 			final IEntity entity = (IEntity) pTouchArea;
 			if(joints[pSceneTouchEvent.getPointerID()]== null) {
-				final IPieza pieza = (IPieza) ((ObjetoFisico)entity.getUserData()).getPadre();
 				final Bloque bloque = (Bloque) entity.getUserData();
+				final IPieza pieza = (IPieza) bloque.getPadre();
+				
 				 entity.attachChild(particulasPuntero[pSceneTouchEvent.getPointerID()]);
 				joints[pSceneTouchEvent.getPointerID()] = this.createMouseJoint(entity, pTouchAreaLocalX, pTouchAreaLocalY);
-				/*
-				motor.runOnUpdateThread(new Runnable() {
-					
-					@Override
-					public void run() {
-					for(Bloque b: new ArrayList<Bloque>(pieza.getBloques())){
-						// TODO Auto-generated method stub
-						for (IPieza p : pieza.quitarBloqueDesenlazar(b)){
-							 p.registrarAreasTactiles(EscenaJuego.this);
-							 p.registrarGraficos(EscenaJuego.this.capaBaja);
-							 piezas.add(p);
-						 }
-						if (pieza.getBloques().isEmpty()){
-							
-							pieza.destruirPieza();
-							piezas.remove(pieza);
-							
-						}
-					}
-					}
-						
-				});
-			*/
+	
 				 
 			}
 			
@@ -929,14 +877,21 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		Log.w("FLUJO" , "PARTIDA INICIADA");
 	}
 	@Override
-	public boolean onFinalizarPartida(boolean ganado){return true;}
+	public boolean onFinalizarPartida(boolean ganado){
+		actividadJuego.deleteFile(ARCHIVO_ESTADO);
+		
+		
+		return true;}
 	@Override
 	public void  onPartidaFinalizada(){
-		actividadJuego.deleteFile(ARCHIVO_ESTADO);
+		
 	}
 	
 	@Override
 	public  boolean onQuitarLinea(Collection<Bloque> bloques){
+		EscenaCartel cartel = new EscenaCartel(camara,new SlideMenuSceneAnimator(EaseCubicInOut.getInstance()),"HOLA MUNDO",5);
+		cartel.setBackgroundEnabled(false);
+		this.setChildScene(cartel);
 		return true;
 	}
 	
@@ -995,10 +950,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		 ps.registerEntityModifier( new DelayModifier(1.3f, new IEntityModifier.IEntityModifierListener() {
 			
 			@Override
-			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
-				// TODO Auto-generated method stub
-				
-			}
+			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {}
 			
 			@Override
 			public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
@@ -1021,7 +973,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	
 	public void onPonerPieza(){
 		
-		IPieza pieza = PiezaFactory.piezaAleatoria(mundo, camara.getWidth() /2, camara.getHeight()* 1.2f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
+		IPieza pieza = new PiezaT(mundo, camara.getWidth() /2, camara.getHeight()* 1.2f, tamaño_bloque, IPieza.FIXTUREDEF_DEFECTO,PiezaBase.BODYDEF_DEFECTO ); 
 		pieza.registrarAreasTactiles(this);
 		pieza.registrarGraficos(this.capaBaja);
 		
@@ -1037,7 +989,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 		}
 		if( bloques >= MAX_BLOQUES){
 			
-			finalizarPartida();
+			finalizarPartida(false);
 		}
 		//degradadoFondo.setGradientFitToBounds(false);
 		//degradadoFondo.setFromRed(bloques/(MAX_BLOQUES/5) );
@@ -1066,19 +1018,11 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 	public void pausarEscena() {
 		Log.w("FLUJO" , "ESCENA JUEGO PAUSADA");
 		guardarEstado();
+	
 		/*
-	motor.runOnUpdateThread(new Runnable() {
-			
-			@Override
-			public void run() {
-				//EscenaJuego.this.unregisterUpdateHandler(pTimerHandler);
-				cargarEstado();
-
-				pausado = false;
-				
-				
-			}});
-		*/
+		 * 
+		 * Encargamos  el abrir el menú  a la siguiente actualización/fotograma
+		 */
 		motor.runOnUpdateThread(new Runnable() {
 			@Override
 			public void run() {
@@ -1104,6 +1048,13 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener, IO
 				
 				
 			}});
+	
+		//forzamos una actualización para que el estado se cargue inmediatamente
+		
+		/*
+		 * Esto es necesario porque cargar estado modifica la 
+		 * 
+		 */
 		try {
 			motor.onUpdate(1);
 		} catch (InterruptedException e) {
