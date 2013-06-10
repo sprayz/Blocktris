@@ -1,5 +1,13 @@
 package proyecto.blocktris.recursos;
 
+import java.io.IOException;
+
+import org.andengine.audio.music.Music;
+import org.andengine.audio.music.MusicFactory;
+import org.andengine.audio.music.MusicLibrary;
+import org.andengine.audio.music.MusicManager;
+import org.andengine.audio.sound.Sound;
+import org.andengine.audio.sound.SoundFactory;
 import org.andengine.engine.Engine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.opengl.font.Font;
@@ -28,17 +36,55 @@ public class ManagerRecursos {
 	public Camera camara;
 	public VertexBufferObjectManager vbom;
 
+	//Música
+	public Music musicaFondo;
+	public Sound sonidoLinea;
+	public Sound sonidoAlarma;
+	
 	// TEXTURAS Y REGIONES
 	private BuildableBitmapTextureAtlas taBloques;
 	public TiledTextureRegion trBloques;
 	public TiledTextureRegion trBloquesSombra;
 	public TiledTextureRegion trAnimBrillo;
-
+	
+	
 	// Fuentes y Otros
 
 	public Font fGlobal;
 
 	public void cargarRecursosGenerales() {
+		//cargamos  los sonidos
+		try {
+			SoundFactory.setAssetBasePath("snd/");
+			sonidoLinea = SoundFactory.createSoundFromAsset(motor.getSoundManager(), actividadJuego, "sd_0.wav");
+			sonidoLinea.setVolume(1.0f);
+			sonidoAlarma = SoundFactory.createSoundFromAsset(motor.getSoundManager(), actividadJuego, "alarm.mp3");
+			sonidoAlarma.setVolume(1.0f);
+		} catch (IllegalStateException e1) {
+			
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			
+			e1.printStackTrace();
+		}
+	
+		//cargamos la música
+		MusicFactory.setAssetBasePath("snd/");
+		try {
+			
+			musicaFondo = MusicFactory.createMusicFromAsset(motor.getMusicManager(), actividadJuego, "tgfcoder-FrozenJam-SeamlessLoop.mp3");
+			musicaFondo.setLooping(true);
+			musicaFondo.setVolume(0.2f);
+		} catch (IllegalStateException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
 		// cargamos la fuente común
 		FontFactory.setAssetBasePath("font/");
 		fGlobal = FontFactory.createFromAsset(actividadJuego.getFontManager(),

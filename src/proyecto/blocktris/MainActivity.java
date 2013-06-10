@@ -41,6 +41,8 @@ public class MainActivity extends BaseGameActivity{
 	public Engine onCreateEngine(EngineOptions pEngineOptions) 
 	{
 		pEngineOptions.getRenderOptions().setDithering(true); //para el degradado del fondo
+		pEngineOptions.getAudioOptions().setNeedsMusic(true); //para la música
+		pEngineOptions.getAudioOptions().setNeedsSound(true);
 	    return new Engine(pEngineOptions);
 	}
 	
