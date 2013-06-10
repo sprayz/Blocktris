@@ -76,7 +76,7 @@ public interface IPieza {
   		
 		public List<Bloque> getBloques();
 		public Body getCuerpo();
-		public boolean quitarBloque(Bloque b);
+		public void quitarBloque(Bloque b);
 		public Collection<IPieza> Desenlazar();
 		public IPieza separarBloques(List<Bloque> list);
 		

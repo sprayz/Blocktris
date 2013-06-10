@@ -40,6 +40,8 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+import com.badlogic.gdx.physics.box2d.Joint;
+import com.badlogic.gdx.physics.box2d.JointEdge;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 
@@ -318,7 +320,7 @@ public List<Bloque> getBloques() {
 	/**
 	 * Quita el bloque de la pieza teniendo en cuenta las dependencias.
 	 * Divide la pieza en varias si fuese necesario.
-	 * @return Esta función retorna una  lista de piezas que se divide la original 
+	 * @return Esta función retorna un ArrayList de piezas en las  que se divide la original 
 	 */
 	public List<IPieza> Desenlazar(){
 		
@@ -368,6 +370,7 @@ public List<Bloque> getBloques() {
 
 	 		for(Set<Bloque> bloques : listaPieza){
 				if(bloques.size() == this.getBloques().size()){
+					
 					break;
 				}
 					
@@ -390,7 +393,7 @@ public List<Bloque> getBloques() {
 
 	
 	
-	public boolean quitarBloque(Bloque b){
+	public void quitarBloque(Bloque b){
 		Bloque res= null;
 		if(bloques.remove(b)){
 		
@@ -402,9 +405,9 @@ public List<Bloque> getBloques() {
 			b.destruir();
 			if(this.escena != null)
 				b.desregistrarAreaTactil(this.escena);
-			return true;
+			
 		}
-		return false;	
+		return;	
 		
 		
 	}
@@ -482,8 +485,10 @@ public List<Bloque> getBloques() {
 		}
 		bloques.clear();
 		
+		
+		
 		destruida = true;
-		this.cuerpo.setActive(false);
+		//this.cuerpo.setActive(false);
 		
 		mundo.unregisterPhysicsConnector(conector);
 		mundo.destroyBody(this.cuerpo);

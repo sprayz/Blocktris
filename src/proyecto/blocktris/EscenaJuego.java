@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.TreeMap;
 
 import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.engine.Engine.EngineLock;
 import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.entity.Entity;
@@ -58,6 +59,7 @@ import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.util.adt.align.HorizontalAlign;
+import org.andengine.util.debug.Debug;
 import org.andengine.util.modifier.IModifier;
 import org.andengine.util.modifier.ease.EaseCubicInOut;
 
@@ -609,9 +611,9 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 		// TreeMap para ordenar las fixturas por su proximidad al origen según
 		// insertamos
 		final TreeMap<Float, Bloque> bloquesLinea = new TreeMap<Float, Bloque>();
-
+		HashSet<IPieza> piezasTocadas = new HashSet<IPieza>();
 		for (int linea = 0; linea < FILAS; linea++) {
-
+piezasTocadas.clear();
 			bloquesLinea.clear();
 			Vector2 p1;
 			Vector2 p2;
@@ -668,19 +670,19 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 					}
 					// continuamos hasta el final aunque hayamos encontrado algo
 
-					return 1;
+					return -1;
 				}
 			}, p1, p2);
 			// si hemos encontrado COLUMNAS bloques alineados tenemos una línea
 			// completa
-/*
+
 			float cont = 1.0f;
 			for (Bloque b : bloquesLinea.values()) {
 
 				b.getGrafico().setAlpha(cont);
 				cont -= 0.08;
 			}
-			*/
+			
 			if (bloquesLinea.size() >= COLUMNAS
 					&& onQuitarLinea(bloquesLinea.values())) {
 
@@ -689,7 +691,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 				 */
 
 				// Las piezas que hemos tocado
-				HashSet<IPieza> piezasTocadas = new HashSet<IPieza>();
+				
 
 				for (Bloque b : bloquesLinea.values()) {
 
@@ -699,7 +701,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 					
 					if (!onQuitarBloque(b))
 						continue;
-					Log.w("LINEA", "Quitando bloque:"+b );
+					//Log.w("LINEA", "Quitando bloque:"+b );
 					// saco la pieza y la añado a la colección
 					IPieza pieza = (IPieza) b.getPadre();
 					
@@ -707,30 +709,28 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 				pieza.quitarBloque(b);
 					
 
-					if (pieza.getBloques().isEmpty()) {
-						
-						pieza.destruirPieza();
-						piezasEscena.remove(pieza);
-						Log.e("LINEA", "quitando de tocadas con bloques:" + pieza.getBloques().size());
-						piezasTocadas.remove(pieza);
-
-					}else{
-						
-						
-					}
+					
 					
 				}
-				Log.e("LINEA", "piezas tocadas tiene:" + piezasTocadas.size());
+				//Log.e("LINEA", "piezas tocadas tiene:" + piezasTocadas.size());
 				for (IPieza tocada : piezasTocadas) {
-					Log.e("LINEA", "Delenlazando:" + tocada);
-					for (IPieza p : tocada.Desenlazar()) {
+					if (tocada.getBloques().isEmpty()) {
+						Log.w("LINEA", "Quitando pieza:"+tocada);
+						tocada.destruirPieza();
+						piezasEscena.remove(tocada);
+						//Log.e("LINEA", "quitando de tocadas con bloques:" + pieza.getBloques().size());
 						
-						p.registrarAreasTactiles(this);
-						p.registrarGraficos(this.capaBaja);
-						piezasEscena.add(p);
-
+					}else{
+	
+						for (IPieza p : tocada.Desenlazar()) {
+							
+							p.registrarAreasTactiles(this);
+							p.registrarGraficos(this.capaBaja);
+							piezasEscena.add(p);
+	
+						}
+								
 					}
-
 				}
 
 			}
@@ -771,8 +771,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 				final Bloque bloque = (Bloque) entity.getUserData();
 				final IPieza pieza = (IPieza) bloque.getPadre();
 
-				//entity.attachChild(particulasPuntero[pSceneTouchEvent
-				//		.getPointerID()]);
+				entity.attachChild(particulasPuntero[pSceneTouchEvent
+						.getPointerID()]);
 				joints[pSceneTouchEvent.getPointerID()] = this
 						.createMouseJoint(entity, pTouchAreaLocalX,
 								pTouchAreaLocalY);
@@ -804,17 +804,16 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 
 			switch (pSceneTouchEvent.getAction()) {
 			case TouchEvent.ACTION_DOWN:
-				//particulasPuntero[pSceneTouchEvent.getPointerID()]
-				//		.setParticlesSpawnEnabled(true);
+				Log.e("MOUSE", "MOUSE DOWN");
+				particulasPuntero[pSceneTouchEvent.getPointerID()]
+						.setParticlesSpawnEnabled(true);
 				// ((BaseParticleEmitter)
 				// particulas[pSceneTouchEvent.getPointerID()].getParticleEmitter()).setCenter(pSceneTouchEvent.getX(),
 				// pSceneTouchEvent.getY());
-				return true;
+				return false;
 			case TouchEvent.ACTION_MOVE:
-
-				// ((BaseParticleEmitter)
-				// particulas[pSceneTouchEvent.getPointerID()].getParticleEmitter()).setCenter(pSceneTouchEvent.getX(),
-				// pSceneTouchEvent.getY());
+//((BaseParticleEmitter)particulas[pSceneTouchEvent.getPointerID()].getParticleEmitter()).setCenter(pSceneTouchEvent.getX(),
+//			 pSceneTouchEvent.getY());
 				if (joints[pSceneTouchEvent.getPointerID()] != null) {
 					final Vector2 vec = Vector2Pool
 							.obtain(pSceneTouchEvent.getX()
@@ -828,11 +827,24 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 				}
 				return true;
 			case TouchEvent.ACTION_UP:
-				if (joints[pSceneTouchEvent.getPointerID()] != null  &&  joints[pSceneTouchEvent.getPointerID()].getBodyA().isActive() ) {
+				Log.e("MOUSE", "MOUSE UP");
+				if (joints[pSceneTouchEvent.getPointerID()] != null  && joints[pSceneTouchEvent.getPointerID()].getBodyB() != null) {
 
 					
 					IPieza pieza = (IPieza) joints[pSceneTouchEvent.getPointerID()].getBodyB().getUserData();
 					Log.e("SOLTANDO PIEZA", ""+pieza);
+				
+					if(!pieza.getCuerpo().isActive()){
+						return false;
+					}
+					
+					/*
+					if(pieza.getCuerpo().getJointList().isEmpty()){
+						joints[pSceneTouchEvent.getPointerID()] = null;
+						return true;
+					}
+					*/	
+					
 					/*
 					 * !!
 					 * 
@@ -861,12 +873,12 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 								.getPointerID()]);
 					}
 					joints[pSceneTouchEvent.getPointerID()] = null;
-					//particulasPuntero[pSceneTouchEvent.getPointerID()]
-				//			.detachSelf();
+					particulasPuntero[pSceneTouchEvent.getPointerID()]
+						.detachSelf();
 				}
-				//particulasPuntero[pSceneTouchEvent.getPointerID()]
-				//		.setParticlesSpawnEnabled(false);
-				return true;
+				particulasPuntero[pSceneTouchEvent.getPointerID()]
+					.setParticlesSpawnEnabled(false);
+				return false;
 			}
 			return false;
 		}
@@ -880,18 +892,17 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 
 		if (pTimerHandler == timerLinea) {
 
-			motor.runOnUpdateThread(new Runnable() {
-				@Override
-				public void run() {
+			EngineLock lock = motor.getEngineLock();
+			lock.lock();
+			
 					comprobarLineas();
 					pTimerHandler.reset();
 
-				}
-			});
-
+			
+			lock.unlock();
+			
 		}
 		if (pTimerHandler == timerPieza) {
-
 			motor.runOnUpdateThread(new Runnable() {
 				@Override
 				public void run() {
@@ -901,6 +912,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 				}
 			});
 
+			
 		}
 
 	}
