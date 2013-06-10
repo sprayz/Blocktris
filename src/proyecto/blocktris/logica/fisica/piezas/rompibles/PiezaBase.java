@@ -18,6 +18,7 @@ import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.TiledSprite;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
+import org.andengine.extension.physics.box2d.PhysicsConnectorManager;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.extension.physics.box2d.util.Vector2Pool;
@@ -30,6 +31,8 @@ import proyecto.blocktris.logica.fisica.piezas.IPieza;
 import proyecto.blocktris.logica.fisica.piezas.IPieza.PIEZAS;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
 import proyecto.blocktris.recursos.ManagerRecursos;
+
+import android.util.Log;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -120,7 +123,8 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 			fixturedef.shape.dispose();
 			fixtura.setUserData(this);
 			
-			
+			if(fixtura.getShape() == null)
+				Log.e("CREANDO BLOQUE", "Bloque " + this +" NO TIENE SHAPE");
 			grafico.setAnchorCenter(0, 0);
 			
 		
@@ -237,9 +241,10 @@ public List<Bloque> getBloques() {
 	protected Body cuerpo;
 	protected Scene escena;
 	protected float tamaño_bloque;
-	
+	protected PhysicsConnector conector;
+	protected PhysicsWorld mundo;
 	protected IEntity contenedor = new Entity();
-	
+	protected boolean destruida = false;
 
 	public IEntity getContenedor() {
 		return contenedor;
@@ -264,7 +269,8 @@ public List<Bloque> getBloques() {
 		BodyDef bdef;
 		FixtureDef fdef;
 		Body cuerpo_antiguo = lista_bloques.get(0).getCuerpo();
-	
+		
+		
 		
 		
 		
@@ -302,7 +308,10 @@ public List<Bloque> getBloques() {
 			
 			
 		}
-		 mundo.registerPhysicsConnector(new PhysicsConnector(contenedor, cuerpo));
+		this.mundo = mundo;
+		this.conector = new PhysicsConnector(contenedor, cuerpo);
+		
+		 mundo.registerPhysicsConnector(conector);
 	
 	}
 	
@@ -313,19 +322,17 @@ public List<Bloque> getBloques() {
 	 */
 	public List<IPieza> Desenlazar(){
 		
-		
-		boolean division = true;
-		
+	
 		List<IPieza> resultado = new ArrayList<IPieza>();
 		//matriz de matrices (una para cada pieza resultado
 		ArrayList<Set<Bloque>> listaPieza = new ArrayList<Set<Bloque>>();
-		
+		ArrayList<Bloque> aSaltarse = new ArrayList<Bloque>();
 		for(int i=0;i<bloques.size();i++){
 			//representa todos los bloques a los que se puede llegar desde  uno
 			//siguiendo los adyacentes.
 			Set<Bloque> isla ; 
 			
-			ArrayList<Bloque> aSaltarse = new ArrayList<Bloque>();
+			
 			Bloque b = bloques.get(i);
 		
 				if(b.getAdjacentes().isEmpty()){
@@ -408,7 +415,7 @@ public List<Bloque> getBloques() {
 		
 		if(list.size()== bloques.size())
 			return this;
-		Iterator<Bloque> it =list.iterator();
+		
 		
 	
 		IPieza res = new PiezaBase(this.bloques.get(0).getMundo(),list);
@@ -474,9 +481,12 @@ public List<Bloque> getBloques() {
 			b.destruir();
 		}
 		bloques.clear();
+		
+		destruida = true;
 		this.cuerpo.setActive(false);
 		
-		this.cuerpo.getWorld().destroyBody(this.cuerpo);
+		mundo.unregisterPhysicsConnector(conector);
+		mundo.destroyBody(this.cuerpo);
 		return this;
 	}
 

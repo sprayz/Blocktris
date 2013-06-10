@@ -45,7 +45,7 @@ public abstract class EscenaBase extends Scene
     }
     
     //---------------------------------------------
-    // ABSTRACTION
+    // ABSTRACCION
     //---------------------------------------------
    
     public abstract void crearEscena();

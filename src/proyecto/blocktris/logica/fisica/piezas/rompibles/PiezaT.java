@@ -57,7 +57,10 @@ public class PiezaT extends PiezaBase {
 			 this.contenedor.attachChild(b.getGrafico());
 		 }
 		
-		 mundo.registerPhysicsConnector(new PhysicsConnector(contenedor, cuerpo));
+		 this.mundo = mundo;
+			this.conector = new PhysicsConnector(contenedor, cuerpo);
+			
+			 mundo.registerPhysicsConnector(conector);
 		
 		 
 	}

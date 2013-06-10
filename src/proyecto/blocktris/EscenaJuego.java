@@ -43,6 +43,8 @@ import org.andengine.entity.scene.menu.animator.SlideMenuSceneAnimator;
 import org.andengine.entity.scene.menu.item.IMenuItem;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.UncoloredSprite;
+import org.andengine.entity.text.Text;
+import org.andengine.entity.text.TextOptions;
 import org.andengine.entity.util.FPSLogger;
 import org.andengine.extension.debugdraw.DebugRenderer;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
@@ -55,6 +57,7 @@ import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.controller.MultiTouchController;
+import org.andengine.util.adt.align.HorizontalAlign;
 import org.andengine.util.modifier.IModifier;
 import org.andengine.util.modifier.ease.EaseCubicInOut;
 
@@ -68,6 +71,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
+import com.badlogic.gdx.physics.box2d.DestructionListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
@@ -108,13 +112,19 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 	PhysicsWorld mundo;
 	float tamaño_bloque;
 
-	public static final int FILAS = 3;
+	public static final int FILAS = 12;
 	public static final int COLUMNAS = 9;
 	public static final int MAX_BLOQUES = FILAS * COLUMNAS;
 	public static final int MAX_MULTITOQUE = 8;
 
+	
+	public static final int PUNTOS_LINEA = 100;
+	public static final int MULTIPLICADOR_LINEA =2 ;
+	public  float  tiempoUltimaLinea;
+	private int  lineasConsecutivas;
+	public static  float MAX_TIEMPOLINEA = 100;
 	public static final float intervaloPonerPieza = 2f;
-	public static final float intervaloComprobarLinea = 0.2f;
+	public static final float intervaloComprobarLinea = 1f;
 	private Entity capaBaja;
 	private Entity capaAlta;
 	private BatchedSpriteParticleSystem[] particulasPuntero;
@@ -131,6 +141,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 	protected EstadoJuego estadoGuardado;
 	protected ArrayList<IPieza> piezasEscena;
 
+	private Text cartelPuntos;
 	private boolean primerCargado = true;
 	protected IPieza ultimaPieza;
 
@@ -145,7 +156,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 		//
 		piezasEscena = new ArrayList<IPieza>();
 		estadoGuardado = new EstadoJuego();
-
+		
 		joints = new MouseJoint[MAX_MULTITOQUE];
 
 		timerLinea = new TimerHandler(intervaloComprobarLinea, false, this);
@@ -160,22 +171,35 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 		degradadoFondo.setGradientFitToBounds(true);
 		degradadoFondo.setGradientDitherEnabled(true);
 
+		
 		fondo = new EntityBackground(degradadoFondo);
 
 		this.setBackgroundEnabled(true);
 		this.setBackground(fondo);
 
+		
+		
+		
+		cartelPuntos = new Text(camara.getWidth()/2f,camara.getHeight()*(8f/9f), 
+				managerRecursos.fGlobal, "", "XXXXXXXXX".length(), new TextOptions(HorizontalAlign.CENTER ),vbom);
+		
+		//cartelPuntos.setHeight(camara.getHeight()/9f);
 		// CAPAS
 		capaBaja = new Entity();
 		capaAlta = new Entity();
 		this.attachChild(capaBaja);
 		this.attachChild(capaAlta);
 
+		
+		capaAlta.attachChild(cartelPuntos);
+		cartelPuntos.setAlpha(0.8f);
+		
+		
 		// CAJA
 
 		// dejamos un 20% de el tamaño del bloque de margen
 		tamaño_bloque = camara.getWidth() / COLUMNAS;
-		tamaño_bloque = tamaño_bloque - ((tamaño_bloque / 5f / COLUMNAS));
+		tamaño_bloque = tamaño_bloque - ((tamaño_bloque / 4f / COLUMNAS));
 
 		inicializarSistemasParticulas();
 		motor.registerUpdateHandler(new FPSLogger());
@@ -222,6 +246,10 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 		 * es decir, puedan atravesar el techo para descender pero no para
 		 * ascender (^_^)
 		 */
+	
+		
+		
+		
 
 		mundo.setContactListener(new ContactListener() {
 
@@ -301,10 +329,11 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 		
 		
 		registerUpdateHandler(mundo);
-		//DebugRenderer debug = new DebugRenderer(mundo, vbom);
-		//debug.setDrawBodies(true);
-		//debug.setDrawJoints(true);
-		//attachChild(debug);
+		
+		/*DebugRenderer debug = new DebugRenderer(mundo, vbom);
+		debug.setDrawBodies(true);
+	debug.setDrawJoints(true);
+	attachChild(debug);*/
 	}
 
 	/*
@@ -614,7 +643,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 					// si no pertenece a un cuerpo estático(muro)
 
 					// Log.d("RAYCAST","RAYO bloque " + bloquesLinea.size());
-
+				
 					if (!(fixture.getBody().getType() == BodyType.StaticBody)) {
 						Vector2 velocidad = fixture.getBody()
 								.getLinearVelocity();
@@ -626,7 +655,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 							// un margen de 10 grados arriba o abajo)
 							double diferencia = Math.abs(Math.toDegrees(fixture
 									.getBody().getAngle()) % 90);
-							if (diferencia < 10
+							if (diferencia < 5
 									|| Math.abs(diferencia - 90) < 5) {
 								// lo añadimos a la linea
 
@@ -644,13 +673,14 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 			}, p1, p2);
 			// si hemos encontrado COLUMNAS bloques alineados tenemos una línea
 			// completa
-
+/*
 			float cont = 1.0f;
 			for (Bloque b : bloquesLinea.values()) {
 
 				b.getGrafico().setAlpha(cont);
 				cont -= 0.08;
 			}
+			*/
 			if (bloquesLinea.size() >= COLUMNAS
 					&& onQuitarLinea(bloquesLinea.values())) {
 
@@ -663,28 +693,40 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 
 				for (Bloque b : bloquesLinea.values()) {
 
+					
 					// si el evento dice que este bloque no se toca no lo
 					// destruimos
+					
 					if (!onQuitarBloque(b))
 						continue;
+					Log.w("LINEA", "Quitando bloque:"+b );
 					// saco la pieza y la añado a la colección
 					IPieza pieza = (IPieza) b.getPadre();
+					
 					piezasTocadas.add(pieza);
-
-					pieza.quitarBloque(b);
+				pieza.quitarBloque(b);
+					
 
 					if (pieza.getBloques().isEmpty()) {
+						
 						pieza.destruirPieza();
 						piezasEscena.remove(pieza);
+						Log.e("LINEA", "quitando de tocadas con bloques:" + pieza.getBloques().size());
+						piezasTocadas.remove(pieza);
 
+					}else{
+						
+						
 					}
+					
 				}
-
+				Log.e("LINEA", "piezas tocadas tiene:" + piezasTocadas.size());
 				for (IPieza tocada : piezasTocadas) {
-
+					Log.e("LINEA", "Delenlazando:" + tocada);
 					for (IPieza p : tocada.Desenlazar()) {
-						p.registrarAreasTactiles(EscenaJuego.this);
-						p.registrarGraficos(EscenaJuego.this.capaBaja);
+						
+						p.registrarAreasTactiles(this);
+						p.registrarGraficos(this.capaBaja);
 						piezasEscena.add(p);
 
 					}
@@ -729,12 +771,12 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 				final Bloque bloque = (Bloque) entity.getUserData();
 				final IPieza pieza = (IPieza) bloque.getPadre();
 
-				entity.attachChild(particulasPuntero[pSceneTouchEvent
-						.getPointerID()]);
+				//entity.attachChild(particulasPuntero[pSceneTouchEvent
+				//		.getPointerID()]);
 				joints[pSceneTouchEvent.getPointerID()] = this
 						.createMouseJoint(entity, pTouchAreaLocalX,
 								pTouchAreaLocalY);
-
+				Log.e("COGIENDO PIEZA", ""+pieza);
 			}
 
 			return false;
@@ -762,8 +804,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 
 			switch (pSceneTouchEvent.getAction()) {
 			case TouchEvent.ACTION_DOWN:
-				particulasPuntero[pSceneTouchEvent.getPointerID()]
-						.setParticlesSpawnEnabled(true);
+				//particulasPuntero[pSceneTouchEvent.getPointerID()]
+				//		.setParticlesSpawnEnabled(true);
 				// ((BaseParticleEmitter)
 				// particulas[pSceneTouchEvent.getPointerID()].getParticleEmitter()).setCenter(pSceneTouchEvent.getX(),
 				// pSceneTouchEvent.getY());
@@ -786,8 +828,11 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 				}
 				return true;
 			case TouchEvent.ACTION_UP:
-				if (joints[pSceneTouchEvent.getPointerID()] != null) {
+				if (joints[pSceneTouchEvent.getPointerID()] != null  &&  joints[pSceneTouchEvent.getPointerID()].getBodyA().isActive() ) {
 
+					
+					IPieza pieza = (IPieza) joints[pSceneTouchEvent.getPointerID()].getBodyB().getUserData();
+					Log.e("SOLTANDO PIEZA", ""+pieza);
 					/*
 					 * !!
 					 * 
@@ -810,16 +855,17 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 					 * 
 					 * //confirmado
 					 */
+					
 					if (joints[pSceneTouchEvent.getPointerID()].isActive()) {
 						mundo.destroyJoint(joints[pSceneTouchEvent
 								.getPointerID()]);
 					}
 					joints[pSceneTouchEvent.getPointerID()] = null;
-					particulasPuntero[pSceneTouchEvent.getPointerID()]
-							.detachSelf();
+					//particulasPuntero[pSceneTouchEvent.getPointerID()]
+				//			.detachSelf();
 				}
-				particulasPuntero[pSceneTouchEvent.getPointerID()]
-						.setParticlesSpawnEnabled(false);
+				//particulasPuntero[pSceneTouchEvent.getPointerID()]
+				//		.setParticlesSpawnEnabled(false);
 				return true;
 			}
 			return false;
@@ -884,10 +930,33 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 
 	@Override
 	public boolean onQuitarLinea(Collection<Bloque> bloques) {
-		//managerRecursos.sonidoLinea.setVolume(1.0f);
-		//managerRecursos.sonidoLinea.getVolume();
-		managerRecursos.sonidoLinea.play();
+		/*
 		
+		//si entramos en el tiempo de lineas consecutivas
+		if(motor.getSecondsElapsedTotal() -  tiempoUltimaLinea < MAX_TIEMPOLINEA){
+			lineasConsecutivas ++;
+			
+			
+			
+		}else{
+			lineasConsecutivas =0;
+		}
+		
+		puntuacion=  puntuacion +  PUNTOS_LINEA * (MULTIPLICADOR_LINEA * lineasConsecutivas==0?1:lineasConsecutivas);
+		managerRecursos.sonidoLinea.play();
+		motor.runOnUpdateThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				cartelPuntos.setText(Integer.toString(puntuacion));
+				
+			}
+		});
+		
+		
+		tiempoUltimaLinea= motor.getSecondsElapsedTotal();
+		
+		*/
 		return true;
 	}
 
@@ -976,7 +1045,16 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 	}
 
 	public void onPonerPieza() {
-
+motor.runOnUpdateThread( new Runnable() {
+	
+	@Override
+	public void run() {
+		cartelPuntos.setText(Integer.toString(puntuacion));
+		
+	}
+});
+		
+		puntuacion++;
 		IPieza pieza = new PiezaPalo(mundo,
 				camara.getWidth() / 2, camara.getHeight() * 2f, tamaño_bloque,
 				IPieza.FIXTUREDEF_DEFECTO, PiezaBase.BODYDEF_DEFECTO);
