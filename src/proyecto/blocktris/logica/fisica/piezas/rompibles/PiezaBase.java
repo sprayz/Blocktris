@@ -247,7 +247,7 @@ public List<Bloque> getBloques() {
 	protected PhysicsWorld mundo;
 	protected IEntity contenedor = new Entity();
 	protected boolean destruida = false;
-
+	protected boolean destruccionPendiente =false;
 	public IEntity getContenedor() {
 		return contenedor;
 	}
@@ -486,13 +486,20 @@ public List<Bloque> getBloques() {
 		bloques.clear();
 		
 		
-		
-		destruida = true;
-		//this.cuerpo.setActive(false);
+		destruccionPendiente = true;
+		this.cuerpo.setActive(false);
 		
 		mundo.unregisterPhysicsConnector(conector);
-		mundo.destroyBody(this.cuerpo);
+		//mundo.destroyBody(this.cuerpo);
 		return this;
+	}
+
+	public boolean isDestruida() {
+		return destruida;
+	}
+
+	public boolean isDestruccionPendiente() {
+		return destruccionPendiente;
 	}
 
 	

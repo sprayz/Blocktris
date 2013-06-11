@@ -81,7 +81,8 @@ public interface IPieza {
 		public IPieza separarBloques(List<Bloque> list);
 		
 		public PIEZAS getTipo();
-	
+		public boolean isDestruida();
+		public boolean isDestruccionPendiente();
 	
 
 	

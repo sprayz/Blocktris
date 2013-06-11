@@ -10,10 +10,12 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.ListIterator;
 import java.util.TreeMap;
 
 import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.engine.Engine.EngineLock;
+import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.entity.Entity;
@@ -210,7 +212,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 		// gravedad hacia abajo :-]
 		mundo = new FixedStepPhysicsWorld(60, new Vector2(0,
 				-SensorManager.GRAVITY_EARTH), true, 20, 16);
-		mundo.setContinuousPhysics(true);
+	//	mundo.setContinuousPhysics(true);
 		// activamos le sensor de rientacion para cambiar la gravedad
 		// managerRecursos.actividadJuego.getEngine().enableAccelerationSensor(managerRecursos.actividadJuego,this);
 		motor.setTouchController(new MultiTouchController());
@@ -332,10 +334,12 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 		
 		registerUpdateHandler(mundo);
 		
-		/*DebugRenderer debug = new DebugRenderer(mundo, vbom);
+		
+		
+		DebugRenderer debug = new DebugRenderer(mundo, vbom);
 		debug.setDrawBodies(true);
 	debug.setDrawJoints(true);
-	attachChild(debug);*/
+	attachChild(debug);
 	}
 
 	/*
@@ -488,7 +492,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 			p.destruirPieza();
 		}
 		System.gc();
-		piezasEscena.clear();
+		
 
 		Log.d("REINICIO", "CUERPOS: " + mundo.getBodyCount());
 	}
@@ -599,6 +603,26 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 		return (MouseJoint) mundo.createJoint(mouseJointDef);
 	}
 
+	
+	
+	private void purgarPiezas(){	
+		
+				for(ListIterator<IPieza> pi = piezasEscena.listIterator();
+						pi.hasNext();){
+					
+					IPieza p = pi.next();
+					
+					if(!p.getCuerpo().isActive() ){
+						mundo.destroyBody(p.getCuerpo());
+						pi.remove();
+					}
+					
+				}
+			
+		
+	}
+	
+	
 	public void comprobarLineas() {
 		/*
 		 * El motor (Box2d) no garantiza que el orden en el que se reportan las
@@ -717,7 +741,7 @@ piezasTocadas.clear();
 					if (tocada.getBloques().isEmpty()) {
 						Log.w("LINEA", "Quitando pieza:"+tocada);
 						tocada.destruirPieza();
-						piezasEscena.remove(tocada);
+						
 						//Log.e("LINEA", "quitando de tocadas con bloques:" + pieza.getBloques().size());
 						
 					}else{
@@ -779,7 +803,7 @@ piezasTocadas.clear();
 				Log.e("COGIENDO PIEZA", ""+pieza);
 			}
 
-			return false;
+			return true;
 		}
 		return false;
 
@@ -834,16 +858,14 @@ piezasTocadas.clear();
 					IPieza pieza = (IPieza) joints[pSceneTouchEvent.getPointerID()].getBodyB().getUserData();
 					Log.e("SOLTANDO PIEZA", ""+pieza);
 				
-					if(!pieza.getCuerpo().isActive()){
-						return false;
+					if(pieza.getCuerpo().isActive() && !pieza.getCuerpo().getJointList().isEmpty()){
+						
+						mundo.destroyJoint(joints[pSceneTouchEvent
+													.getPointerID()]);
 					}
 					
-					/*
-					if(pieza.getCuerpo().getJointList().isEmpty()){
-						joints[pSceneTouchEvent.getPointerID()] = null;
-						return true;
-					}
-					*/	
+					
+				
 					
 					/*
 					 * !!
@@ -868,16 +890,17 @@ piezasTocadas.clear();
 					 * //confirmado
 					 */
 					
-					if (joints[pSceneTouchEvent.getPointerID()].isActive()) {
-						mundo.destroyJoint(joints[pSceneTouchEvent
-								.getPointerID()]);
-					}
-					joints[pSceneTouchEvent.getPointerID()] = null;
-					particulasPuntero[pSceneTouchEvent.getPointerID()]
-						.detachSelf();
+					
+				
+					
 				}
+				
+				joints[pSceneTouchEvent.getPointerID()] = null;
 				particulasPuntero[pSceneTouchEvent.getPointerID()]
-					.setParticlesSpawnEnabled(false);
+					.detachSelf();
+				particulasPuntero[pSceneTouchEvent.getPointerID()]
+						.setParticlesSpawnEnabled(false);
+				
 				return false;
 			}
 			return false;
@@ -903,6 +926,20 @@ piezasTocadas.clear();
 			
 		}
 		if (pTimerHandler == timerPieza) {
+			/*
+			 * Reutilizamos el update handler de las piezas para
+			 * destruir las piezas pendientes
+			 */
+			motor.runOnUpdateThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					purgarPiezas();
+					
+				}
+			});
+			
+			
 			motor.runOnUpdateThread(new Runnable() {
 				@Override
 				public void run() {
@@ -917,6 +954,7 @@ piezasTocadas.clear();
 
 	}
 
+	
 	@Override
 	public boolean onIniciarPartida() {
 
@@ -1112,7 +1150,19 @@ motor.runOnUpdateThread( new Runnable() {
 		Log.w("FLUJO", "ESCENA JUEGO PAUSADA");
 		if(	managerRecursos.musicaFondo.isPlaying())
 			managerRecursos.musicaFondo.pause();
+
+		EngineLock lock = motor.getEngineLock();
+		lock.lock();
+		purgarPiezas();
 		guardarEstado();
+
+		
+		lock.unlock();
+		
+		
+		
+		
+		
 
 		/*
 		 * 
@@ -1122,7 +1172,7 @@ motor.runOnUpdateThread( new Runnable() {
 		motor.runOnUpdateThread(new Runnable() {
 			@Override
 			public void run() {
-
+				
 				pausado = true;
 				EscenaJuego.this.setChildScene(new EscenaMenu(camara, acabada,
 						EscenaJuego.this), false, true, true);
