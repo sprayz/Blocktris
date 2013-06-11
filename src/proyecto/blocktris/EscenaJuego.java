@@ -13,7 +13,12 @@ import java.util.HashSet;
 import java.util.ListIterator;
 import java.util.TreeMap;
 
+import org.andengine.entity.modifier.AlphaModifier;
+import org.andengine.entity.modifier.EntityModifier;
 import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
+import org.andengine.entity.modifier.MoveYModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
 import org.andengine.engine.Engine.EngineLock;
 import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.handler.timer.ITimerCallback;
@@ -60,12 +65,17 @@ import org.andengine.input.sensor.acceleration.AccelerationData;
 import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.controller.MultiTouchController;
+import org.andengine.ui.dialog.StringInputDialogBuilder;
+import org.andengine.util.DialogUtils;
 import org.andengine.util.adt.align.HorizontalAlign;
+import org.andengine.util.call.Callback;
 import org.andengine.util.debug.Debug;
 import org.andengine.util.modifier.IModifier;
 import org.andengine.util.modifier.ease.EaseCubicInOut;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.hardware.SensorManager;
 import android.opengl.GLES20;
 import android.util.Log;
@@ -122,11 +132,11 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 	public static final int MAX_MULTITOQUE = 8;
 
 	
-	public static final int PUNTOS_LINEA = 100;
+	public static final int PUNTOS_LINEA = 10;
 	public static final int MULTIPLICADOR_LINEA =2 ;
 	public  float  tiempoUltimaLinea;
 	private int  lineasConsecutivas;
-	public static  float MAX_TIEMPOLINEA = 100;
+	public static  float MAX_TIEMPOLINEA = 5;
 	public static final float intervaloPonerPieza = 2f;
 	public static final float intervaloComprobarLinea = 1f;
 	private Entity capaBaja;
@@ -185,7 +195,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 		
 		
 		cartelPuntos = new Text(camara.getWidth()/2f,camara.getHeight()*(8f/9f), 
-				managerRecursos.fGlobal, "", "XXXXXXXXX".length(), new TextOptions(HorizontalAlign.CENTER ),vbom);
+				managerRecursos.fGlobal, "0", "XXXXXXXXX".length(), new TextOptions(HorizontalAlign.CENTER ),vbom);
 		
 		//cartelPuntos.setHeight(camara.getHeight()/9f);
 		// CAPAS
@@ -463,8 +473,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 
 	}
 
-	public void finalizarPartida(boolean ganado) {
-		if (!onFinalizarPartida(ganado))
+	public void finalizarPartida() {
+		if (!onFinalizarPartida())
 			return;
 		reiniciarEscena();
 		this.unregisterUpdateHandler(timerLinea);
@@ -537,8 +547,6 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 			particulasPuntero[i]
 					.addParticleInitializer(new BlendFunctionParticleInitializer<UncoloredSprite>(
 							GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
-			// particulas[i].addParticleInitializer(new
-			// VelocityParticleInitializer<Sprite>(120, 0, 12, 0));
 			particulasPuntero[i]
 					.addParticleInitializer(new RotationParticleInitializer<UncoloredSprite>(
 							0.0f, 360.0f));
@@ -556,10 +564,6 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 			particulasPuntero[i]
 					.addParticleModifier(new ColorParticleModifier<UncoloredSprite>(
 							0.0f, 0.4f, 1, 1, 0.5f, 1, 0, 1));
-			// particulas[i].addParticleModifier(new
-			// AlphaParticleModifier<Sprite>(0, 0.2f, 0, 1 ));
-			// particulas[i].addParticleModifier(new
-			// AlphaParticleModifier<Sprite>(0.5f,1 , 1, 0));
 			// no queremos que estén activados desde el principio
 			particulasPuntero[i].setParticlesSpawnEnabled(false);
 
@@ -641,7 +645,7 @@ piezasTocadas.clear();
 			bloquesLinea.clear();
 			Vector2 p1;
 			Vector2 p2;
-			// tiramos una linea que atraviese la caja sin tocar los muros
+			// tiramos una linea que atraviese la caja 
 			p1 = Vector2Pool.obtain(
 					0 / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, (linea
 							* tamaño_bloque + (tamaño_bloque / 2) + MARGENES)
@@ -650,16 +654,6 @@ piezasTocadas.clear();
 			p2 = Vector2Pool.obtain((camara.getWidth())
 					/ PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, p1.y);
 
-			/*
-			 * Line lin = new
-			 * Line(p1.x*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT,
-			 * p1.y*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT
-			 * ,p2.x*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT
-			 * ,p2.y*PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT ,vbom);
-			 * 
-			 * this.capaAlta.attachChild(lin); Log.d("RAYCAST","RAYO LINEA");
-			 * //tiramos el rayo
-			 */
 			mundo.rayCast(new RayCastCallback() {
 
 				@Override
@@ -668,7 +662,7 @@ piezasTocadas.clear();
 					// cada vez que encuentre una fixture
 					// si no pertenece a un cuerpo estático(muro)
 
-					// Log.d("RAYCAST","RAYO bloque " + bloquesLinea.size());
+				
 				
 					if (!(fixture.getBody().getType() == BodyType.StaticBody)) {
 						Vector2 velocidad = fixture.getBody()
@@ -700,12 +694,6 @@ piezasTocadas.clear();
 			// si hemos encontrado COLUMNAS bloques alineados tenemos una línea
 			// completa
 
-			float cont = 1.0f;
-			for (Bloque b : bloquesLinea.values()) {
-
-				b.getGrafico().setAlpha(cont);
-				cont -= 0.08;
-			}
 			
 			if (bloquesLinea.size() >= COLUMNAS
 					&& onQuitarLinea(bloquesLinea.values())) {
@@ -736,13 +724,13 @@ piezasTocadas.clear();
 					
 					
 				}
-				//Log.e("LINEA", "piezas tocadas tiene:" + piezasTocadas.size());
+				
 				for (IPieza tocada : piezasTocadas) {
 					if (tocada.getBloques().isEmpty()) {
 						Log.w("LINEA", "Quitando pieza:"+tocada);
 						tocada.destruirPieza();
 						
-						//Log.e("LINEA", "quitando de tocadas con bloques:" + pieza.getBloques().size());
+						
 						
 					}else{
 	
@@ -831,13 +819,10 @@ piezasTocadas.clear();
 				Log.e("MOUSE", "MOUSE DOWN");
 				particulasPuntero[pSceneTouchEvent.getPointerID()]
 						.setParticlesSpawnEnabled(true);
-				// ((BaseParticleEmitter)
-				// particulas[pSceneTouchEvent.getPointerID()].getParticleEmitter()).setCenter(pSceneTouchEvent.getX(),
-				// pSceneTouchEvent.getY());
+				
 				return false;
 			case TouchEvent.ACTION_MOVE:
-//((BaseParticleEmitter)particulas[pSceneTouchEvent.getPointerID()].getParticleEmitter()).setCenter(pSceneTouchEvent.getX(),
-//			 pSceneTouchEvent.getY());
+
 				if (joints[pSceneTouchEvent.getPointerID()] != null) {
 					final Vector2 vec = Vector2Pool
 							.obtain(pSceneTouchEvent.getX()
@@ -845,7 +830,7 @@ piezasTocadas.clear();
 									pSceneTouchEvent.getY()
 											/ PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
 					joints[pSceneTouchEvent.getPointerID()].setTarget(vec);
-					// joints[pSceneTouchEvent.getPointerID()].getBodyB().applyAngularImpulse(4.5f);
+					
 
 					Vector2Pool.recycle(vec);
 				}
@@ -968,8 +953,41 @@ piezasTocadas.clear();
 	}
 
 	@Override
-	public boolean onFinalizarPartida(boolean ganado) {
+	public boolean onFinalizarPartida() {
+		final StringInputDialogBuilder dialogb = 
+				new StringInputDialogBuilder(actividadJuego, 
+											R.string.dialogo_titulo, 
+											R.string.dialogo_mensaje,
+											R.string.dialogo_mensaje, 
+											R.drawable.ic_launcher,
+											new Callback<String>() {
 
+												@Override
+												public void onCallback(
+														String pCallbackValue) {
+													
+														Log.d("NOMBRE", pCallbackValue);
+														ActividadPuntuaciones.lanzar(actividadJuego);
+												}
+					
+			},new OnCancelListener() {
+				
+				@Override
+				public void onCancel(DialogInterface dialog) {
+					
+					
+				}
+			});
+		
+		actividadJuego.runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				dialogb.create().show();
+			
+			}
+		});
+		pausarEscena();
 		return true;
 	}
 
@@ -980,24 +998,63 @@ piezasTocadas.clear();
 
 	@Override
 	public boolean onQuitarLinea(Collection<Bloque> bloques) {
-		Text puntos = new Text(cartelPuntos.getX(),cartelPuntos.getY(),managerRecursos.fGlobal,"","XXXXXXXXX".length(), 
+		Text puntos = new Text(camara.getWidth()/2,cartelPuntos.getY(),managerRecursos.fGlobal,"","XXXXXXXXX".length(), 
 												new TextOptions(HorizontalAlign.CENTER),vbom);
 		
+		
+		/*
+		 * Para determinar la altura de la linea  hago la media de la altura de todos los bloques que vamos a quitar
+		 */
+		
+		float mediaY=0f;
+		for (Bloque b : bloques){
+			
+			mediaY = mediaY + b.getGrafico().getSceneCenterCoordinates()[1];
+		}
+		mediaY = mediaY/ bloques.size();
+		puntos.setY(mediaY);
+		puntos.setHeight(tamaño_bloque);
 		//si entramos en el tiempo de lineas consecutivas
 		if(motor.getSecondsElapsedTotal() -  tiempoUltimaLinea < MAX_TIEMPOLINEA){
 			lineasConsecutivas ++;
 			
-			
+			tiempoUltimaLinea = motor.getSecondsElapsedTotal();
 			
 		}else{
-			lineasConsecutivas =0;
+			lineasConsecutivas =1;
 		}
-		int psuma= PUNTOS_LINEA * MULTIPLICADOR_LINEA * lineasConsecutivas==0?1:lineasConsecutivas;
-		puntuacion=+  psuma;
+		int psuma= PUNTOS_LINEA * MULTIPLICADOR_LINEA * lineasConsecutivas;
+		Log.w("PUNTOS", "Lineas consecutivas: " + lineasConsecutivas + " Puntos: "+ psuma);
+		puntuacion= puntuacion +   psuma;
 		puntos.setText(Integer.toString(psuma));
+		puntos.setHeight(tamaño_bloque);
+		puntos.registerEntityModifier(new ParallelEntityModifier(new IEntityModifierListener() {
+			
+			@Override
+			public void onModifierStarted(IModifier<IEntity> pModifier, IEntity pItem) {
+				
+				
+			}
+			
+			@Override
+			public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
+				motor.runOnUpdateThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						pItem.detachSelf();
+						
+					}
+				});
+				
+				
+			}
+		}, new AlphaModifier(3f,1.0f , 0.0f), new MoveYModifier(3f, puntos.getY(),puntos.getY() + tamaño_bloque * 3)));
 		
 		managerRecursos.sonidoLinea.play();
 		
+		
+		this.capaAlta.attachChild(puntos);
 		
 		
 		
@@ -1102,10 +1159,12 @@ piezasTocadas.clear();
 	}
 
 	public void onPonerPieza() {
-motor.runOnUpdateThread( new Runnable() {
+		
+	motor.runSafely( new Runnable() {
 	
 	@Override
 	public void run() {
+		
 		cartelPuntos.setText(Integer.toString(puntuacion));
 		
 	}
@@ -1261,7 +1320,7 @@ motor.runOnUpdateThread( new Runnable() {
 			return true;
 
 		case EscenaMenu.ID_NUEVAPARTIDA:
-			finalizarPartida(false);
+			finalizarPartida();
 			iniciarPartida();
 			pMenuScene.back(true);
 			

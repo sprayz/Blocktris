@@ -10,4 +10,6 @@
 	 <string name="menu_multijugador">Multijugador</string>
 	 <string name="menu_instrucciones">Instrucciones</string>
 	 <string name="menu_salir">Salir</string>
+	   <string name="dialogo_titulo">Phytris</string>
+    <string name="dialogo_mensaje">Introduce tu nombre</string>
 </resources>

@@ -8,7 +8,7 @@ public interface IEscenaTetris {
 	
 	public boolean onIniciarPartida();
 	public void onPartidaIniciada();
-	public boolean onFinalizarPartida(boolean ganado);
+	public boolean onFinalizarPartida();
 	public void  onPartidaFinalizada();
 	public boolean onQuitarBloque(final Bloque bloque) ;
 	public  boolean onQuitarLinea(Collection<Bloque> bloques);
