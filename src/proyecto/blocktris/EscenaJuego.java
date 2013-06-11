@@ -435,7 +435,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 
 		reiniciarEscena();
 		if (estadoGuardado != null) {
-			piezasEscena.clear();
+		
 			puntuacion = estadoGuardado.puntuacion;
 			acabada = estadoGuardado.acabada;
 			for (EstadoPieza ep : estadoGuardado.piezas) {
