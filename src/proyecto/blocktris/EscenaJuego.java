@@ -980,7 +980,8 @@ piezasTocadas.clear();
 
 	@Override
 	public boolean onQuitarLinea(Collection<Bloque> bloques) {
-		/*
+		Text puntos = new Text(cartelPuntos.getX(),cartelPuntos.getY(),managerRecursos.fGlobal,"","XXXXXXXXX".length(), 
+												new TextOptions(HorizontalAlign.CENTER),vbom);
 		
 		//si entramos en el tiempo de lineas consecutivas
 		if(motor.getSecondsElapsedTotal() -  tiempoUltimaLinea < MAX_TIEMPOLINEA){
@@ -991,9 +992,15 @@ piezasTocadas.clear();
 		}else{
 			lineasConsecutivas =0;
 		}
+		int psuma= PUNTOS_LINEA * MULTIPLICADOR_LINEA * lineasConsecutivas==0?1:lineasConsecutivas;
+		puntuacion=+  psuma;
+		puntos.setText(Integer.toString(psuma));
 		
-		puntuacion=  puntuacion +  PUNTOS_LINEA * (MULTIPLICADOR_LINEA * lineasConsecutivas==0?1:lineasConsecutivas);
 		managerRecursos.sonidoLinea.play();
+		
+		
+		
+		
 		motor.runOnUpdateThread(new Runnable() {
 			
 			@Override
@@ -1006,7 +1013,7 @@ piezasTocadas.clear();
 		
 		tiempoUltimaLinea= motor.getSecondsElapsedTotal();
 		
-		*/
+		
 		return true;
 	}
 
