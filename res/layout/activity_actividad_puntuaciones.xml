@@ -8,15 +8,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".ActividadPuntuaciones" >
 
-   <TextView
-       android:id="@+id/textView1"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:layout_alignParentRight="true"
-       android:layout_alignTop="@+id/listView1"
-       android:text="Large Text"
-       android:textAppearance="?android:attr/textAppearanceLarge" />
-
    <ListView
        android:id="@+id/listView1"
        android:layout_width="match_parent"
@@ -26,13 +17,19 @@
    </ListView>
 
    <TextView
+       android:id="@+id/textView1"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_alignParentLeft="true"
+       android:layout_alignParentTop="true"
+       android:textAppearance="?android:attr/textAppearanceLarge" />
+
+   <TextView
        android:id="@+id/textView2"
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:layout_alignParentRight="true"
-       android:layout_below="@+id/textView1"
-       android:layout_marginTop="26dp"
-       android:text="Large Text"
+       android:layout_alignParentTop="true"
        android:textAppearance="?android:attr/textAppearanceLarge" />
    
 </RelativeLayout>

@@ -27,7 +27,9 @@ public class ActividadPuntuaciones extends Activity {
 			    new String[] { BDPuntuaciones.CAMPO_NOMBRE, BDPuntuaciones.CAMPO_PUNTOS },
 			   new int [] { R.id.textView1 , R.id.textView2}
 			    
-			);        
+			);    
+		
+		bd.close();
 	}
 
 	@Override

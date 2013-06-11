@@ -101,12 +101,14 @@ import proyecto.blocktris.logica.fisica.piezas.IPieza;
 import proyecto.blocktris.logica.fisica.piezas.PiezaFactory;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.*;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
+import proyecto.blocktris.recursos.BDPuntuaciones;
 import proyecto.blocktris.recursos.EstadoJuego;
 import proyecto.blocktris.recursos.ExclStrat;
 import proyecto.blocktris.recursos.ManagerEscenas;
 import proyecto.blocktris.recursos.ManagerRecursos;
 import proyecto.blocktris.recursos.EstadoJuego.EstadoPieza;
 import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
+import proyecto.blocktris.recursos.Puntuacion;
 
 public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 		IOnSceneTouchListener, IOnAreaTouchListener, ITimerCallback,
@@ -966,6 +968,12 @@ piezasTocadas.clear();
 												public void onCallback(
 														String pCallbackValue) {
 													
+														 BDPuntuaciones bd = new BDPuntuaciones(actividadJuego);
+														 Puntuacion p = new Puntuacion();
+														 p.setNombre(pCallbackValue);
+														 p.setPuntos(puntuacion);
+														 bd.addContact(p);
+														 bd.close();
 														Log.d("NOMBRE", pCallbackValue);
 														ActividadPuntuaciones.lanzar(actividadJuego);
 												}
