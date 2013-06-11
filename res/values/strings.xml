@@ -2,19 +2,18 @@
 <resources>
 
     <string name="app_name">Phytris</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
+
     <string name="title_activity_actividad_bluetooth">Select a Device</string>
     <string name="actividadBluetooth_refrescar">Scan</string>
     <string name="actividadBluetooth_conectar">Connect</string>
     <string name="menu_continuar">Continue</string>
     <string name="menu_nuevaPartida">New Game</string>
-    <string name="menu_multijugador">Multiplayer</string>
+    <string name="menu_puntuaciones">High Scores</string>
     <string name="menu_instrucciones">Instructions</string>
     <string name="menu_salir">Quit</string>
     <string name="dialogo_titulo">Phytris</string>
     <string name="dialogo_mensaje">Enter your name</string>
    
-    <string name="title_activity_actividad_puntuaciones">-</string>
+    <string name="title_activity_actividad_puntuaciones">High Scores</string>
 
 </resources>

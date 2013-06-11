@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="actividadBluetooth_refrescar">Refrescar</string>
-    <string name="title_activity_actividad_bluetooth">Selecciona un Dispositivo</string>
-     <string name="actividadBluetooth_conectar">Conectar</string>
-     
-     
-      <string name="menu_continuar">Continuar</string>
-	 <string name="menu_nuevaPartida">Nueva Partida</string>
-	 <string name="menu_multijugador">Multijugador</string>
-	 <string name="menu_instrucciones">Instrucciones</string>
-	 <string name="menu_salir">Salir</string>
-	   <string name="dialogo_titulo">Phytris</string>
+        <string name="app_name">Phytris</string>
+
+    <string name="title_activity_actividad_bluetooth">Selecciona un dispositivo</string>
+    <string name="actividadBluetooth_refrescar">Escaneo</string>
+    <string name="actividadBluetooth_conectar">Conectar</string>
+    <string name="menu_continuar">Continuar</string>
+    <string name="menu_nuevaPartida">Nueva Partida</string>
+    <string name="menu_puntuaciones">Mejores Puntuaciones</string>
+    <string name="menu_instrucciones">Instrucciones</string>
+    <string name="menu_salir">Quitar</string>
+    <string name="dialogo_titulo">Phytris</string>
     <string name="dialogo_mensaje">Introduce tu nombre</string>
+   
+    <string name="title_activity_actividad_puntuaciones">Mejores Puntuaciones</string>
 </resources>

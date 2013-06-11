@@ -1,6 +1,5 @@
 package proyecto.blocktris;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -13,19 +12,17 @@ import java.util.HashSet;
 import java.util.ListIterator;
 import java.util.TreeMap;
 
-import org.andengine.entity.modifier.AlphaModifier;
-import org.andengine.entity.modifier.EntityModifier;
-import org.andengine.entity.modifier.IEntityModifier;
-import org.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
-import org.andengine.entity.modifier.MoveYModifier;
-import org.andengine.entity.modifier.ParallelEntityModifier;
 import org.andengine.engine.Engine.EngineLock;
-import org.andengine.engine.handler.IUpdateHandler;
 import org.andengine.engine.handler.timer.ITimerCallback;
 import org.andengine.engine.handler.timer.TimerHandler;
 import org.andengine.entity.Entity;
 import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.AlphaModifier;
 import org.andengine.entity.modifier.DelayModifier;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.IEntityModifier.IEntityModifierListener;
+import org.andengine.entity.modifier.MoveYModifier;
+import org.andengine.entity.modifier.ParallelEntityModifier;
 import org.andengine.entity.particle.BatchedSpriteParticleSystem;
 import org.andengine.entity.particle.emitter.IParticleEmitter;
 import org.andengine.entity.particle.emitter.PointParticleEmitter;
@@ -47,45 +44,50 @@ import org.andengine.entity.scene.background.Background;
 import org.andengine.entity.scene.background.EntityBackground;
 import org.andengine.entity.scene.menu.MenuScene;
 import org.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener;
-import org.andengine.entity.scene.menu.animator.SlideMenuSceneAnimator;
 import org.andengine.entity.scene.menu.item.IMenuItem;
-import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.UncoloredSprite;
 import org.andengine.entity.text.Text;
 import org.andengine.entity.text.TextOptions;
 import org.andengine.entity.util.FPSLogger;
-import org.andengine.extension.debugdraw.DebugRenderer;
 import org.andengine.extension.physics.box2d.FixedStepPhysicsWorld;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
 import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.extension.physics.box2d.util.Vector2Pool;
 import org.andengine.extension.physics.box2d.util.constants.PhysicsConstants;
-import org.andengine.input.sensor.acceleration.AccelerationData;
-import org.andengine.input.sensor.acceleration.IAccelerationListener;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.controller.MultiTouchController;
 import org.andengine.ui.dialog.StringInputDialogBuilder;
-import org.andengine.util.DialogUtils;
 import org.andengine.util.adt.align.HorizontalAlign;
 import org.andengine.util.call.Callback;
-import org.andengine.util.debug.Debug;
 import org.andengine.util.modifier.IModifier;
-import org.andengine.util.modifier.ease.EaseCubicInOut;
 
+import proyecto.blocktris.logica.EscenaBase;
+import proyecto.blocktris.logica.fisica.ObjetoFisico;
+import proyecto.blocktris.logica.fisica.piezas.IPieza;
+import proyecto.blocktris.logica.fisica.piezas.PiezaFactory;
+import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase;
+import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
+import proyecto.blocktris.recursos.BDPuntuaciones;
+import proyecto.blocktris.recursos.EstadoJuego;
+import proyecto.blocktris.recursos.EstadoJuego.EstadoPieza;
+import proyecto.blocktris.recursos.ExclStrat;
+import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
+import proyecto.blocktris.recursos.ManagerRecursos;
+import proyecto.blocktris.recursos.Puntuacion;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.hardware.SensorManager;
 import android.opengl.GLES20;
 import android.util.Log;
+
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Contact;
 import com.badlogic.gdx.physics.box2d.ContactImpulse;
 import com.badlogic.gdx.physics.box2d.ContactListener;
-import com.badlogic.gdx.physics.box2d.DestructionListener;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.Manifold;
@@ -95,30 +97,13 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import proyecto.blocktris.logica.EscenaBase;
-import proyecto.blocktris.logica.fisica.ObjetoFisico;
-import proyecto.blocktris.logica.fisica.piezas.IPieza;
-import proyecto.blocktris.logica.fisica.piezas.PiezaFactory;
-import proyecto.blocktris.logica.fisica.piezas.rompibles.*;
-import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
-import proyecto.blocktris.recursos.BDPuntuaciones;
-import proyecto.blocktris.recursos.EstadoJuego;
-import proyecto.blocktris.recursos.ExclStrat;
-import proyecto.blocktris.recursos.ManagerEscenas;
-import proyecto.blocktris.recursos.ManagerRecursos;
-import proyecto.blocktris.recursos.EstadoJuego.EstadoPieza;
-import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
-import proyecto.blocktris.recursos.Puntuacion;
-
-public class EscenaJuego extends EscenaBase implements IAccelerationListener,
+public class EscenaJuego extends EscenaBase implements 
 		IOnSceneTouchListener, IOnAreaTouchListener, ITimerCallback,
-		IEscenaTetris, IOnMenuItemClickListener {
+		 IOnMenuItemClickListener {
 
 	public static final String ARCHIVO_ESTADO = "estado.dat";
 	public static float MARGENES = 20;
 	public static float ANGULO_MAX = 10;
-	public static double SEN_ANGULO_MIN = Math.sin(Math.toRadians(ANGULO_MAX));
-	public static double SEN_ANGULO_MAX = Math.sin(Math.toRadians(-ANGULO_MAX));
 	public static FixtureDef fdef_muro = PhysicsFactory.createFixtureDef(1.0f,
 			0, 0.5f);
 	public Body suelo;
@@ -128,18 +113,18 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 	PhysicsWorld mundo;
 	float tamaño_bloque;
 
-	public static final int FILAS = 12;
-	public static final int COLUMNAS = 9;
+	public static final int FILAS = 10;
+	public static final int COLUMNAS = 8;
 	public static final int MAX_BLOQUES = FILAS * COLUMNAS;
 	public static final int MAX_MULTITOQUE = 8;
-
+	public static final int LIMITE_BLOQUES_ALARMA =(int) (MAX_BLOQUES / 1.3);
 	
 	public static final int PUNTOS_LINEA = 10;
 	public static final int MULTIPLICADOR_LINEA =2 ;
 	public  float  tiempoUltimaLinea;
 	private int  lineasConsecutivas;
 	public static  float MAX_TIEMPOLINEA = 5;
-	public static final float intervaloPonerPieza = 2f;
+	public static final float intervaloPonerPieza = 5f;
 	public static final float intervaloComprobarLinea = 1f;
 	private Entity capaBaja;
 	private Entity capaAlta;
@@ -225,23 +210,19 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 		mundo = new FixedStepPhysicsWorld(60, new Vector2(0,
 				-SensorManager.GRAVITY_EARTH), true, 20, 16);
 	//	mundo.setContinuousPhysics(true);
-		// activamos le sensor de rientacion para cambiar la gravedad
-		// managerRecursos.actividadJuego.getEngine().enableAccelerationSensor(managerRecursos.actividadJuego,this);
 		motor.setTouchController(new MultiTouchController());
-
 		// activamos el toque
 		setOnSceneTouchListener(this);
 		setOnAreaTouchListener(this);
 
 		// sprite de referencia marcando el centro
-		AnimatedSprite caja = new AnimatedSprite(camara.getCenterX(),
-				camara.getCenterY(),
-
-				managerRecursos.trBloques.deepCopy(), vbom);
-		caja.setSize(10, 10);
-		this.capaBaja.attachChild(caja);
-		caja.setVisible(true);
-		caja.animate(100);
+		//AnimatedSprite caja = new AnimatedSprite(camara.getCenterX(),
+		//		camara.getCenterY(),
+			//	managerRecursos.trBloques.deepCopy(), vbom);
+		//caja.setSize(10, 10);
+	//	this.capaBaja.attachChild(caja);
+		//caja.setVisible(true);
+	//	caja.animate(100);
 
 		// PAREDES
 		suelo = PhysicsFactory.createLineBody(mundo, 0, 0 + MARGENES,
@@ -271,12 +252,13 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 
 			@Override
 			public void preSolve(Contact contact, Manifold oldManifold) {
-				// TODO Auto-generated method stub
+				
 
 				Body cuerpoPieza;
 				// si alguno de los cuerpos colicionando es el techo...
 				if ((contact.getFixtureA().getBody() == techo)
 						|| (contact.getFixtureB().getBody() == techo)) {
+			
 					// chulo ehh?
 					// sacamos como cuerpo de la pieza aquel que no sea el
 					// techo.
@@ -284,8 +266,7 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 							.getFixtureA().getBody() : contact.getFixtureB()
 							.getBody();
 
-					// Log.d("COLISION", "NORMAL Y = "
-					// +contact.getWorldManifold().getNormal().y );
+					
 					// no colisionamos
 					contact.setEnabled(false);
 
@@ -320,38 +301,21 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 			}
 
 			@Override
-			public void postSolve(Contact contact, ContactImpulse impulse) {
-				// TODO Auto-generated method stub
-
-			}
+			public void postSolve(Contact contact, ContactImpulse impulse) {}
 
 			@Override
-			public void endContact(Contact contact) {
-				// TODO Auto-generated method stub
-
-			}
+			public void endContact(Contact contact) {}
 
 			@Override
-			public void beginContact(Contact contact) {
-				// TODO Auto-generated method stub
-
-			}
+			public void beginContact(Contact contact) {}
 		});
-
 		this.registerUpdateHandler(timerLinea);
 		this.registerUpdateHandler(timerPieza);
-
-		
-		
-		
 		registerUpdateHandler(mundo);
-		
-		
-		
-		DebugRenderer debug = new DebugRenderer(mundo, vbom);
+		/*DebugRenderer debug = new DebugRenderer(mundo, vbom);
 		debug.setDrawBodies(true);
 	debug.setDrawJoints(true);
-	attachChild(debug);
+	attachChild(debug);*/
 	}
 
 	/*
@@ -399,10 +363,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 			Log.e("SERIALIZADO", f.getMessage());
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	public void cargarEstado() {
@@ -423,12 +385,8 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 				sb.append(linea).append("\n");
 
 			}
-
 			String resultado = sb.toString();
 			Gson gson = new Gson();
-			BufferedInputStream bis = new BufferedInputStream(fileIn);
-
-			Log.w("DESSERIALIZANDO", " CARGANDO ESTADO");
 			estadoGuardado = gson.fromJson(resultado, EstadoJuego.class);
 
 		} catch (Exception i) {
@@ -476,26 +434,24 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 	}
 
 	public void finalizarPartida() {
-		if (!onFinalizarPartida())
-			return;
+		if(managerRecursos.musicaFondo.isPlaying())
+			managerRecursos.musicaFondo.stop();
+		
 		reiniciarEscena();
 		this.unregisterUpdateHandler(timerLinea);
 		this.unregisterUpdateHandler(timerPieza);
 		puntuacion = 0;
 		acabada = true;
-		onPartidaFinalizada();
-
-	}
+		}
 
 	public void iniciarPartida() {
+		managerRecursos.musicaFondo.play();
 		acabada = false;
-		if (!onIniciarPartida())
-			return;
-
+	
 		this.registerUpdateHandler(timerLinea);
 		this.registerUpdateHandler(timerPieza);
 
-		onPartidaIniciada();
+	
 	}
 
 	@Override
@@ -511,13 +467,13 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 
 	@Override
 	public TipoEscena getTipoEscena() {
-		// TODO Auto-generated method stub
+		
 		return null;
 	}
 
 	@Override
 	public void deshacerEscena() {
-		// TODO Auto-generated method stub
+	
 
 	}
 
@@ -545,7 +501,6 @@ public class EscenaJuego extends EscenaBase implements IAccelerationListener,
 			particulasPuntero[i]
 					.addParticleInitializer(new ColorParticleInitializer<UncoloredSprite>(
 							1, 1, 0));
-			// particulas[i].addParticleInitializer(new );
 			particulasPuntero[i]
 					.addParticleInitializer(new BlendFunctionParticleInitializer<UncoloredSprite>(
 							GLES20.GL_SRC_ALPHA, GLES20.GL_ONE));
@@ -663,9 +618,6 @@ piezasTocadas.clear();
 						Vector2 normal, float fraction) {
 					// cada vez que encuentre una fixture
 					// si no pertenece a un cuerpo estático(muro)
-
-				
-				
 					if (!(fixture.getBody().getType() == BodyType.StaticBody)) {
 						Vector2 velocidad = fixture.getBody()
 								.getLinearVelocity();
@@ -715,7 +667,6 @@ piezasTocadas.clear();
 					
 					if (!onQuitarBloque(b))
 						continue;
-					//Log.w("LINEA", "Quitando bloque:"+b );
 					// saco la pieza y la añado a la colección
 					IPieza pieza = (IPieza) b.getPadre();
 					
@@ -759,19 +710,7 @@ piezasTocadas.clear();
 	// EVENTOS
 	// *************
 
-	@Override
-	public void onAccelerationAccuracyChanged(
-			final AccelerationData pAccelerationData) {
-
-	}
-
-	@Override
-	public void onAccelerationChanged(final AccelerationData pAccelerationData) {
-		final Vector2 gravity = Vector2Pool.obtain(pAccelerationData.getX(),
-				pAccelerationData.getY());
-		mundo.setGravity(gravity);
-		Vector2Pool.recycle(gravity);
-	}
+	
 
 	@Override
 	public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
@@ -810,8 +749,7 @@ piezasTocadas.clear();
 			degradadoFondo.setGradientVector(
 					pSceneTouchEvent.getX() - camara.getWidth() / 2,
 					pSceneTouchEvent.getY() - camara.getHeight() / 2);
-			// degradadoFondo.setGradientVector(pSceneTouchEvent.getX(),
-			// pSceneTouchEvent.getY());
+			
 		}
 		if (this.mundo != null
 				&& pSceneTouchEvent.getPointerID() < MAX_MULTITOQUE) {
@@ -850,10 +788,6 @@ piezasTocadas.clear();
 						mundo.destroyJoint(joints[pSceneTouchEvent
 													.getPointerID()]);
 					}
-					
-					
-				
-					
 					/*
 					 * !!
 					 * 
@@ -876,9 +810,6 @@ piezasTocadas.clear();
 					 * 
 					 * //confirmado
 					 */
-					
-					
-				
 					
 				}
 				
@@ -942,69 +873,9 @@ piezasTocadas.clear();
 	}
 
 	
-	@Override
-	public boolean onIniciarPartida() {
 
-		Log.w("FLUJO", "PARTIDA INICIANDO PARTIDA");
-		return true;
-	}
 
-	@Override
-	public void onPartidaIniciada() {
-		Log.w("FLUJO", "PARTIDA INICIADA");
-	}
-
-	@Override
-	public boolean onFinalizarPartida() {
-		final StringInputDialogBuilder dialogb = 
-				new StringInputDialogBuilder(actividadJuego, 
-											R.string.dialogo_titulo, 
-											R.string.dialogo_mensaje,
-											R.string.dialogo_mensaje, 
-											R.drawable.ic_launcher,
-											new Callback<String>() {
-
-												@Override
-												public void onCallback(
-														String pCallbackValue) {
-													
-														 BDPuntuaciones bd = new BDPuntuaciones(actividadJuego);
-														 Puntuacion p = new Puntuacion();
-														 p.setNombre(pCallbackValue);
-														 p.setPuntos(puntuacion);
-														 bd.addContact(p);
-														 bd.close();
-														Log.d("NOMBRE", pCallbackValue);
-														ActividadPuntuaciones.lanzar(actividadJuego);
-												}
-					
-			},new OnCancelListener() {
-				
-				@Override
-				public void onCancel(DialogInterface dialog) {
-					
-					
-				}
-			});
-		
-		actividadJuego.runOnUiThread(new Runnable() {
-			
-			@Override
-			public void run() {
-				dialogb.create().show();
-			
-			}
-		});
-		pausarEscena();
-		return true;
-	}
-
-	@Override
-	public void onPartidaFinalizada() {
-
-	}
-
-	@Override
+	
 	public boolean onQuitarLinea(Collection<Bloque> bloques) {
 		Text puntos = new Text(camara.getWidth()/2,cartelPuntos.getY(),managerRecursos.fGlobal,"","XXXXXXXXX".length(), 
 												new TextOptions(HorizontalAlign.CENTER),vbom);
@@ -1025,17 +896,17 @@ piezasTocadas.clear();
 		//si entramos en el tiempo de lineas consecutivas
 		if(motor.getSecondsElapsedTotal() -  tiempoUltimaLinea < MAX_TIEMPOLINEA){
 			lineasConsecutivas ++;
-			
 			tiempoUltimaLinea = motor.getSecondsElapsedTotal();
 			
 		}else{
 			lineasConsecutivas =1;
 		}
+		
 		int psuma= PUNTOS_LINEA * MULTIPLICADOR_LINEA * lineasConsecutivas;
-		Log.w("PUNTOS", "Lineas consecutivas: " + lineasConsecutivas + " Puntos: "+ psuma);
 		puntuacion= puntuacion +   psuma;
 		puntos.setText(Integer.toString(psuma));
-		puntos.setHeight(tamaño_bloque);
+		puntos.setScale(0.8f);
+		puntos.setAlpha(0.8f);
 		puntos.registerEntityModifier(new ParallelEntityModifier(new IEntityModifierListener() {
 			
 			@Override
@@ -1085,7 +956,7 @@ piezasTocadas.clear();
 	public void onLineaQuitada() {
 	};
 
-	@Override
+
 	public boolean onQuitarBloque(final Bloque bloque) {
 
 		// creamos un sistema de partículas para cada bloque que se elimina
@@ -1179,7 +1050,7 @@ piezasTocadas.clear();
 });
 		
 		puntuacion++;
-		IPieza pieza = new PiezaPalo(mundo,
+		IPieza pieza = PiezaFactory.piezaAleatoria(mundo,
 				camara.getWidth() / 2, camara.getHeight() * 2f, tamaño_bloque,
 				IPieza.FIXTUREDEF_DEFECTO, PiezaBase.BODYDEF_DEFECTO);
 		pieza.registrarAreasTactiles(this);
@@ -1196,53 +1067,90 @@ piezasTocadas.clear();
 		if (bloques >= MAX_BLOQUES) {
 
 			acabada = true;
+			
+			
+			
 			pausarEscena();
 
-		} else if (bloques >= MAX_BLOQUES / 1.3) {
+			final StringInputDialogBuilder dialogb = 
+					new StringInputDialogBuilder(actividadJuego, 
+												R.string.dialogo_titulo, 
+												R.string.dialogo_mensaje,
+												R.string.dialogo_mensaje, 
+												R.drawable.ic_launcher,
+												new Callback<String>() {
+
+													@Override
+													public void onCallback(
+															String pCallbackValue) {
+														//solo si el usuario escribe un nombre
+														if(!pCallbackValue.equalsIgnoreCase("")){
+															
+															 BDPuntuaciones bd = new BDPuntuaciones(actividadJuego);
+															 Puntuacion p = new Puntuacion();
+															 p.setNombre(pCallbackValue);
+															 p.setPuntos(puntuacion);
+															 bd.addContact(p);
+															 bd.close();
+															ActividadPuntuaciones.lanzar(actividadJuego);
+														}
+													}
+						
+				},new OnCancelListener() {
+					
+					@Override
+					public void onCancel(DialogInterface dialog) {
+						
+					
+					}
+				});
+			
+			actividadJuego.runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					dialogb.create().show();
+					
+					
+				}
+			});
+
+			
+		} else if (bloques >= LIMITE_BLOQUES_ALARMA) {
 
 			managerRecursos.sonidoAlarma.play();
 		}
-
-		Log.d("PIEZA ", "PUESTA PIEZA : " + pieza.getTipo().toString());
 
 	}
 
 	@Override
 	public void teclaMenuPresionada() {
-
-		pausarEscena();
+		if(!pausado)
+			pausarEscena();
 
 	}
 
 	@Override
 	public void teclaVolverPreionada() {
-		pausarEscena();
+		if(!pausado)
+			pausarEscena();
 	}
 
 	@Override
 	public void pausarEscena() {
-		Log.w("FLUJO", "ESCENA JUEGO PAUSADA");
 		if(	managerRecursos.musicaFondo.isPlaying())
 			managerRecursos.musicaFondo.pause();
 
+		//Obtenemos el lock de el motor para  poder ejecutar el guardado inmediatamente
 		EngineLock lock = motor.getEngineLock();
 		lock.lock();
+		
 		purgarPiezas();
 		guardarEstado();
-
-		
 		lock.unlock();
-		
-		
-		
-		
-		
-
 		/*
-		 * 
 		 * Encargamos el abrir el menú a la siguiente actualización/fotograma
 		 */
-
 		motor.runOnUpdateThread(new Runnable() {
 			@Override
 			public void run() {
@@ -1257,10 +1165,6 @@ piezasTocadas.clear();
 
 	@Override
 	public void reanudarEscena() {
-		Log.w("FLUJO", "ESCENA JUEGO REANUDADA");
-		
-			
-		
 		motor.runOnUpdateThread(new Runnable() {
 
 			@Override
@@ -1275,17 +1179,14 @@ piezasTocadas.clear();
 		// forzamos una actualización para que el estado se cargue
 		// inmediatamente
 
-		/*
-		 * Esto es necesario porque cargar estado modifica la
-		 */
+		
 		try {
 			motor.onUpdate(1);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+			
 			e.printStackTrace();
 		}
 		/*
-		 * 
 		 * Si es el primer cargado
 		 */
 		if (primerCargado) {
@@ -1295,17 +1196,8 @@ piezasTocadas.clear();
 
 	}
 
-	@Override
-	public void onEscenaPausada() {
-
-	}
-
-	@Override
-	public void onEscenaReanudada() {
-
-	}
-
-	@Override
+	
+	
 	public boolean isPartidaAcabada() {
 
 		return acabada;
@@ -1319,18 +1211,25 @@ piezasTocadas.clear();
 
 		case EscenaMenu.ID_CONTINUAR:
 			pMenuScene.back(true);
-			
+			pausado = false;
 			managerRecursos.musicaFondo.play();
 			return false;
-		case EscenaMenu.ID_MULTIJUGADOR:
-			ActividadBluetooth
+		case EscenaMenu.ID_PUNTUACIONES:
+			ActividadPuntuaciones
 					.lanzar(ManagerRecursos.getInstancia().actividadJuego);
 			return true;
 
 		case EscenaMenu.ID_NUEVAPARTIDA:
 			finalizarPartida();
+			
+			
+			
+			
+			
+			
 			iniciarPartida();
 			pMenuScene.back(true);
+			pausado = false;
 			
 			managerRecursos.musicaFondo.seekTo(0);
 			managerRecursos.musicaFondo.resume();

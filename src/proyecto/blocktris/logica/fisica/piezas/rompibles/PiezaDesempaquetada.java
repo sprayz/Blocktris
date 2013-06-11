@@ -57,7 +57,7 @@ public class PiezaDesempaquetada extends PiezaBase {
 			
 			// por cada adyacente de ese bloque
 			for(Integer ad: b.adyacentes){
-				this.bloques.get(i).getAdjacentes().add(this.bloques.get(ad));
+				this.bloques.get(i).getAdyacentes().add(this.bloques.get(ad));
 				
 			}
 			

@@ -25,14 +25,14 @@ public class EscenaMenu extends MenuScene {
 	
 	final static int ACTIVIDAD_BLUETOOTH = 6;
 	 IMenuItem botonContinuar = null;
-	  IMenuItem botonMulti;
+	  IMenuItem botonInstrucc;
 	  IMenuItem botonNuevaPartida;
 	  IMenuItem botonInstrucciones;
 	  IMenuItem botonSalir;
 	 
 	 public static final int ID_CONTINUAR=0;
 	 public static final int ID_NUEVAPARTIDA=1;
-	 public static final int ID_MULTIJUGADOR=2;
+	 public static final int ID_PUNTUACIONES=2;
 	 public static final int ID_INSTRUCCIONES=3;
 	 public static final int ID_SALIR=4;
 	 
@@ -62,7 +62,7 @@ public class EscenaMenu extends MenuScene {
 
 		  
 		
-		   botonMulti = new ScaleMenuItemDecorator(new TextMenuItem(ID_MULTIJUGADOR, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_multijugador), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
+		   botonInstrucc = new ScaleMenuItemDecorator(new TextMenuItem(ID_PUNTUACIONES, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_puntuaciones), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
 		  botonNuevaPartida = new ScaleMenuItemDecorator(new TextMenuItem(ID_NUEVAPARTIDA, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_nuevaPartida), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
 		  botonInstrucciones = new ScaleMenuItemDecorator(new TextMenuItem(ID_INSTRUCCIONES, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_instrucciones), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
 		   botonSalir = new ScaleMenuItemDecorator(new TextMenuItem(ID_SALIR, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_salir), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
@@ -72,7 +72,7 @@ public class EscenaMenu extends MenuScene {
 		  addMenuItem(botonContinuar);
 		}
 		  addMenuItem(botonNuevaPartida);
-		  addMenuItem(botonMulti);
+		  addMenuItem(botonInstrucc);
 		addMenuItem(botonInstrucciones);
 		addMenuItem(botonSalir);
 		buildAnimations();

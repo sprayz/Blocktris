@@ -139,7 +139,7 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 			
 		}
 
-		public ArrayList<Bloque> getAdjacentes() {
+		public ArrayList<Bloque> getAdyacentes() {
 			return adjacentes;
 		}
 		
@@ -203,7 +203,7 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 			//por cada candidato
 			while( !( (actual= candidatos.pollLast()) ==null  )  ){
 				//sacamos sus adyacentes
-				for( Bloque b : actual.getAdjacentes()){
+				for( Bloque b : actual.getAdyacentes()){
 					//por cada adyacente , l añadimos a los navegados y a los candidatos
 					//para comprobar y tiene hijos que navegar
 					
@@ -297,9 +297,9 @@ public List<Bloque> getBloques() {
 		//para cada bloque
 		for(int i=0;i< lista_bloques.size();i++){
 			//por cada adyacente del antiguo
-			for(Bloque adj : lista_bloques.get(i).getAdjacentes()){
+			for(Bloque adj : lista_bloques.get(i).getAdyacentes()){
 			
-				adyacentes_nuevos = bloques.get(i).getAdjacentes();
+				adyacentes_nuevos = bloques.get(i).getAdyacentes();
 				//añadimos los adyacentes del nuevo que tengan el mismo indice que los adyacentes del viejo
 				indice = lista_bloques.indexOf(adj);
 				if(indice <0)
@@ -337,7 +337,7 @@ public List<Bloque> getBloques() {
 			
 			Bloque b = bloques.get(i);
 		
-				if(b.getAdjacentes().isEmpty()){
+				if(b.getAdyacentes().isEmpty()){
 					Set<Bloque> temp = new HashSet<Bloque>();
 					temp.add(b);
 					listaPieza.add(temp);
@@ -399,7 +399,7 @@ public List<Bloque> getBloques() {
 		
 			for(Bloque bloque : bloques){
 				
-				bloque.getAdjacentes().remove(b);	
+				bloque.getAdyacentes().remove(b);	
 			}
 			
 			b.destruir();

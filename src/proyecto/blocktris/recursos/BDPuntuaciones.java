@@ -46,9 +46,9 @@ public class BDPuntuaciones extends SQLiteOpenHelper {
 	}
 	
 	
-	 public Cursor getTop20() {
+	 public Cursor getTop10() {
 		   
-		    String selectQuery = "SELECT  * FROM " + TABLA_PUNTUACIONES + " ORDER BY " + CAMPO_PUNTOS + " LIMIT 20";
+		    String selectQuery = "SELECT  * FROM " + TABLA_PUNTUACIONES + " ORDER BY " + CAMPO_PUNTOS + " DESC LIMIT 10";
 		 
 		    SQLiteDatabase db = this.getWritableDatabase();
 		    Cursor cursor = db.rawQuery(selectQuery, null);
@@ -58,10 +58,10 @@ public class BDPuntuaciones extends SQLiteOpenHelper {
 		}
 	 
 	 
-	 public List<Puntuacion> getTop20Lista() {
+	 public List<Puntuacion> getTop10Lista() {
 		    List<Puntuacion> res = new ArrayList<Puntuacion>();
 		    
-		    Cursor cursor = getTop20();
+		    Cursor cursor = getTop10();
 		 
 		  
 		    if (cursor.moveToFirst()) {

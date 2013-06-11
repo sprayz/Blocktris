@@ -50,8 +50,6 @@ public abstract class EscenaBase extends Scene
    
     public abstract void crearEscena();
     public abstract void reiniciarEscena();
-    public abstract void onEscenaPausada();
-    public abstract void onEscenaReanudada();
     public abstract void pausarEscena();
     public abstract void  reanudarEscena();
     public abstract void teclaVolverPreionada();

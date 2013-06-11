@@ -104,7 +104,7 @@ public class EstadoJuego implements Serializable {
 				Bloque b =  pieza.getBloques().get(i);
 				
 				// por cada adyacente de ese bloque
-				for(Bloque ad: b.getAdjacentes()){
+				for(Bloque ad: b.getAdyacentes()){
 					estado.bloques.get(i).adyacentes.add(pieza.getBloques().indexOf(ad));
 					
 				}

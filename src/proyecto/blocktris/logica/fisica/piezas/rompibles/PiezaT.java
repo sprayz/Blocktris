@@ -37,20 +37,20 @@ public class PiezaT extends PiezaBase {
 		cuerpo.setTransform(xf, yf, 0);
 		 
 		
-		bloques.get(0).getAdjacentes().add(bloques.get(1));
+		bloques.get(0).getAdyacentes().add(bloques.get(1));
 	
 		cuerpo.setUserData(this); 
 		
-		bloques.get(1).getAdjacentes().add(bloques.get(2));
-		bloques.get(1).getAdjacentes().add(bloques.get(3));
-		bloques.get(1).getAdjacentes().add(bloques.get(0));
+		bloques.get(1).getAdyacentes().add(bloques.get(2));
+		bloques.get(1).getAdyacentes().add(bloques.get(3));
+		bloques.get(1).getAdyacentes().add(bloques.get(0));
 
-		bloques.get(2).getAdjacentes().add(bloques.get(1));
+		bloques.get(2).getAdyacentes().add(bloques.get(1));
 
 		
 		
 		
-		bloques.get(3).getAdjacentes().add(bloques.get(1));
+		bloques.get(3).getAdyacentes().add(bloques.get(1));
 		
 		 for(Bloque b: bloques){
 			 b.setPadre(this);
