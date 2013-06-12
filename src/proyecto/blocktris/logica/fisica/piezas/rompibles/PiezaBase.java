@@ -1,3 +1,6 @@
+/*
+ *  @author Pablo Morillas Lozano
+ */
 package proyecto.blocktris.logica.fisica.piezas.rompibles;
 
 import java.io.Serializable;
@@ -32,7 +35,13 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PiezaBase.
+ */
 public  class PiezaBase implements IPieza {
+	
+	/** The bodydef defecto. */
 	public static  BodyDef BODYDEF_DEFECTO;
 	static{
 		BODYDEF_DEFECTO = new BodyDef();
@@ -49,10 +58,21 @@ public  class PiezaBase implements IPieza {
 	
 	
 	
+/**
+ * The Class Bloque.
+ */
 public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
+		
+		/** Los bloques  a los que está unido */
 		private ArrayList<Bloque> adjacentes;
+		
+		/** Las propiedades */
 		private Fixture fixtura;
+		
+		/** La coordenada X  en unidades relativas al propio tamaño */
 		private float x;
+		
+		/** La coordenada Y  en unidades relativas al propio tamaño */
 		private float y;
 		
 
@@ -61,19 +81,36 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 
 
 
+		/** El color del grafico. */
 		private ColorBloque color;
 		
 		public ColorBloque getColor() {
 			return color;
 		}
 
+	
 		public void setColor(ColorBloque color) {
 			this.color = color;
 			grafico.setCurrentTileIndex(color.ordinal());
 		}
 
+		/**
+		 * Enumeracion de los colores
+		 */
 		public static enum ColorBloque implements Serializable{
-			AZUL,VERDE,GRIS,MORADO,ROJO,ARENA
+			
+			
+			AZUL,
+
+VERDE,
+
+GRIS,
+
+MORADO,
+
+ROJO,
+
+ARENA
 			
 		}
 		
@@ -81,10 +118,29 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 			return x;
 		}
 
+		
 		public float getY() {
 			return y;
 		}
 		
+		/**
+		 * Instantiates a new bloque.
+		 * 
+		 * @param mundo
+		 *            el mundo
+		 * @param cuerpo_base
+		 *            el cuerpo al que pertenece
+		 * @param x
+		 *            la x en unidades relativas al propio tamaño
+		 * @param y
+		 *           la y en unidades relativas al propio tamaño
+		 * @param tamaño_bloque
+		 *            el tamaño del bloque en unidades gráficas
+		 * @param color
+		 *            el color
+		 * @param fixturedef
+		 *            las propiedades
+		 */
 		public Bloque (PhysicsWorld  mundo, Body cuerpo_base ,float x,float y, float tamaño_bloque,ColorBloque color ,FixtureDef fixturedef) {
 			this.adjacentes= new ArrayList<Bloque>();
 			this.cuerpo = cuerpo_base;
@@ -96,51 +152,68 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 			 this.y=y;
 			
 			 
-			 //añadimos  el offset por defecto apra que el posicionamiento sea el acostumbrado
-			 //aunque para el propositoi de  las piezas sigamos considerando el centro en  la esquina izquierda inferior
-			
-			 //NO TOCAR
-			//Yo futuro, puede que creas que sabes lo que haces, TE EQUIVOCAS.
+			 
+			 //coordenadas de el centro para la fixtura
 			Vector2 centro ;
 			centro =Vector2Pool.obtain((x*tamaño_bloque_fisico) + tamaño_bloque_fisico /2 ,
 					(y* tamaño_bloque_fisico) +tamaño_bloque_fisico /2  );
 
+			
+			//creamos el polígono que nos define (caja)
 			fixturedef.shape = new PolygonShape();
 			((PolygonShape) fixturedef.shape).setAsBox(tamaño_bloque_fisico /2, tamaño_bloque_fisico /2, centro, 0f);
 			
+			
+			//creamos la fixture 
 			fixtura= this.cuerpo.createFixture(fixturedef);
+			
+			// la documentación dice que el Shape se  clona  al crear la fixture  y que deberíamos deshacernos de él tras su uso
 			fixturedef.shape.dispose();
+			
+		
 			fixtura.setUserData(this);
 			
-			if(fixtura.getShape() == null)
-				Log.e("CREANDO BLOQUE", "Bloque " + this +" NO TIENE SHAPE");
+			//movemos el eje de posicionamiento a la esquina inferior izquierda
 			grafico.setAnchorCenter(0, 0);
 			
 		
+			//colocamos el gráfico 
 			grafico.setPosition(x* tamaño_bloque, y*tamaño_bloque);
 				Vector2Pool.recycle(centro);
 				
 			grafico.setUserData(this);
 			((TiledSprite)grafico).setCurrentTileIndex(color.ordinal());
-			//grafico.setAnchorCenter(, );
+		
+			
 			
 		}
 
+		/**
+		 * Devuelve los bloques adyacentes inmediatos.
+		 * 
+		 * @see Bloque#getAdyacentesRecursivo()
+		 * 
+		 * @return el conjunto de clos bloques adyacentes inmediatos
+		 */
 		public ArrayList<Bloque> getAdyacentes() {
 			return adjacentes;
 		}
 		
 		
 		
+		/* (non-Javadoc)
+		 * @see proyecto.blocktris.logica.fisica.ObjetoFisico#destruir()
+		 */
 		@Override
 		public void destruir() {
-			//cuerpo.setActive(false);
+			
 			cuerpo.destroyFixture(fixtura);
 			
 			grafico.detachSelf();
-			//grafico.dispose();
+			
 		}
 
+		
 		public Fixture getFixtura() {
 			return fixtura;
 		}
@@ -150,6 +223,12 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 	
 		
 		
+		/**
+		 * Devuelve todos los bloques adyacentes de manera recursiva
+		 * @see Bloque#getAdyacentes()
+		 * 
+		 * @return  boques adyacentes recursivos
+		 */
 		public Set<Bloque> getAdyacentesRecursivo(){
 			/* Aunque Bloque no implementa hashCode() ni equals() podemos usar  un HashSet
 			 * aceptando que solo diferenciará entre referencias al mismo objeto
@@ -210,10 +289,16 @@ public static	class Bloque extends ObjetoFisico<AnimatedSprite>{
 	
 }
 	
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.fisica.piezas.IPieza#getTipo()
+	 */
 	public PIEZAS getTipo() {
 	return tipo;
 }
 
+/* (non-Javadoc)
+ * @see proyecto.blocktris.logica.fisica.piezas.IPieza#getBloques()
+ */
 public List<Bloque> getBloques() {
 	return bloques;
 }
@@ -224,35 +309,72 @@ public List<Bloque> getBloques() {
 
 
 
+	/** El tipo. */
 	protected PIEZAS tipo;
+	
+	/** Si se le han quitado bloques. */
 	protected boolean modificada = false;
+	
+	/** Los bloques. */
 	protected ArrayList<Bloque> bloques = new ArrayList<Bloque>();
+	
+	/** El cuerpo. */
 	protected Body cuerpo;
+	
+	/** La escena. */
 	protected Scene escena;
+	
+	/** El tamaño de bloque. */
 	protected float tamaño_bloque;
+	
+	/** El conector. */
 	protected PhysicsConnector conector;
+	
+	/** El mundo. */
 	protected PhysicsWorld mundo;
+	
+	/** Entidad contenedora para los gráficos contenedor. */
 	protected IEntity contenedor = new Entity();
+	
+	/** Si esta pieza ha sido destruida. */
 	protected boolean destruida = false;
-	protected boolean destruccionPendiente =false;
+	
+	
+
+	
 	public IEntity getContenedor() {
 		return contenedor;
 	}
+	
 	
 	public Scene getEscena() {
 		return escena;
 	}
 
+	
 	public boolean isModificada() {
 		return modificada;
 	}
 
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.fisica.piezas.IPieza#getCuerpo()
+	 */
 	public Body getCuerpo() {
 		return cuerpo;
 	}
 
+	
+	@SuppressWarnings("unused")
 	private PiezaBase(){}
 	
+	/**
+	 * Crea una pieza a partir  de un conjunto de bloques.
+	 * 
+	 * @param mundo
+	 *            el mundo
+	 * @param lista_bloques
+	 *            los bloques
+	 */
 	private PiezaBase(PhysicsWorld mundo,List<Bloque> lista_bloques){
 		ArrayList<Bloque> bloques_nuevos = new ArrayList<Bloque>();
 		BodyDef bdef;
@@ -380,7 +502,11 @@ public List<Bloque> getBloques() {
 
 	
 	
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.fisica.piezas.IPieza#quitarBloque(proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque)
+	 */
 	public void quitarBloque(Bloque b){
+		modificada =  true;
 		Bloque res= null;
 		if(bloques.remove(b)){
 		
@@ -400,6 +526,9 @@ public List<Bloque> getBloques() {
 	}
 	
 	
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.fisica.piezas.IPieza#separarBloques(java.util.List)
+	 */
 	public IPieza separarBloques(List<Bloque> list){
 		
 		
@@ -429,6 +558,9 @@ public List<Bloque> getBloques() {
 	
 	
 	
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.fisica.piezas.IPieza#registrarGraficos(org.andengine.entity.IEntity)
+	 */
 	public void registrarGraficos(IEntity entidad){
 		entidad.attachChild(contenedor);
 	}
@@ -436,6 +568,9 @@ public List<Bloque> getBloques() {
 	
 	
 	
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.fisica.piezas.IPieza#registrarAreasTactiles(org.andengine.entity.scene.Scene)
+	 */
 	public void registrarAreasTactiles(Scene escena){
 		this.escena= escena;
 		for(Bloque b: bloques){
@@ -443,6 +578,10 @@ public List<Bloque> getBloques() {
 			
 		}
 	}
+	
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.fisica.piezas.IPieza#desregistrarAreasTactiles(org.andengine.entity.scene.Scene)
+	 */
 	public void desregistrarAreasTactiles(Scene escena){
 		this.escena = escena;
 		for(Bloque b: bloques){
@@ -450,10 +589,29 @@ public List<Bloque> getBloques() {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.fisica.piezas.IPieza#desregistrarGraficos()
+	 */
 	public void desregistrarGraficos(){
 		contenedor.detachSelf();
 	}
 	
+	/**
+	 * 
+	 * 
+	 * @param mundo
+	 *            el mundo
+	 * @param x
+	 *            coordenada x
+	 * @param y
+	 *            coordenada y
+	 * @param tamaño_bloque
+	 *            el tamaño del bloque
+	 * @param fixturedef
+	 *            la propiedades de los bloques
+	 * @param bodydef
+	 *            las propiedades de la pieza
+	 */
 	public PiezaBase(PhysicsWorld mundo, float x,float y,float tamaño_bloque,FixtureDef fixturedef,BodyDef bodydef)	{}
 
 
@@ -462,6 +620,9 @@ public List<Bloque> getBloques() {
 
 
 
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.fisica.piezas.IPieza#destruirPieza()
+	 */
 	@Override
 	public IPieza destruirPieza() {
 		desregistrarAreasTactiles(escena);
@@ -473,7 +634,7 @@ public List<Bloque> getBloques() {
 		bloques.clear();
 		
 		
-		destruccionPendiente = true;
+		destruida= true;
 		this.cuerpo.setActive(false);
 		
 		mundo.unregisterPhysicsConnector(conector);
@@ -481,13 +642,14 @@ public List<Bloque> getBloques() {
 		return this;
 	}
 
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.fisica.piezas.IPieza#isDestruida()
+	 */
 	public boolean isDestruida() {
 		return destruida;
 	}
 
-	public boolean isDestruccionPendiente() {
-		return destruccionPendiente;
-	}
+	
 
 	
 

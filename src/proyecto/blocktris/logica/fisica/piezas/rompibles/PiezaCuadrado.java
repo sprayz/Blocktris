@@ -1,3 +1,6 @@
+/*
+ *  @author Pablo Morillas Lozano
+ */
 package proyecto.blocktris.logica.fisica.piezas.rompibles;
 
 import java.util.List;
@@ -17,8 +20,28 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.JointDef;
 import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 
+// TODO: Auto-generated Javadoc
+/**
+ * La clase PiezaCuadrado.
+ */
 public class PiezaCuadrado extends PiezaBase {
 
+	/**
+	 * Crea una pieza  de tipo cuadrado
+	 * 
+	 * @param mundo
+	 *            el mundo
+	 * @param x
+	 *            coordenada x
+	 * @param y
+	 *            coordenada y
+	 * @param tamaño_bloque
+	 *            el tamaño del bloque
+	 * @param fixturedef
+	 *            la propiedades de los bloques
+	 * @param bodydef
+	 *            las propiedades de la pieza
+	 */
 	public PiezaCuadrado(PhysicsWorld mundo, float x, float y, float tamaño_bloque,
 			FixtureDef fixturedef,BodyDef bodydef) {
 		super(mundo, x, y, tamaño_bloque, fixturedef,bodydef);

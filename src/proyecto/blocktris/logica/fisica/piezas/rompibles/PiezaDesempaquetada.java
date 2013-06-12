@@ -1,3 +1,6 @@
+/*
+ *  @author Pablo Morillas Lozano
+ */
 package proyecto.blocktris.logica.fisica.piezas.rompibles;
 
 import java.util.List;
@@ -20,8 +23,20 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.JointDef;
 import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PiezaDesempaquetada.
+ */
 public class PiezaDesempaquetada extends PiezaBase {
 
+	/**
+	 * Instantiates a new pieza desempaquetada.
+	 * 
+	 * @param mundo
+	 *            the mundo
+	 * @param estado
+	 *            the estado
+	 */
 	public PiezaDesempaquetada(PhysicsWorld mundo, EstadoJuego.EstadoPieza estado) {
 		
 		super(mundo, 

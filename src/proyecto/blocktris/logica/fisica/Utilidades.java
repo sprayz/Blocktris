@@ -1,3 +1,6 @@
+/*
+ *  @author Pablo Morillas Lozano
+ */
 package proyecto.blocktris.logica.fisica;
 
 
@@ -20,6 +23,10 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Utilidades.
+ */
 public final class Utilidades {
 
 	
@@ -31,6 +38,13 @@ public final class Utilidades {
 	
 	
 	
+	/**
+	 * Body a BodyDef.
+	 * 
+	 * @param original
+	 *            el original
+	 * @return un {@link BodyDef} con las carácteristicas actuales del  {@link Body} original
+	 */
 	public static BodyDef bodyToDef(Body original){
 		BodyDef bdef = new BodyDef();
 		
@@ -53,6 +67,13 @@ public final class Utilidades {
 		return bdef;
 	}
 	
+	/**
+	 * Fixture a FixtureDef.
+	 * 
+	 * @param original
+	 *            el original
+	 * @return un {@link FixtureDef} con las carácteristicas actuales del  {@link Fixture} original
+	 */
 	public static FixtureDef fixtureToDef(Fixture original){
 		FixtureDef fdef = new FixtureDef();
 		fdef.density = original.getDensity();
@@ -63,6 +84,9 @@ public final class Utilidades {
 		fdef.friction = original.getFriction();
 		fdef.isSensor = original.isSensor();
 		fdef.restitution = original.getRestitution();
+		/*
+		 * Copiamos la lista de vértices
+		 */
 		PolygonShape forma = new PolygonShape();
 		Vector2[] vertices = new Vector2[((PolygonShape)original.getShape()).getVertexCount()];
 		for( int i= 0 ;i < vertices.length ; i++ ){

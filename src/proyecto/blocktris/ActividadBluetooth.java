@@ -1,3 +1,6 @@
+/*
+ *  @author Pablo Morillas Lozano
+ */
 package proyecto.blocktris;
 
 import java.util.ArrayList;
@@ -25,26 +28,41 @@ import android.widget.TableRow;
 import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
 
+// TODO: Auto-generated Javadoc
 /**
- * Actividad que puebla dinámicamente una lista de dispositivos Bluetooth  en rango
+ * Actividad que puebla dinámicamente una lista de dispositivos Bluetooth en
+ * rango.
  * 
  * @author Pablo Morillas Lozano
- * 
- *
  */
 public class ActividadBluetooth extends Activity{
+	
+	/** The dispositivos. */
 	List<BluetoothDevice> dispositivos = new ArrayList<BluetoothDevice>();
+	
+	/** The resultado. */
 	Intent resultado = new Intent();
+	
+	/** The seleccionado. */
 	BluetoothDevice seleccionado = null;
+	
+	/** The lista. */
 	TableLayout lista;
+	
+	/** The br. */
 	BroadcastReceiver br;
 
+	/** The Constant P_BLUETOOTH. */
 	private static final int P_BLUETOOTH = 0;
+	
+	/** The Constant P_EMPAREJAR. */
 	private static final int P_EMPAREJAR = P_BLUETOOTH + 1;
 	
 	/**
-	 * 
 	 * Método estático para lanzar esta actividad desde otra.
+	 * 
+	 * @param c
+	 *            the c
 	 */
 	public static void lanzar(Activity c) {
 		Intent i = new Intent(c.getBaseContext(), ActividadBluetooth.class);
@@ -52,6 +70,9 @@ public class ActividadBluetooth extends Activity{
 
 	}
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onCreate(android.os.Bundle)
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 
@@ -96,10 +117,22 @@ public class ActividadBluetooth extends Activity{
 			registerReceiver(br, filter);
 	}
 
+	/**
+	 * Dispositivo seleccionado.
+	 * 
+	 * @param v
+	 *            the v
+	 */
 	public void dispositivoSeleccionado(View v) {
 
 	}
 
+	/**
+	 * Añadir lista.
+	 * 
+	 * @param bd
+	 *            the bd
+	 */
 	private void añadirLista(BluetoothDevice bd) {
 		LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT,
 				LayoutParams.WRAP_CONTENT);
@@ -115,7 +148,7 @@ public class ActividadBluetooth extends Activity{
 		bConectar.setTextColor(Color.rgb(3, 255, 255));
 		tr.addView(bConectar);
 		tr.addView(tvNombre);
-		tr.setTag(new Integer(lista.getChildCount()));
+		tr.setTag( Integer.valueOf(lista.getChildCount()));
 		bConectar.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -135,6 +168,9 @@ public class ActividadBluetooth extends Activity{
 	
 	
 
+	/**
+	 * Limpiar lista.
+	 */
 	private void limpiarLista() {
 		if (lista.getChildCount() == 0)
 			return;
@@ -145,6 +181,12 @@ public class ActividadBluetooth extends Activity{
 
 	}
 
+	/**
+	 * Refrescar.
+	 * 
+	 * @param v
+	 *            the v
+	 */
 	public void refrescar(View v) {
 		// borramos llas entradas actuales
 		dispositivos.clear();
@@ -167,6 +209,9 @@ public class ActividadBluetooth extends Activity{
 
 	}
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onDestroy()
+	 */
 	@Override
 	protected void onDestroy() {
 		Log.d("Actividad Bluetooth", "Actividad Destruida");
@@ -177,6 +222,9 @@ public class ActividadBluetooth extends Activity{
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
+	 */
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 

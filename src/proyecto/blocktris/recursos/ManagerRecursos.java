@@ -1,3 +1,6 @@
+/*
+ *  @author Pablo Morillas Lozano
+ */
 package proyecto.blocktris.recursos;
 
 import java.io.IOException;
@@ -27,31 +30,59 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.ui.activity.BaseGameActivity;
 import org.andengine.util.debug.Debug;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class ManagerRecursos.
+ */
 public class ManagerRecursos {
 
+	/** The instancia. */
 	private static ManagerRecursos INSTANCIA = null;
 
+	/** The motor. */
 	public Engine motor;
+	
+	/** The actividad juego. */
 	public BaseGameActivity actividadJuego;
+	
+	/** The camara. */
 	public Camera camara;
+	
+	/** The vbom. */
 	public VertexBufferObjectManager vbom;
 
 	//Música
+	/** The musica fondo. */
 	public Music musicaFondo;
+	
+	/** The sonido linea. */
 	public Sound sonidoLinea;
+	
+	/** The sonido alarma. */
 	public Sound sonidoAlarma;
 	
 	// TEXTURAS Y REGIONES
+	/** The ta bloques. */
 	private BuildableBitmapTextureAtlas taBloques;
+	
+	/** The tr bloques. */
 	public TiledTextureRegion trBloques;
+	
+	/** The tr bloques sombra. */
 	public TiledTextureRegion trBloquesSombra;
+	
+	/** The tr anim brillo. */
 	public TiledTextureRegion trAnimBrillo;
 	
 	
 	// Fuentes y Otros
 
+	/** The global. */
 	public Font fGlobal;
 
+	/**
+	 * Cargar recursos generales.
+	 */
 	public void cargarRecursosGenerales() {
 		//cargamos  los sonidos
 		try {
@@ -123,6 +154,18 @@ public class ManagerRecursos {
 		}
 	}
 
+	/**
+	 * Preparar manager.
+	 * 
+	 * @param motor
+	 *            the motor
+	 * @param actividadJuego
+	 *            the actividad juego
+	 * @param camara
+	 *            the camara
+	 * @param vbom
+	 *            the vbom
+	 */
 	public static void prepararManager(Engine motor,
 			BaseGameActivity actividadJuego, Camera camara,
 			VertexBufferObjectManager vbom) {
@@ -136,6 +179,11 @@ public class ManagerRecursos {
 	// GETTERS AND SETTERS
 	// ---------------------------------------------
 
+	/**
+	 * Gets the instancia.
+	 * 
+	 * @return the instancia
+	 */
 	public static ManagerRecursos getInstancia() {
 		if (INSTANCIA == null) {
 			INSTANCIA = new ManagerRecursos();

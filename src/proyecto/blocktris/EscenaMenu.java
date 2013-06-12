@@ -1,3 +1,6 @@
+/*
+ *  @author Pablo Morillas Lozano
+ */
 package proyecto.blocktris;
 
 import org.andengine.engine.camera.Camera;
@@ -20,33 +23,69 @@ import proyecto.blocktris.recursos.ManagerEscenas;
 import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 import proyecto.blocktris.recursos.ManagerRecursos;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class EscenaMenu.
+ */
 public class EscenaMenu extends MenuScene {
 
 	
-	final static int ACTIVIDAD_BLUETOOTH = 6;
-	 IMenuItem botonContinuar = null;
-	  IMenuItem botonInstrucc;
-	  IMenuItem botonNuevaPartida;
-	  IMenuItem botonInstrucciones;
-	  IMenuItem botonSalir;
+	/** código de retorno para identificar el resultado  */
+	 final static int ACTIVIDAD_BLUETOOTH = 6;
 	 
-	 public static final int ID_CONTINUAR=0;
-	 public static final int ID_NUEVAPARTIDA=1;
-	 public static final int ID_PUNTUACIONES=2;
-	 public static final int ID_INSTRUCCIONES=3;
-	 public static final int ID_SALIR=4;
+ 	/** El boton continuar. */
+ 	IMenuItem botonContinuar = null;
+	  
+  	/** El boton puntuaciones. */
+  	IMenuItem botonPuntuaciones;
+	  
+  	/** El boton nueva partida. */
+  	IMenuItem botonNuevaPartida;
+	  
+  	/** El boton instrucciones. */
+  	IMenuItem botonInstrucciones;
+	  
+  	/** El boton salir. */
+  	IMenuItem botonSalir;
 	 
+	 /** Menu Continuar ID_CONTINUAR. */
+ 	public static final int ID_CONTINUAR=0;
+	 
+ 	/** Menu nuevapartida */
+ 	public static final int ID_NUEVAPARTIDA=1;
+	 
+ 	/** Menu puntuaciones */
+ 	public static final int ID_PUNTUACIONES=2;
+	 
+ 	/** Menu instrucciones */
+ 	public static final int ID_INSTRUCCIONES=3;
+	 
+ 	/** Menu salir. */
+ 	public static final int ID_SALIR=4;
+	 
+	/**
+	 * Instancia escena menu.
+	 * 
+	 * @param camara
+	 *            la camara
+	 * @param juegoAcabado
+	 *            identifica deba mostrar el boton continuar o no.
+	 * @param listener
+	 *            el listener  al que mandar los eventos
+	 */
 	public EscenaMenu(Camera camara,boolean juegoAcabado,IOnMenuItemClickListener listener ){
 		super(camara);
 		 this.setOnMenuItemClickListener(listener);
 		/*
 		 * Aparentemente es imposible hacer una escena semitransparente o aplicar el mismo efecto a su  fondo
 		 * 
-		 * La manera recomendad es crear manualmente  un fondo  con un grafico que ocupe toda la escena
+		 * Tanto la clase Background  cómo scene   heredan de entity pero ignoran
+		 * el método setAlpha(float)
 		 * 
+		 * La manera recomendada es crear manualmente  un fondo  con un gráfico que ocupe toda la escena
 		 *  y ponerle a este ultimo su transaparencia.
 		 *  
-		 *  NOTA: Puede ser  inceficiente  en escenas con muchos graficos por encima del fondo DUH...
+		 *  NOTA: Puede ser  inceficiente  en escenas con muchos graficos por encima del fondo ...
 		 */
 		Rectangle fondo = new Rectangle(camara.getCenterX(),
 										camara.getCenterY(),
@@ -60,9 +99,9 @@ public class EscenaMenu extends MenuScene {
 		this.setMenuSceneAnimator(new AlphaMenuSceneAnimator() ) ;
 		
 
-		  
+		  //botones
 		
-		   botonInstrucc = new ScaleMenuItemDecorator(new TextMenuItem(ID_PUNTUACIONES, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_puntuaciones), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
+		   botonPuntuaciones = new ScaleMenuItemDecorator(new TextMenuItem(ID_PUNTUACIONES, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_puntuaciones), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
 		  botonNuevaPartida = new ScaleMenuItemDecorator(new TextMenuItem(ID_NUEVAPARTIDA, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_nuevaPartida), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
 		  botonInstrucciones = new ScaleMenuItemDecorator(new TextMenuItem(ID_INSTRUCCIONES, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_instrucciones), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
 		   botonSalir = new ScaleMenuItemDecorator(new TextMenuItem(ID_SALIR, ManagerRecursos.getInstancia().fGlobal , ManagerRecursos.getInstancia().actividadJuego.getText(R.string.menu_salir), ManagerRecursos.getInstancia().vbom) , 1.1f, 1);
@@ -72,17 +111,18 @@ public class EscenaMenu extends MenuScene {
 		  addMenuItem(botonContinuar);
 		}
 		  addMenuItem(botonNuevaPartida);
-		  addMenuItem(botonInstrucc);
+		  addMenuItem(botonPuntuaciones);
 		addMenuItem(botonInstrucciones);
 		addMenuItem(botonSalir);
 		buildAnimations();
 		 
+		//sin fondo
 		setBackgroundEnabled(false);
 		
 		 
 	
 		  
-		  Log.d("MENU", "MEMNU CREADO");
+		 
 	}
 
 	

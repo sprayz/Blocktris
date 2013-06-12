@@ -1,3 +1,6 @@
+/*
+ *  @author Pablo Morillas Lozano
+ */
 package proyecto.blocktris;
 
 import java.io.BufferedOutputStream;
@@ -57,6 +60,7 @@ import org.andengine.extension.physics.box2d.util.Vector2Pool;
 import org.andengine.extension.physics.box2d.util.constants.PhysicsConstants;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.controller.MultiTouchController;
+import org.andengine.ui.activity.BaseGameActivity;
 import org.andengine.ui.dialog.StringInputDialogBuilder;
 import org.andengine.util.adt.align.HorizontalAlign;
 import org.andengine.util.call.Callback;
@@ -106,54 +110,131 @@ public class EscenaJuego extends EscenaBase implements
 		IOnSceneTouchListener, IOnAreaTouchListener, ITimerCallback,
 		 IOnMenuItemClickListener {
 
-	public static final String ARCHIVO_ESTADO = "estado.dat";
-	public static float MARGENES = 20;
-	public static float ANGULO_MAX = 10;
-	public static FixtureDef fdef_muro = PhysicsFactory.createFixtureDef(1.0f,
+	/** el archivo en el alamacenamiento privado donde guardamos el estado. */
+	private static final String ARCHIVO_ESTADO = "estado.dat";
+	
+	/** Márgen inferior.
+	 * No combiene que los usuarion con dedos de morcilla  
+	 * presionen por error la linea inferior de botones :-p. */
+	private static float MARGENES = 20;
+	
+	/** Angulo  máximo  que puede tener un bloque respecto a los ejes para tomarlo en cuenta
+	 *  en el escaneo de líneas */
+	private static float ANGULO_MAX = 10;
+	
+	/** Las propiedades de los muros(densidad,elasticidad,fricción).
+	 * @see FixtureDef */
+	private static FixtureDef fdef_muro = PhysicsFactory.createFixtureDef(1.0f,
 			0, 0.5f);
-	public Body suelo;
-	public Body techo;
-	public Body pared_izquierda;
-	public Body pared_derecha;
+	
+	/** El suelo. */
+	private Body suelo;
+	
+	/** El techo. */
+	private Body techo;
+	
+	/** La pared_izquierda. */
+	private Body pared_izquierda;
+	
+	/** La pared_derecha. */
+	private Body pared_derecha;
+	
+	/** El mundo. */
 	PhysicsWorld mundo;
+	
+	/** El tamaño_bloque. */
 	float tamaño_bloque;
 
-	public static final int FILAS = 10;
-	public static final int COLUMNAS = 8;
-	public static final int MAX_BLOQUES = FILAS * COLUMNAS;
-	public static final int MAX_MULTITOQUE = 8;
-	public static final int LIMITE_BLOQUES_ALARMA =(int) (MAX_BLOQUES / 1.3);
+	/** el número de filas. */
+	private static final int FILAS = 10;
 	
-	public static final int PUNTOS_LINEA = 10;
-	public static final int MULTIPLICADOR_LINEA =2 ;
+	/** el número de columnas. */
+	private static final int COLUMNAS = 8;
 	
-	public static  float MAX_TIEMPOLINEA = 5;
-	public static final float intervaloPonerPieza = 5f;
-	public static final float intervaloComprobarLinea = 1f;
+	/** La cantidad de bloques  máximos en el mundo. */
+	private static final int MAX_BLOQUES = FILAS * COLUMNAS;
+	
+	/** El máximo numero de  punteros que tratamos. */
+	private static final int MAX_MULTITOQUE = 8;
+	
+	/** A partir de estos bloques se alerta al usuario de que  se está 
+	 * llenando la escena y que se acerca el final(MUAHAHAHA! :D) de la partida. */
+	private static final int LIMITE_BLOQUES_ALARMA =(int) (MAX_BLOQUES / 1.3);
+	
+	/** Los puntos que da cada línea */
+	private static final int PUNTOS_LINEA = 10;
+	
+	/** Cada línea consecutiva aplica este multiplicador a sus puntos. */
+	private static final int MULTIPLICADOR_LINEA =2 ;
+	
+	/** El intervalo de  tiempo  en el que   las líneas se consideran consecutivas. */
+	private static  float MAX_TIEMPOLINEA = 5;
+	
+	/**  El intervalo de  tiempo  entre  pieza y pieza . */
+	private static final float intervaloPonerPieza = 5f;
+	
+	/** El intervalo entre escaneos buscando líneas. */
+	private static final float intervaloComprobarLinea = 1f;
+
+	/** Velocidad  máxima  que puede llevar un bloque para tomarlo en cuenta
+	 *  en el escaneo de líneas. */
+	protected static final float VELOCIDAD_MAX = 0.2f;
+	
+	/** La capa gráfica baja.*/
 	private Entity capaBaja;
+	
+	/** La capa gráfica alta.*/
 	private Entity capaAlta;
+	
+	/** Los sitemas de partículas para cada puntero */
 	private BatchedSpriteParticleSystem[] particulasPuntero;
+	
+	/** Los enlaces  de ratón  para cada puntero (para coger las piezas con el dedo) */
 	private MouseJoint[] joints;
+	
+	/** El degradado de fondo */
 	private Gradient degradadoFondo;
+	
+	/** El objeto de fondo. */
 	private Background fondo;
 
+	/** El  contador del intervalo  de piezas. */
 	private TimerHandler timerPieza;
+	
+	/** El  contador del intervalo  de  el escaneo de líneas */
 	private TimerHandler timerLinea;
 	/*
 	 * ESTADO DEL JUEGO
 	 */
-	public  float  tiempoUltimaLinea;
+	/** El tiempo ( en  segundos, relativo al inicio del motor)  en el que 
+	 * se registró la última línea. */
+	private  float  tiempoUltimaLinea;
+	
+	/** Las líneas consecutivas que llevamos */
 	private int  lineasConsecutivas;
-	protected boolean acabada = false;
-	protected EstadoJuego estadoGuardado;
-	protected ArrayList<IPieza> piezasEscena;
+	
+	/** Bandera para determinar si se acabó la pertida. */
+	private boolean acabada = false;
+	
+	/** Contenedor para serializar el estado del juego.  */
+	private EstadoJuego estadoGuardado;
+	
+	/** Piezas que se encuentran actualmente en la escena. */
+	private ArrayList<IPieza> piezasEscena;
 
+	/** El cartel de la puntuación */
 	private Text cartelPuntos;
+	
+	/** Bander apara determinar si es la primera vez que estamos cargando. */
 	private boolean primerCargado = true;
-	protected IPieza ultimaPieza;
+	
+	
+	/** Puntuación  de la partida actual */
+	private int puntuacion;
 
-	protected int puntuacion;
-
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.EscenaBase#crearEscena()
+	 */
 	@Override
 	public void crearEscena() {
 		/*
@@ -177,9 +258,10 @@ public class EscenaJuego extends EscenaBase implements
 				vbom);
 		degradadoFondo.setFromColor(0.0f, 0.5f, 1.0f);
 		degradadoFondo.setToColor(1, 1, 1);
+		//  el degradado se ajusta a las dimensiones del contenedor  aunque 
+		//modifiquemos suparámetros
 		degradadoFondo.setGradientFitToBounds(true);
-		degradadoFondo.setGradientDitherEnabled(true);
-
+	
 		
 		fondo = new EntityBackground(degradadoFondo);
 
@@ -201,6 +283,7 @@ public class EscenaJuego extends EscenaBase implements
 
 		
 		capaAlta.attachChild(cartelPuntos);
+		//semitransparencia
 		cartelPuntos.setAlpha(0.8f);
 		
 		
@@ -212,27 +295,28 @@ public class EscenaJuego extends EscenaBase implements
 
 		
 		inicializarSistemasParticulas();
+		
+		//añade  al Catlog los FPS cada 5 sec
 		motor.registerUpdateHandler(new FPSLogger());
 
 		// FISICA
-		// gravedad hacia abajo :-]
-		mundo = new FixedStepPhysicsWorld(60, new Vector2(0,
-				-SensorManager.GRAVITY_EARTH), true, 20, 16);
-	
+		
+		
+		mundo = new PhysicsWorld( new Vector2(0,-SensorManager.GRAVITY_EARTH), // gravedad hacia abajo :-]
+				true, //los cuerpos que alcancen estabilidad y no esten colisionando se pueden sacar de la simulación
+				20, //iteraciones de velocidad
+				16); //iteraciones de colisión
+			/*Cuantas más iteraciones por actualización  más precisa es la simulación pero mas recursos lleva
+			 * alcanzar  los mismos FPS
+			 */
+		
+		
+		// activamos el Multitoque
 		motor.setTouchController(new MultiTouchController());
-		// activamos el toque
 		setOnSceneTouchListener(this);
 		setOnAreaTouchListener(this);
-
-		// sprite de referencia marcando el centro
-		//AnimatedSprite caja = new AnimatedSprite(camara.getCenterX(),
-		//		camara.getCenterY(),
-			//	managerRecursos.trBloques.deepCopy(), vbom);
-		//caja.setSize(10, 10);
-	//	this.capaBaja.attachChild(caja);
-		//caja.setVisible(true);
-	//	caja.animate(100);
-
+	
+		
 		// PAREDES
 		suelo = PhysicsFactory.createLineBody(mundo, 0, 0 + MARGENES,
 				camara.getWidth(), 0 + MARGENES, fdef_muro);
@@ -282,16 +366,20 @@ public class EscenaJuego extends EscenaBase implements
 					/*
 					 * la alternativa a este método es usar el vector normal, es
 					 * decir la dirección en que el motor aplicaría la fuerza
-					 * para compensar dos fixturas incrustados el problema es
+					 * para compensar dos fixturas incrustadas el problema es
 					 * que cambia de sentido a mitad de cada fixtura
 					 * 
-					 * y esto causa que se reactive al colisión y que el motor
+					 * y esto causa que se reactive la colisión y que el motor
 					 * repela los dos cuerpos que , de repente ,están
 					 * incrustados y colisionando. esto hace un efecto elástico
 					 * que se incrementa cuantas mas fixturas tenga la pieza La
 					 * consecuencia es que el cuerpo sufre una aceleración
 					 * considerable al atraversar el techo.
+					 * 
+					 * Las piezas  caen cómo meteoritos y  siembran destrucción en cualquier estructura que 
+					 * el jugador pudiera haber organizado
 					 */
+					
 					// por cada punto de colision
 					for (Vector2 p : contact.getWorldManifold().getPoints()) {
 						// si resulta que la velocidad lineal es positiva ( va
@@ -318,6 +406,7 @@ public class EscenaJuego extends EscenaBase implements
 			@Override
 			public void beginContact(Contact contact) {}
 		});
+		
 		this.registerUpdateHandler(timerLinea);
 		this.registerUpdateHandler(timerPieza);
 		registerUpdateHandler(mundo);
@@ -367,6 +456,9 @@ public class EscenaJuego extends EscenaBase implements
 		}
 	}
 
+	/**
+	 * Cargar estado.
+	 */
 	public void cargarEstado() {
 
 		estadoGuardado = null;
@@ -423,6 +515,7 @@ public class EscenaJuego extends EscenaBase implements
 		 * Actualizamos manualmente los PhysicsConnector para que posicionen
 		 * correctamente los graficos respecto a los cuerpos, sin esperar al
 		 * siguiente fotograma
+		 * 
 		 */
 		
 		for (PhysicsConnector pc : mundo.getPhysicsConnectorManager()) {
@@ -433,6 +526,9 @@ public class EscenaJuego extends EscenaBase implements
 
 	}
 
+	/**
+	 * Finaliza la partida actual.
+	 */
 	public void finalizarPartida() {
 		if(managerRecursos.musicaFondo.isPlaying())
 			managerRecursos.musicaFondo.stop();
@@ -444,6 +540,9 @@ public class EscenaJuego extends EscenaBase implements
 		acabada = true;
 		}
 
+	/**
+	 * Inicia  una nueva partida
+	 */
 	public void iniciarPartida() {
 		managerRecursos.musicaFondo.play();
 		acabada = false;
@@ -454,6 +553,9 @@ public class EscenaJuego extends EscenaBase implements
 	
 	}
 
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.EscenaBase#reiniciarEscena()
+	 */
 	@Override
 	public void reiniciarEscena() {
 		for (IPieza p : piezasEscena) {
@@ -462,9 +564,11 @@ public class EscenaJuego extends EscenaBase implements
 		System.gc();
 		
 
-		Log.d("REINICIO", "CUERPOS: " + mundo.getBodyCount());
 	}
 
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.EscenaBase#deshacerEscena()
+	 */
 	@Override
 	public void deshacerEscena() {
 	
@@ -476,13 +580,16 @@ public class EscenaJuego extends EscenaBase implements
 	// *******
 
 	/**
-	 * Esta función inicializa un sistema de partículas por cada puntero posible
+	 * Esta función inicializa un sistema de partículas por cada puntero
+	 * posible.
 	 */
 	private void inicializarSistemasParticulas() {
 		particulasPuntero = new BatchedSpriteParticleSystem[MAX_MULTITOQUE];
 
 		for (int i = 0; i < particulasPuntero.length; i++) {
 
+			//queremos que  el rectángulo sea ligeramente más pequeño para que  las partículas  sobresalgan
+			//demasiado de  el bloque
 			IParticleEmitter pe = new RectangleOutlineParticleEmitter(
 					tamaño_bloque / 2, tamaño_bloque / 2, tamaño_bloque * 0.9f,
 					tamaño_bloque * 0.9f);
@@ -522,7 +629,17 @@ public class EscenaJuego extends EscenaBase implements
 	}
 
 	/**
-	 * Sacado del ejemplo de AE demostrando MouseJoint
+	 * Sacado del ejemplo de AE demostrando MouseJoint.
+	 * 
+	 * Esta función crea  un {@link MouseJoint}.
+	 * 
+	 * @param entidad
+	 *            the entidad
+	 * @param pTouchAreaLocalX
+	 *            the touch area local x
+	 * @param pTouchAreaLocalY
+	 *            the touch area local y
+	 * @return the mouse joint
 	 */
 	private MouseJoint createMouseJoint(final IEntity entidad,
 			final float pTouchAreaLocalX, final float pTouchAreaLocalY) {
@@ -550,7 +667,7 @@ public class EscenaJuego extends EscenaBase implements
 		mouseJointDef.dampingRatio = 0.00f;
 		mouseJointDef.frequencyHz = 20f;
 		mouseJointDef.maxForce = (200 * body.getMass() * 4);
-		mouseJointDef.collideConnected = true;
+		mouseJointDef.collideConnected = true; //si desactivamos la colision las piezas atraviesarán el suelo :-)
 
 		mouseJointDef.target.set(localPoint);
 		Vector2Pool.recycle(localPoint);
@@ -561,6 +678,16 @@ public class EscenaJuego extends EscenaBase implements
 	
 	
 	
+	/**
+	 * Destruye los cuerpos de las piezas de la escena que estén marcados inactivos
+	 * ( no siendo simulados).
+	 * 
+	 * Este método se ha de ejecutar en un {@link IUpdateHandler}.
+	 * NO , repito , NO  es posible ejecutarse dentro de un Runnable en el 
+	 * hilo de actualización  sin causar problemas de sincronización en la extensión box2d
+	 * y errores en la librería nativa
+	 * 
+	 */
 	private void purgarPiezas(){	
 		
 				for(ListIterator<IPieza> pi = piezasEscena.listIterator();
@@ -579,9 +706,17 @@ public class EscenaJuego extends EscenaBase implements
 	}
 	
 	
+	/**
+	 * Este método  escanea la escena  buscando y tratando bloques alineados.
+	 * 
+	 * Este método realiza cambios en el estado de la escena y debería, por lo tanto,
+	 * ejecutarse en el hilo de actualización.
+	 * 
+	 * @see BaseGameActivity#runOnUpdateThread(Runnable, boolean)
+	 */
 	public void comprobarLineas() {
 		/*
-		 * El motor (Box2d) no garantiza que el orden en el que se reportan las
+		 * El motor físico (Box2d) no garantiza que el orden en el que se reportan las
 		 * intersecciones sea el de proximidad al origen del rayo. Por lo tanto
 		 * hay que ordenar en base al parametro fraction, que representa con un
 		 * decimal de 0.0f a 1.0f en que fraccion de la distancia del origen al
@@ -595,9 +730,11 @@ public class EscenaJuego extends EscenaBase implements
 		for (int linea = 0; linea < FILAS; linea++) {
 piezasTocadas.clear();
 			bloquesLinea.clear();
-			Vector2 p1;
-			Vector2 p2;
-			// tiramos una linea que atraviese la caja 
+			
+			Vector2 p1; //punto inicial
+			Vector2 p2; //punto final
+			
+			
 			p1 = Vector2Pool.obtain(
 					0 / PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, (linea
 							* tamaño_bloque + (tamaño_bloque / 2) + MARGENES)
@@ -606,6 +743,7 @@ piezasTocadas.clear();
 			p2 = Vector2Pool.obtain((camara.getWidth())
 					/ PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT, p1.y);
 
+			//le pedimos al mundo físico que tire un rayo de p1 a p2  y que nos reporte  las intersecciones
 			mundo.rayCast(new RayCastCallback() {
 
 				@Override
@@ -617,15 +755,22 @@ piezasTocadas.clear();
 						Vector2 velocidad = fixture.getBody()
 								.getLinearVelocity();
 
-						if (Math.abs(velocidad.x) < 0.2
-								&& Math.abs(velocidad.y) < 0.2) {
+					/*
+					 * Dado que la estabilidad absoluta es ridículamente dificil de alcanzar
+					 * por el método  a base de aproximación que usa el motor fisico.
+					 * 
+					 * Fijamos una valor  de una quietud aceptable.
+					 * 
+					 */
+						if (Math.abs(velocidad.x) < VELOCIDAD_MAX
+								&& Math.abs(velocidad.y) <VELOCIDAD_MAX) {
 
 							// y además se encuentra alineado con los ejes( con
-							// un margen de 10 grados arriba o abajo)
+							// un margen de ANGULO_MAX grados arriba o abajo)
 							double diferencia = Math.abs(Math.toDegrees(fixture
 									.getBody().getAngle()) % 90);
-							if (diferencia < 5
-									|| Math.abs(diferencia - 90) < 5) {
+							if (diferencia < ANGULO_MAX
+									|| Math.abs(diferencia - 90) < ANGULO_MAX) {
 								// lo añadimos a la linea
 
 								bloquesLinea.put(fraction,
@@ -647,13 +792,10 @@ piezasTocadas.clear();
 			if (bloquesLinea.size() >= COLUMNAS
 					&& onQuitarLinea(bloquesLinea.values())) {
 
-				/*
-				 * Por cada bloque en la linea
-				 */
 
-				// Las piezas que hemos tocado
 				
-
+				
+				//por cada bloque ne la línea
 				for (Bloque b : bloquesLinea.values()) {
 
 					
@@ -662,28 +804,31 @@ piezasTocadas.clear();
 					
 					if (!onQuitarBloque(b))
 						continue;
-					// saco la pieza y la añado a la colección
+					
+					// sacamos la pieza y la añadimos a la colección
 					IPieza pieza = (IPieza) b.getPadre();
 					
 					piezasTocadas.add(pieza);
-				pieza.quitarBloque(b);
+					pieza.quitarBloque(b);
 					
 
 					
 					
 				}
 				
+				//por cada pieza que hayamos tocado al destruir los bloques de la línea
 				for (IPieza tocada : piezasTocadas) {
+					//si  no tiene bloques
 					if (tocada.getBloques().isEmpty()) {
-						Log.w("LINEA", "Quitando pieza:"+tocada);
-						tocada.destruirPieza();
-						
-						
-						
+						//la destruimos (MUAHAHAHAHA :P)
+						tocada.destruirPieza();	
 					}else{
-	
+						//si le quedan bloques  cabe la posibilidad que hayamos  dividido la pieza
+						//al quitar bloques
+						
+						// por cada pieza resultante de la posible división
 						for (IPieza p : tocada.Desenlazar()) {
-							
+							// la añadimos a la escena
 							p.registrarAreasTactiles(this);
 							p.registrarGraficos(this.capaBaja);
 							piezasEscena.add(p);
@@ -694,7 +839,13 @@ piezasTocadas.clear();
 				}
 
 			}
-
+			/*
+			 * Devolvemos los vectores a la reserva
+			 * 
+			 * En  otras aplicaciones más intensivas  en el uso de box2d
+			 * la creación  y consiguiente deshecho de vectores  provoca pausas fecuentes por el recolector de basura
+			 * Vector2Pool soluciona esto  creando una "piscina" global de vectores que se reciclan.
+			 */
 			Vector2Pool.recycle(p1);
 			Vector2Pool.recycle(p2);
 
@@ -707,26 +858,38 @@ piezasTocadas.clear();
 
 	
 
+	/* (non-Javadoc)
+	 * @see org.andengine.entity.scene.IOnAreaTouchListener#onAreaTouched(org.andengine.input.touch.TouchEvent, org.andengine.entity.scene.ITouchArea, float, float)
+	 */
 	@Override
 	public boolean onAreaTouched(TouchEvent pSceneTouchEvent,
 			final ITouchArea pTouchArea, float pTouchAreaLocalX,
 			float pTouchAreaLocalY) {
 
+		/*
+		 * Una de las áreas táctiles que registramos   ha sido tocada :-d
+		 */
+		
+		//si estamos dentro de el rango de multitoque que controlamos
 		if (pSceneTouchEvent.isActionDown()
-				&& pSceneTouchEvent.getPointerID() < MAX_MULTITOQUE) {
+				&& pSceneTouchEvent.getPointerID() < MAX_MULTITOQUE){
 			final IEntity entity = (IEntity) pTouchArea;
+			
+			//si este puntero no tiene asignado ya un enlace/articulación
 			if (joints[pSceneTouchEvent.getPointerID()] == null) {
 				final Bloque bloque = (Bloque) entity.getUserData();
-				final IPieza pieza = (IPieza) bloque.getPadre();
+				//final IPieza pieza = (IPieza) bloque.getPadre();
 
+				// particulas bonitas en el  bloque que hemos agarrado
 				entity.attachChild(particulasPuntero[pSceneTouchEvent
 						.getPointerID()]);
 				particulasPuntero[pSceneTouchEvent
 									.getPointerID()].setParticlesSpawnEnabled(true);
+				//creamos un enlace con el raton (MouseJoint) 
 				joints[pSceneTouchEvent.getPointerID()] = this
 						.createMouseJoint(entity, pTouchAreaLocalX,
 								pTouchAreaLocalY);
-				Log.e("COGIENDO PIEZA", ""+pieza);
+				
 			}
 
 			return true;
@@ -735,37 +898,62 @@ piezasTocadas.clear();
 
 	}
 
+	/* (non-Javadoc)
+	 * @see org.andengine.entity.scene.IOnSceneTouchListener#onSceneTouchEvent(org.andengine.entity.scene.Scene, org.andengine.input.touch.TouchEvent)
+	 */
 	@Override
 	public boolean onSceneTouchEvent(Scene pScene, TouchEvent pSceneTouchEvent) {
 
+		/*
+		 * Hemos recibido un evento de toque  en general
+		 */
+		
+		/*
+		 * Si es el primer puntero...
+		 * 
+		 * NOTA: andengine hace esencialmente lo que le da la gana con los punteros.
+		 * se puede confiar en  distinguir unos de otros pero  le cuesta mucho y a menudo falla
+		 *  en  mantener la realcion entre el ID y el orden de toque.
+		 * 
+		 * A menudo el primer dedo se convierte en el segunod o ternceor o quinto...
+		 * 
+		 */
 		if (pSceneTouchEvent.getPointerID() == 0) {
 
+			// rotamos el degradado respecto al centro de coordenadas de la escena y al puntero
+			
+			//fórmula alternativa
 			// degradadoFondo.setGradientAngle( (float) (180/ Math.PI *
 			// Math.atan2(degradadoFondo.getX() - pSceneTouchEvent.getX(),
 			// pSceneTouchEvent.getY() - degradadoFondo.getY())));
+			
 			degradadoFondo.setGradientVector(
 					pSceneTouchEvent.getX() - camara.getWidth() / 2,
 					pSceneTouchEvent.getY() - camara.getHeight() / 2);
 			
 		}
+		// si no hemos   tocado antes de inicializar la escena
 		if (this.mundo != null
 				&& pSceneTouchEvent.getPointerID() < MAX_MULTITOQUE) {
 
 			switch (pSceneTouchEvent.getAction()) {
 			case TouchEvent.ACTION_DOWN:
-				Log.e("MOUSE", "MOUSE DOWN");
-				particulasPuntero[pSceneTouchEvent.getPointerID()]
-						.setParticlesSpawnEnabled(true);
+				//debug
 				
+				Log.d("MOUSE", "MOUSE DOWN");
+				
+				//pasamos el evento
 				return false;
 			case TouchEvent.ACTION_MOVE:
 
+				//si estamos arrastrando algo
 				if (joints[pSceneTouchEvent.getPointerID()] != null) {
 					final Vector2 vec = Vector2Pool
 							.obtain(pSceneTouchEvent.getX()
 									/ PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT,
 									pSceneTouchEvent.getY()
 											/ PhysicsConstants.PIXEL_TO_METER_RATIO_DEFAULT);
+					// ponemos el extremo de el enlace en  el puntero
 					joints[pSceneTouchEvent.getPointerID()].setTarget(vec);
 					
 
@@ -773,7 +961,10 @@ piezasTocadas.clear();
 				}
 				return true;
 			case TouchEvent.ACTION_UP:
-				Log.e("MOUSE", "MOUSE UP");
+				// Hemos levantado el dedo
+				Log.d("MOUSE", "MOUSE UP");
+				
+				//nos aseguramos que lo que estamos tocando no ha sido destruido
 				if (joints[pSceneTouchEvent.getPointerID()] != null  && joints[pSceneTouchEvent.getPointerID()].getBodyB() != null) {
 
 					
@@ -825,18 +1016,24 @@ piezasTocadas.clear();
 	}
 
 	// ha pasado el tiempo de un timer
+	/* (non-Javadoc)
+	 * @see org.andengine.engine.handler.timer.ITimerCallback#onTimePassed(org.andengine.engine.handler.timer.TimerHandler)
+	 */
 	@Override
 	public void onTimePassed(final TimerHandler pTimerHandler) {
 
+		
 		if (pTimerHandler == timerLinea) {
 
+			//esperamos a la siguiente actualización
 			EngineLock lock = motor.getEngineLock();
+			//bloqueamos el motor
 			lock.lock();
-			
+					//hacemos nuestras cosas
 					comprobarLineas();
 					pTimerHandler.reset();
 
-			
+			//devolvemos la vida al motor
 			lock.unlock();
 			
 		}
@@ -845,16 +1042,10 @@ piezasTocadas.clear();
 			 * Reutilizamos el update handler de las piezas para
 			 * destruir las piezas pendientes
 			 */
-			motor.runOnUpdateThread(new Runnable() {
-				
-				@Override
-				public void run() {
+			
 					purgarPiezas();
-					
-				}
-			});
 			
-			
+			// encargamos al siguiente fotograma...
 			motor.runOnUpdateThread(new Runnable() {
 				@Override
 				public void run() {
@@ -873,13 +1064,20 @@ piezasTocadas.clear();
 
 
 	
+	/**
+	 * On quitar linea.
+	 * 
+	 * @param bloques
+	 *            los bloques
+	 * @return true para continuar false para  no destruirla
+	 */
 	public boolean onQuitarLinea(Collection<Bloque> bloques) {
 		Text puntos = new Text(camara.getWidth()/2,cartelPuntos.getY(),managerRecursos.fGlobal,"","XXXXXXXXX".length(), 
 												new TextOptions(HorizontalAlign.CENTER),vbom);
 		
 		
 		/*
-		 * Para determinar la altura de la linea  hago la media de la altura de todos los bloques que vamos a quitar
+		 * Para determinar la altura de la linea  hacemos la media de la altura de todos los bloques que vamos a quitar
 		 */
 		
 		float mediaY=0f;
@@ -904,6 +1102,8 @@ piezasTocadas.clear();
 		puntos.setText(Integer.toString(psuma));
 		puntos.setScale(0.8f);
 		puntos.setAlpha(0.8f);
+		
+		//ponemos  dos efectos ( transaparencia y desplazado vertical) simultáneos
 		puntos.registerEntityModifier(new ParallelEntityModifier(new IEntityModifierListener() {
 			
 			@Override
@@ -912,12 +1112,14 @@ piezasTocadas.clear();
 				
 			}
 			
+			//cuendo los dos efectos hayan acabado
 			@Override
 			public void onModifierFinished(IModifier<IEntity> pModifier, final IEntity pItem) {
 				motor.runOnUpdateThread(new Runnable() {
 					
 					@Override
 					public void run() {
+						// nos  autodestruimos
 						pItem.detachSelf();
 						
 					}
@@ -927,6 +1129,7 @@ piezasTocadas.clear();
 			}
 		}, new AlphaModifier(3f,1.0f , 0.0f), new MoveYModifier(3f, puntos.getY(),puntos.getY() + tamaño_bloque * 3)));
 		
+		//campanita
 		managerRecursos.sonidoLinea.play();
 		
 		
@@ -950,10 +1153,20 @@ piezasTocadas.clear();
 		return true;
 	}
 
+	/**
+	 * On linea quitada.
+	 */
 	public void onLineaQuitada() {
 	};
 
 
+	/**
+	 * On quitar bloque.
+	 * 
+	 * @param bloque
+	 *            el bloque
+	 * @return true para quitarlo o false para  no hacerlo
+	 */
 	public boolean onQuitarBloque(final Bloque bloque) {
 
 		// creamos un sistema de partículas para cada bloque que se elimina
@@ -1034,6 +1247,9 @@ piezasTocadas.clear();
 
 	}
 
+	/**
+	 * On poner pieza.
+	 */
 	public void onPonerPieza() {
 		
 	motor.runSafely( new Runnable() {
@@ -1052,7 +1268,6 @@ piezasTocadas.clear();
 				IPieza.FIXTUREDEF_DEFECTO, PiezaBase.BODYDEF_DEFECTO);
 		pieza.registrarAreasTactiles(this);
 		pieza.registrarGraficos(this.capaBaja);
-
 		piezasEscena.add(pieza);
 		// contabilizamos los bloques que hay en escena
 		float bloques = 0;
@@ -1069,6 +1284,7 @@ piezasTocadas.clear();
 			
 			pausarEscena();
 
+			//mostramos un diálogo pidiendo el nombre para añadirlo a puntuaciones
 			final StringInputDialogBuilder dialogb = 
 					new StringInputDialogBuilder(actividadJuego, 
 												R.string.dialogo_titulo, 
@@ -1120,6 +1336,9 @@ piezasTocadas.clear();
 
 	}
 
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.EscenaBase#teclaMenuPresionada()
+	 */
 	@Override
 	public void teclaMenuPresionada() {
 		if(!pausado)
@@ -1127,18 +1346,28 @@ piezasTocadas.clear();
 
 	}
 
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.EscenaBase#teclaVolverPreionada()
+	 */
 	@Override
-	public void teclaVolverPreionada() {
+	public void teclaVolverPresionada() {
 		if(!pausado)
 			pausarEscena();
 	}
 
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.EscenaBase#pausarEscena()
+	 */
 	@Override
 	public void pausarEscena() {
+		// parar el sonido
 		if(	managerRecursos.musicaFondo.isPlaying())
 			managerRecursos.musicaFondo.pause();
 
 		//Obtenemos el lock de el motor para  poder ejecutar el guardado inmediatamente
+		// no podemos  encargarlo al siguiente fotograma
+		// porque en caso de, por ejemplo ser una pausa externa ( apagar la pantalla o boton home)
+		// no  habrá siguiente fotograma
 		EngineLock lock = motor.getEngineLock();
 		lock.lock();
 		
@@ -1160,6 +1389,9 @@ piezasTocadas.clear();
 
 	}
 
+	/* (non-Javadoc)
+	 * @see proyecto.blocktris.logica.EscenaBase#reanudarEscena()
+	 */
 	@Override
 	public void reanudarEscena() {
 		motor.runOnUpdateThread(new Runnable() {
@@ -1184,7 +1416,7 @@ piezasTocadas.clear();
 			e.printStackTrace();
 		}
 		/*
-		 * Si es el primer cargado
+		 * Si es el primer cargado sacamos el menú
 		 */
 		if (primerCargado) {
 			primerCargado = false;
@@ -1195,11 +1427,15 @@ piezasTocadas.clear();
 
 	
 	
+	
 	public boolean isPartidaAcabada() {
 
 		return acabada;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.andengine.entity.scene.menu.MenuScene.IOnMenuItemClickListener#onMenuItemClicked(org.andengine.entity.scene.menu.MenuScene, org.andengine.entity.scene.menu.item.IMenuItem, float, float)
+	 */
 	@Override
 	public boolean onMenuItemClicked(MenuScene pMenuScene, IMenuItem pMenuItem,
 			float pMenuItemLocalX, float pMenuItemLocalY) {
@@ -1236,7 +1472,7 @@ piezasTocadas.clear();
 					.lanzar(ManagerRecursos.getInstancia().actividadJuego);
 			return true;
 		case EscenaMenu.ID_SALIR:
-			System.exit(0);
+			System.exit(0); //muerte y destrucción
 			return true;
 
 		default:

@@ -1,3 +1,6 @@
+/*
+ *  @author Pablo Morillas Lozano
+ */
 package proyecto.blocktris.logica.fisica.piezas.rompibles;
 
 import java.util.List;
@@ -19,8 +22,28 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.JointDef;
 import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class PiezaPalo.
+ */
 public class PiezaPalo extends PiezaBase {
 
+	/**
+	 * Instantiates a new pieza palo.
+	 * 
+	 * @param mundo
+	 *            the mundo
+	 * @param x
+	 *            the x
+	 * @param y
+	 *            the y
+	 * @param tamaño_bloque
+	 *            the tamaño_bloque
+	 * @param fixturedef
+	 *            the fixturedef
+	 * @param bodydef
+	 *            the bodydef
+	 */
 	public PiezaPalo(PhysicsWorld mundo, float x, float y, float tamaño_bloque,
 			FixtureDef fixturedef,BodyDef bodydef) {
 		super(mundo, x, y, tamaño_bloque, fixturedef, bodydef);

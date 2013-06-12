@@ -1,3 +1,6 @@
+/*
+ *  @author Pablo Morillas Lozano
+ */
 package proyecto.blocktris.recursos;
 
 import java.io.BufferedOutputStream;
@@ -24,6 +27,7 @@ import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque.ColorBloque;
 
 
+// TODO: Auto-generated Javadoc
 /*
  * Esta clase contiene el estado de el juego, es decir
  *  		 --	informacin sobre todas las piezas  que se  encuentren en juego
@@ -35,17 +39,36 @@ import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque.ColorB
  */
 
 
+/**
+ * The Class EstadoJuego.
+ */
 public class EstadoJuego {
 		
 	
 	
 	
+	/** The acabada. */
 	public boolean acabada;
+	
+	/** The puntuacion. */
 	public int puntuacion;
+	
+	/** The piezas. */
 	public ArrayList<EstadoPieza> piezas = new ArrayList<EstadoJuego.EstadoPieza>() ;
 	
 	
 	
+	/**
+	 * Serializar json.
+	 * 
+	 * @return the string
+	 * @throws SecurityException
+	 *             the security exception
+	 * @throws NoSuchFieldException
+	 *             the no such field exception
+	 * @throws ClassNotFoundException
+	 *             the class not found exception
+	 */
 	public String serializarJSON() throws SecurityException, NoSuchFieldException, ClassNotFoundException{
 
 		/*
@@ -67,6 +90,13 @@ public class EstadoJuego {
 		
 	}
 	
+	/**
+	 * Deserializar json.
+	 * 
+	 * @param json
+	 *            the json
+	 * @return the estado juego
+	 */
 	public static EstadoJuego deserializarJSON(String json){
 		Gson gson = new Gson();
 		return gson.fromJson(json, EstadoJuego.class);
@@ -82,16 +112,28 @@ public class EstadoJuego {
 	
 	
 	
-	 public static class EstadoPieza implements Serializable {
+	 /**
+	 * The Class EstadoPieza.
+	 */
+ 	public static class EstadoPieza implements Serializable {
 		 
-		 public static class EstadoBloque implements Serializable {
+		 /**
+		 * The Class EstadoBloque.
+		 */
+ 		public static class EstadoBloque implements Serializable {
 			
+			/** The color. */
 			public ColorBloque color;
+			
+			/** The x. */
 			public float x;
+			
+			/** The y. */
 			public float y;
 			//para eveiutar referencias circulares al serializar a JSON
 			// guardamos los adyacentes en forma de índices  destro del mismo array
 			// en lugar de  referencias.
+			/** The adyacentes. */
 			public ArrayList<Integer> adyacentes = new ArrayList<Integer>();
 			
 			
@@ -101,18 +143,37 @@ public class EstadoJuego {
 	
 			
 			
+		/**
+		 * Instantiates a new estado pieza.
+		 */
 		private EstadoPieza (){};
 		
 		 
+		/** The tamaño_bloque. */
 		public float tamaño_bloque;
+		
+		/** The bodydef. */
 		public BodyDef bodydef;
+		
+		/** The fixturedef. */
 		public FixtureDef fixturedef;
+		
+		/** The tipo. */
 		public PIEZAS tipo;
+		
+		/** The bloques. */
 		public ArrayList<EstadoBloque> bloques; 
 		
 		
 		
 		
+		/**
+		 * Empaquetar.
+		 * 
+		 * @param pieza
+		 *            the pieza
+		 * @return the estado pieza
+		 */
 		public static  EstadoPieza empaquetar(IPieza pieza ){
 			EstadoPieza estado = new EstadoPieza();
 			
@@ -161,6 +222,15 @@ public class EstadoJuego {
 		
 		
 		
+		/**
+		 * Desempaquetar.
+		 * 
+		 * @param mundo
+		 *            the mundo
+		 * @param estado
+		 *            the estado
+		 * @return the i pieza
+		 */
 		public static IPieza desempaquetar(PhysicsWorld mundo, EstadoPieza estado){
 			IPieza pieza = null;
 			
