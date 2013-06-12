@@ -25,6 +25,13 @@ import android.widget.TableRow;
 import android.widget.TableRow.LayoutParams;
 import android.widget.TextView;
 
+/**
+ * Actividad que puebla dinámicamente una lista de dispositivos Bluetooth  en rango
+ * 
+ * @author Pablo Morillas Lozano
+ * 
+ *
+ */
 public class ActividadBluetooth extends Activity{
 	List<BluetoothDevice> dispositivos = new ArrayList<BluetoothDevice>();
 	Intent resultado = new Intent();
@@ -34,7 +41,11 @@ public class ActividadBluetooth extends Activity{
 
 	private static final int P_BLUETOOTH = 0;
 	private static final int P_EMPAREJAR = P_BLUETOOTH + 1;
-
+	
+	/**
+	 * 
+	 * Método estático para lanzar esta actividad desde otra.
+	 */
 	public static void lanzar(Activity c) {
 		Intent i = new Intent(c.getBaseContext(), ActividadBluetooth.class);
 		c.startActivityForResult(i, 1);
@@ -148,8 +159,7 @@ public class ActividadBluetooth extends Activity{
 		
 		
 		
-		
-		// añadimos las entradas de los dispositivos conocidos
+	
 		
 		
 		
@@ -166,12 +176,6 @@ public class ActividadBluetooth extends Activity{
 		
 		
 	}
-
-	// Wheeee! en la era de la multitarea tenemos una API que asume una de dos
-	// cosas:
-	// 1.La multitarea es una leyenda
-	// 2.El programador/usuario es hyperactivo
-	// FML con android y su diseño autoritario
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {

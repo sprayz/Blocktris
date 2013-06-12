@@ -9,8 +9,18 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.Menu;
 import android.widget.SimpleAdapter;
 
+/**
+ * Esta clase representa la lista de puntuaciones
+ * 
+ * @author Pablo Morillas Lozano
+ *
+ */
 public class ActividadPuntuaciones extends ListActivity {
 
+	/**
+	 * 
+	 * Método estático para lanzar esta actividad desde otra.
+	 */
 	public static void lanzar(Activity c) {
 		
 		

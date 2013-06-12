@@ -72,7 +72,6 @@ import proyecto.blocktris.recursos.BDPuntuaciones;
 import proyecto.blocktris.recursos.EstadoJuego;
 import proyecto.blocktris.recursos.EstadoJuego.EstadoPieza;
 import proyecto.blocktris.recursos.ExclStrat;
-import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 import proyecto.blocktris.recursos.ManagerRecursos;
 import proyecto.blocktris.recursos.Puntuacion;
 import android.content.Context;
@@ -96,7 +95,13 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
+/**
+ * Escena principal del juego.
+ * 
+ * 
+ * @author Pablo Morillas Lozano
+ *
+ */
 public class EscenaJuego extends EscenaBase implements 
 		IOnSceneTouchListener, IOnAreaTouchListener, ITimerCallback,
 		 IOnMenuItemClickListener {
@@ -121,8 +126,7 @@ public class EscenaJuego extends EscenaBase implements
 	
 	public static final int PUNTOS_LINEA = 10;
 	public static final int MULTIPLICADOR_LINEA =2 ;
-	public  float  tiempoUltimaLinea;
-	private int  lineasConsecutivas;
+	
 	public static  float MAX_TIEMPOLINEA = 5;
 	public static final float intervaloPonerPieza = 5f;
 	public static final float intervaloComprobarLinea = 1f;
@@ -138,6 +142,8 @@ public class EscenaJuego extends EscenaBase implements
 	/*
 	 * ESTADO DEL JUEGO
 	 */
+	public  float  tiempoUltimaLinea;
+	private int  lineasConsecutivas;
 	protected boolean acabada = false;
 	protected EstadoJuego estadoGuardado;
 	protected ArrayList<IPieza> piezasEscena;
@@ -151,15 +157,17 @@ public class EscenaJuego extends EscenaBase implements
 	@Override
 	public void crearEscena() {
 		/*
-		 * VARIABLES
+		 * Inicialización
 		 */
 
-		//
+		
 		piezasEscena = new ArrayList<IPieza>();
 		estadoGuardado = new EstadoJuego();
 		
+		//enlaces para el "ratón" 
 		joints = new MouseJoint[MAX_MULTITOQUE];
 
+		
 		timerLinea = new TimerHandler(intervaloComprobarLinea, false, this);
 		timerPieza = new TimerHandler(intervaloPonerPieza, false, this);
 		// FONDO
@@ -180,7 +188,7 @@ public class EscenaJuego extends EscenaBase implements
 
 		
 		
-		
+		//Texto de los puntos
 		cartelPuntos = new Text(camara.getWidth()/2f,camara.getHeight()*(8f/9f), 
 				managerRecursos.fGlobal, "0", "XXXXXXXXX".length(), new TextOptions(HorizontalAlign.CENTER ),vbom);
 		
@@ -196,12 +204,13 @@ public class EscenaJuego extends EscenaBase implements
 		cartelPuntos.setAlpha(0.8f);
 		
 		
-		// CAJA
+		
 
-		// dejamos un 20% de el tamaño del bloque de margen
+		// dejamos cierta holgura para poder maniobrar mejor las piezas
 		tamaño_bloque = camara.getWidth() / COLUMNAS;
 		tamaño_bloque = tamaño_bloque - ((tamaño_bloque / 4f / COLUMNAS));
 
+		
 		inicializarSistemasParticulas();
 		motor.registerUpdateHandler(new FPSLogger());
 
@@ -209,7 +218,7 @@ public class EscenaJuego extends EscenaBase implements
 		// gravedad hacia abajo :-]
 		mundo = new FixedStepPhysicsWorld(60, new Vector2(0,
 				-SensorManager.GRAVITY_EARTH), true, 20, 16);
-	//	mundo.setContinuousPhysics(true);
+	
 		motor.setTouchController(new MultiTouchController());
 		// activamos el toque
 		setOnSceneTouchListener(this);
@@ -312,20 +321,20 @@ public class EscenaJuego extends EscenaBase implements
 		this.registerUpdateHandler(timerLinea);
 		this.registerUpdateHandler(timerPieza);
 		registerUpdateHandler(mundo);
-		/*DebugRenderer debug = new DebugRenderer(mundo, vbom);
-		debug.setDrawBodies(true);
-	debug.setDrawJoints(true);
-	attachChild(debug);*/
+		
+		
 	}
 
-	/*
-	 * EVENTOS
-	 */
 
+	/**
+	 * Este método serializa el estado del juego {@link proyecto.bloqcktris.recursos.EstadoJuego}
+	 * a un archivo en formato JSON.
+	 */
 	public void guardarEstado() {
 
 		estadoGuardado = new EstadoJuego();
 		estadoGuardado.puntuacion = puntuacion;
+		
 		estadoGuardado.acabada = acabada;
 		for (IPieza p : piezasEscena) {
 
@@ -336,24 +345,15 @@ public class EscenaJuego extends EscenaBase implements
 
 			FileOutputStream fileOut = actividadJuego.openFileOutput(
 					ARCHIVO_ESTADO, Context.MODE_PRIVATE);
-			/*
-			 * 
-			 * Evito serializar el componente Shape de los FixtureDef que
-			 * contiene los vértices porque: 1.Está fuertemente atado a la
-			 * librería nativa. 2.No es necesario para recrear la escena. 3.Está
-			 * diseñado para ser creado y accedido solo por las funciónes de la
-			 * librería nativa. En consecuencia es poco más que una referencia a
-			 * una dirección de memoria en el espacio de la librería.
-			 */
-
-			Gson gson = new GsonBuilder().setExclusionStrategies(
-					new ExclStrat(
-							"com.badlogic.gdx.physics.box2d.FixtureDef.shape"))
-					.create();
+		
 			BufferedOutputStream bos = new BufferedOutputStream(fileOut);
 
-			bos.write(gson.toJson(estadoGuardado).getBytes());
-			Log.w("SERIALIZANDO", " GUARDANDO ESTADO");
+					
+					
+				
+
+			bos.write(estadoGuardado.serializarJSON().getBytes());
+			//Log.w("SERIALIZANDO", " GUARDANDO ESTADO");
 			bos.flush();
 			bos.close();
 			fileOut.close();
@@ -386,8 +386,8 @@ public class EscenaJuego extends EscenaBase implements
 
 			}
 			String resultado = sb.toString();
-			Gson gson = new Gson();
-			estadoGuardado = gson.fromJson(resultado, EstadoJuego.class);
+			
+			estadoGuardado = EstadoJuego.deserializarJSON(resultado);
 
 		} catch (Exception i) {
 			Log.e("DESERIALIZADO", i.getMessage());
@@ -466,12 +466,6 @@ public class EscenaJuego extends EscenaBase implements
 	}
 
 	@Override
-	public TipoEscena getTipoEscena() {
-		
-		return null;
-	}
-
-	@Override
 	public void deshacerEscena() {
 	
 
@@ -493,8 +487,8 @@ public class EscenaJuego extends EscenaBase implements
 					tamaño_bloque / 2, tamaño_bloque / 2, tamaño_bloque * 0.9f,
 					tamaño_bloque * 0.9f);
 
-			particulasPuntero[i] = new BatchedSpriteParticleSystem(pe, 100,
-					250, 500, managerRecursos.trAnimBrillo.getTextureRegion(1),
+			particulasPuntero[i] = new BatchedSpriteParticleSystem(pe, 10,
+					20, 4, managerRecursos.trAnimBrillo.getTextureRegion(1),
 					vbom);
 
 			// efectos para cada partícula
@@ -564,6 +558,7 @@ public class EscenaJuego extends EscenaBase implements
 		return (MouseJoint) mundo.createJoint(mouseJointDef);
 	}
 
+	
 	
 	
 	private void purgarPiezas(){	
@@ -726,6 +721,8 @@ piezasTocadas.clear();
 
 				entity.attachChild(particulasPuntero[pSceneTouchEvent
 						.getPointerID()]);
+				particulasPuntero[pSceneTouchEvent
+									.getPointerID()].setParticlesSpawnEnabled(true);
 				joints[pSceneTouchEvent.getPointerID()] = this
 						.createMouseJoint(entity, pTouchAreaLocalX,
 								pTouchAreaLocalY);
@@ -819,7 +816,7 @@ piezasTocadas.clear();
 				particulasPuntero[pSceneTouchEvent.getPointerID()]
 						.setParticlesSpawnEnabled(false);
 				
-				return false;
+				return true;
 			}
 			return false;
 		}

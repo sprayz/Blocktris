@@ -79,6 +79,7 @@ public class MainActivity extends BaseGameActivity{
 	        
 	}
 
+	
 	@Override
 	public
 	synchronized void onResumeGame()
@@ -99,15 +100,7 @@ public class MainActivity extends BaseGameActivity{
 	}
 
 
-	@Override
-	protected void onDestroy() {
-		// TODO Auto-generated method stub
-		//super.onDestroy();
-		 if (this.isGameLoaded()){
-		        System.exit(0);    
-		  }
-	}
-
+	
 
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) {

@@ -1,15 +1,11 @@
 package proyecto.blocktris.logica.fisica.piezas.rompibles;
 
 import java.io.Serializable;
-import java.util.AbstractList;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 
 import org.andengine.entity.Entity;
@@ -18,32 +14,23 @@ import org.andengine.entity.scene.Scene;
 import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.TiledSprite;
 import org.andengine.extension.physics.box2d.PhysicsConnector;
-import org.andengine.extension.physics.box2d.PhysicsConnectorManager;
-import org.andengine.extension.physics.box2d.PhysicsFactory;
 import org.andengine.extension.physics.box2d.PhysicsWorld;
 import org.andengine.extension.physics.box2d.util.Vector2Pool;
 import org.andengine.extension.physics.box2d.util.constants.PhysicsConstants;
 
-
 import proyecto.blocktris.logica.fisica.ObjetoFisico;
 import proyecto.blocktris.logica.fisica.Utilidades;
 import proyecto.blocktris.logica.fisica.piezas.IPieza;
-import proyecto.blocktris.logica.fisica.piezas.IPieza.PIEZAS;
-import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
 import proyecto.blocktris.recursos.ManagerRecursos;
-
 import android.util.Log;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
-import com.badlogic.gdx.physics.box2d.Joint;
-import com.badlogic.gdx.physics.box2d.JointEdge;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
-import com.badlogic.gdx.physics.box2d.Shape;
 
 public  class PiezaBase implements IPieza {
 	public static  BodyDef BODYDEF_DEFECTO;
@@ -54,9 +41,9 @@ public  class PiezaBase implements IPieza {
 		BODYDEF_DEFECTO.allowSleep = true;
 		BODYDEF_DEFECTO.angularDamping= 5f;
 		BODYDEF_DEFECTO.awake= true;
-		BODYDEF_DEFECTO.bullet = false;
+		BODYDEF_DEFECTO.bullet = true;
 		BODYDEF_DEFECTO.fixedRotation= false;
-		BODYDEF_DEFECTO.linearDamping = 1.5f;
+		BODYDEF_DEFECTO.linearDamping = 3f;
 		BODYDEF_DEFECTO.type= BodyType.DynamicBody;
 	}
 	

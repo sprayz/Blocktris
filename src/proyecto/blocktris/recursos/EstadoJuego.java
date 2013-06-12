@@ -1,5 +1,6 @@
 package proyecto.blocktris.recursos;
 
+import java.io.BufferedOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import proyecto.blocktris.logica.fisica.Utilidades;
 import proyecto.blocktris.logica.fisica.piezas.IPieza;
@@ -33,7 +35,7 @@ import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque.ColorB
  */
 
 
-public class EstadoJuego implements Serializable {
+public class EstadoJuego {
 		
 	
 	
@@ -41,6 +43,44 @@ public class EstadoJuego implements Serializable {
 	public boolean acabada;
 	public int puntuacion;
 	public ArrayList<EstadoPieza> piezas = new ArrayList<EstadoJuego.EstadoPieza>() ;
+	
+	
+	
+	public String serializarJSON() throws SecurityException, NoSuchFieldException, ClassNotFoundException{
+
+		/*
+		 * 
+		 * Evito serializar el componente Shape de los FixtureDef que
+		 * contiene los vértices porque:  1.No es necesario para recrear la escena. 
+		 * 2.Está
+		 * diseñado para ser creado y accedido solo por las funciónes de la
+		 * librería nativa. En consecuencia es poco más que una referencia a
+		 * una dirección de memoria en el espacio de la librería.(a un array de vértices)
+		 */
+		Gson gson = new GsonBuilder().setExclusionStrategies(
+				new ExclStrat(
+						"com.badlogic.gdx.physics.box2d.FixtureDef.shape"))
+				.create();
+	
+
+		return gson.toJson(this);
+		
+	}
+	
+	public static EstadoJuego deserializarJSON(String json){
+		Gson gson = new Gson();
+		return gson.fromJson(json, EstadoJuego.class);
+		
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	 public static class EstadoPieza implements Serializable {
 		 

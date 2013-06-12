@@ -48,6 +48,9 @@ public abstract class EscenaBase extends Scene
     // ABSTRACCION
     //---------------------------------------------
    
+    /**
+     * 
+     */
     public abstract void crearEscena();
     public abstract void reiniciarEscena();
     public abstract void pausarEscena();
@@ -55,7 +58,6 @@ public abstract class EscenaBase extends Scene
     public abstract void teclaVolverPreionada();
     public abstract void teclaMenuPresionada();
     
-    public abstract TipoEscena getTipoEscena();
     
     public abstract void deshacerEscena();
 }
