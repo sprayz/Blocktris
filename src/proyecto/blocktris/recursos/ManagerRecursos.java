@@ -30,58 +30,41 @@ import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.ui.activity.BaseGameActivity;
 import org.andengine.util.debug.Debug;
 
-// TODO: Auto-generated Javadoc
+
 /**
- * The Class ManagerRecursos.
+ * ESta clase gestiona el cargado y acceso a los recursos compartidos.
+ * 
+ * Es un  Singleton, es decir solo se permite una instancia de la misma.
  */
 public class ManagerRecursos {
 
-	/** The instancia. */
+	
 	private static ManagerRecursos INSTANCIA = null;
-
-	/** The motor. */
 	public Engine motor;
-	
-	/** The actividad juego. */
 	public BaseGameActivity actividadJuego;
-	
-	/** The camara. */
 	public Camera camara;
-	
-	/** The vbom. */
 	public VertexBufferObjectManager vbom;
 
 	//Música
-	/** The musica fondo. */
 	public Music musicaFondo;
-	
-	/** The sonido linea. */
 	public Sound sonidoLinea;
-	
-	/** The sonido alarma. */
 	public Sound sonidoAlarma;
 	
 	// TEXTURAS Y REGIONES
-	/** The ta bloques. */
+
 	private BuildableBitmapTextureAtlas taBloques;
-	
-	/** The tr bloques. */
 	public TiledTextureRegion trBloques;
-	
-	/** The tr bloques sombra. */
 	public TiledTextureRegion trBloquesSombra;
-	
-	/** The tr anim brillo. */
 	public TiledTextureRegion trAnimBrillo;
 	
 	
 	// Fuentes y Otros
-
-	/** The global. */
 	public Font fGlobal;
 
 	/**
 	 * Cargar recursos generales.
+	 * 
+	 * Este método carga los recursos comunes a toda la aplicación.
 	 */
 	public void cargarRecursosGenerales() {
 		//cargamos  los sonidos
@@ -139,9 +122,9 @@ public class ManagerRecursos {
 				.createTiledFromAsset(taBloques, actividadJuego, "clear.png",
 						8, 1);
 
-		try {// Magia negra
+		try {// Magia negra :-D
 			/*
-			 * Parece que esto es para  cuadrar las regiones en la textura del  atlas.
+			 * Esto es para  cuadrar las regiones en la textura del  atlas.
 			 * 
 			 * 
 			 */
@@ -155,16 +138,16 @@ public class ManagerRecursos {
 	}
 
 	/**
-	 * Preparar manager.
+	 * Asigna ciertos recursos compartidos para su facil acceso a través de la aplicación.
 	 * 
 	 * @param motor
-	 *            the motor
+	 *            el motor
 	 * @param actividadJuego
-	 *            the actividad juego
+	 *            la actividad inicial
 	 * @param camara
-	 *            the camara
+	 *           la camara
 	 * @param vbom
-	 *            the vbom
+	 *            el vbom
 	 */
 	public static void prepararManager(Engine motor,
 			BaseGameActivity actividadJuego, Camera camara,
@@ -179,11 +162,7 @@ public class ManagerRecursos {
 	// GETTERS AND SETTERS
 	// ---------------------------------------------
 
-	/**
-	 * Gets the instancia.
-	 * 
-	 * @return the instancia
-	 */
+	
 	public static ManagerRecursos getInstancia() {
 		if (INSTANCIA == null) {
 			INSTANCIA = new ManagerRecursos();

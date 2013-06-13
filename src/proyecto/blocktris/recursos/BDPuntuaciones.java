@@ -14,38 +14,32 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 
-// TODO: Auto-generated Javadoc
+
 /**
- * The Class BDPuntuaciones.
+ * Esta clase representa la base de datos SQLite que contiene las puntuaciones.
  */
 public class BDPuntuaciones extends SQLiteOpenHelper {
 	
-	/** The Constant NOMBRE_BD. */
+	/** El nombre de la base de datos. */
 	public static final String NOMBRE_BD= "Puntuaciones.db";
 	
-	/** The Constant VERSION_BD. */
+	/** La versión. */
 	public static final int  VERSION_BD = 1;
 	
-	/** The Constant TABLA_PUNTUACIONES. */
+	/** Nombre de la tabla  de puntuaciones. */
 	public static final String TABLA_PUNTUACIONES = "Puntuaciones";
 	
 	//Columnas 
 	
-	/** The Constant CAMPO_ID. */
+	/** Columna id. */
 	public static final String CAMPO_ID = "_id";
 	
-	/** The Constant CAMPO_NOMBRE. */
+	/** Columna nombre. */
 	public static final String CAMPO_NOMBRE = "nombre";
 	
-	/** The Constant CAMPO_PUNTOS. */
+	/** Columna puntuación. */
 	public static final String CAMPO_PUNTOS = "puntos";
 	
-	/**
-	 * Instantiates a new bD puntuaciones.
-	 * 
-	 * @param context
-	 *            the context
-	 */
 	public BDPuntuaciones(Context context) {
 		super(context, NOMBRE_BD, null, VERSION_BD);
 		
@@ -57,7 +51,9 @@ public class BDPuntuaciones extends SQLiteOpenHelper {
 	 */
 	@Override
 	public void onCreate(SQLiteDatabase arg0) {
-		 String CREAR = "CREATE TABLE " + TABLA_PUNTUACIONES + "("
+		
+		//creamos la base de datos acorde a las constantes
+		String CREAR = "CREATE TABLE " + TABLA_PUNTUACIONES + "("
 	                + CAMPO_ID + " INTEGER PRIMARY KEY," + CAMPO_NOMBRE + " TEXT,"
 	                + CAMPO_PUNTOS + " INTEGER" + ")";
 	        arg0.execSQL(CREAR);
@@ -68,7 +64,7 @@ public class BDPuntuaciones extends SQLiteOpenHelper {
 	 */
 	@Override
 	public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) {
-		  
+		 //si cambió el campo versión borramos la tabla y la recreamos 
         arg0.execSQL("DROP TABLE IF EXISTS " + TABLA_PUNTUACIONES);
  
         
@@ -78,9 +74,9 @@ public class BDPuntuaciones extends SQLiteOpenHelper {
 	
 	
 	 /**
-	 * Gets the top10.
+	 * Este método obtiene  las 10 primeras filas ordenadas por puntuación descendentemente.
 	 * 
-	 * @return the top10
+	 * @return cursor con los resultados
 	 */
  	public Cursor getTop10() {
 		   
@@ -94,11 +90,11 @@ public class BDPuntuaciones extends SQLiteOpenHelper {
 		}
 	 
 	 
-	 /**
-	 * Gets the top10 lista.
-	 * 
-	 * @return the top10 lista
-	 */
+ 	 /**
+ 		 * Este método obtiene  las 10 primeras filas ordenadas por puntuación descendentemente.
+ 		 * 
+ 		 * @return Una lista con los resultados
+ 		 */
  	public List<Puntuacion> getTop10Lista() {
 		    List<Puntuacion> res = new ArrayList<Puntuacion>();
 		    
@@ -122,12 +118,14 @@ public class BDPuntuaciones extends SQLiteOpenHelper {
 	 
 	 
 	/**
-	 * Adds the contact.
+	 * Este método añade un objeto Puntuacion.
+	 * 
+	 * Ignora el campo ID del objeto en favor de la configuración de la tabla.
 	 * 
 	 * @param puntuacion
-	 *            the puntuacion
+	 *            el objeto a añadir
 	 */
-	public void addContact(Puntuacion puntuacion) {
+	public void añadirPuntuacion(Puntuacion puntuacion) {
 	    SQLiteDatabase bd = this.getWritableDatabase();
 	 
 	    ContentValues values = new ContentValues();

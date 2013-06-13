@@ -23,6 +23,7 @@ import org.andengine.util.adt.array.ArrayUtils;
 
 
 
+import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
 import proyecto.blocktris.recursos.ManagerRecursos;
 
@@ -40,14 +41,15 @@ import com.badlogic.gdx.physics.box2d.Shape;
 import com.badlogic.gdx.physics.box2d.joints.WeldJoint;
 import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 
-// TODO: Auto-generated Javadoc
+
 /**
- * The Interface IPieza.
+ * La interfaz IPieza.
  */
 public interface IPieza {
 
 	/**
-	 * The Enum PIEZAS.
+	 * Tipos de pieza
+	 * @see PiezaBase#getTipo()
 	 */
 	public static enum PIEZAS implements Serializable{
 		

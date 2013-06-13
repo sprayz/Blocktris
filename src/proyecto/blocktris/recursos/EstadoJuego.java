@@ -22,6 +22,7 @@ import com.google.gson.GsonBuilder;
 import proyecto.blocktris.logica.fisica.Utilidades;
 import proyecto.blocktris.logica.fisica.piezas.IPieza;
 import proyecto.blocktris.logica.fisica.piezas.IPieza.PIEZAS;
+import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaDesempaquetada;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque;
 import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque.ColorBloque;
@@ -40,40 +41,43 @@ import proyecto.blocktris.logica.fisica.piezas.rompibles.PiezaBase.Bloque.ColorB
 
 
 /**
- * The Class EstadoJuego.
+ * Esta clase  es un contenedor de el estado del juego.
+ * Hace lo posible por ser simple de serializar.
+ * 
+ * Usa Gson para serializarse.
  */
 public class EstadoJuego {
 		
 	
 	
 	
-	/** The acabada. */
+	
 	public boolean acabada;
 	
-	/** The puntuacion. */
+	
 	public int puntuacion;
 	
-	/** The piezas. */
+	/** Estado de las piezas en escena */
 	public ArrayList<EstadoPieza> piezas = new ArrayList<EstadoJuego.EstadoPieza>() ;
 	
 	
 	
 	/**
-	 * Serializar json.
+	 * Serializa el objeto a JSON.
 	 * 
-	 * @return the string
+	 * @return Una cadena de JSON que representa el objeto.
 	 * @throws SecurityException
-	 *             the security exception
+	 *            
 	 * @throws NoSuchFieldException
-	 *             the no such field exception
+	 *          
 	 * @throws ClassNotFoundException
-	 *             the class not found exception
+	 *            
 	 */
 	public String serializarJSON() throws SecurityException, NoSuchFieldException, ClassNotFoundException{
 
 		/*
 		 * 
-		 * Evito serializar el componente Shape de los FixtureDef que
+		 * Evitamos serializar el componente Shape de los FixtureDef que
 		 * contiene los vértices porque:  1.No es necesario para recrear la escena. 
 		 * 2.Está
 		 * diseñado para ser creado y accedido solo por las funciónes de la
@@ -91,11 +95,11 @@ public class EstadoJuego {
 	}
 	
 	/**
-	 * Deserializar json.
+	 * Deserializa el objeto a partir de una cadena de JSON.
 	 * 
 	 * @param json
-	 *            the json
-	 * @return the estado juego
+	 *            String que contiene  el JSON que define un objeto EstadoJuego
+	 * @return Un EstadoJuego nuevo creado a  partr de la cadena
 	 */
 	public static EstadoJuego deserializarJSON(String json){
 		Gson gson = new Gson();
@@ -113,27 +117,31 @@ public class EstadoJuego {
 	
 	
 	 /**
-	 * The Class EstadoPieza.
+	 * Esta clase representa  el estado de una pieza.
+	 * 
+	 * @see IPieza
+	 * @see PiezaBase
 	 */
- 	public static class EstadoPieza implements Serializable {
+ 	public static class EstadoPieza {
 		 
 		 /**
-		 * The Class EstadoBloque.
+		 * Esta clase representa  el estado de un bloque
+		 * 
+		 * @see PiezaBase.Bloque
 		 */
- 		public static class EstadoBloque implements Serializable {
+ 		public static class EstadoBloque  {
 			
-			/** The color. */
+			
 			public ColorBloque color;
 			
-			/** The x. */
+	
 			public float x;
 			
-			/** The y. */
+			
 			public float y;
-			//para eveiutar referencias circulares al serializar a JSON
-			// guardamos los adyacentes en forma de índices  destro del mismo array
-			// en lugar de  referencias.
-			/** The adyacentes. */
+			//para evitar referencias circulares al serializar a JSON
+			//(los bloques adyacentes son referencias a otros bloques)
+			// guardamos los adyacentes en forma de índices  dentro del mismo array
 			public ArrayList<Integer> adyacentes = new ArrayList<Integer>();
 			
 			
@@ -143,36 +151,36 @@ public class EstadoJuego {
 	
 			
 			
-		/**
-		 * Instantiates a new estado pieza.
-		 */
+		//evitamos la instanciación
 		private EstadoPieza (){};
 		
 		 
-		/** The tamaño_bloque. */
+	
 		public float tamaño_bloque;
 		
-		/** The bodydef. */
+		
 		public BodyDef bodydef;
 		
-		/** The fixturedef. */
+		
 		public FixtureDef fixturedef;
 		
-		/** The tipo. */
+		
 		public PIEZAS tipo;
 		
-		/** The bloques. */
+		
 		public ArrayList<EstadoBloque> bloques; 
 		
 		
 		
 		
 		/**
-		 * Empaquetar.
+		 * Este método  guada el estado de una pieza.
+		 * 
+		 * @see EstadoJuego.EstadoPieza#desempaquetar
 		 * 
 		 * @param pieza
 		 *            the pieza
-		 * @return the estado pieza
+		 * @return el estado
 		 */
 		public static  EstadoPieza empaquetar(IPieza pieza ){
 			EstadoPieza estado = new EstadoPieza();
@@ -223,13 +231,17 @@ public class EstadoJuego {
 		
 		
 		/**
-		 * Desempaquetar.
+		 * Este método  crea una pieza a a partir de su estado guardado.
+		 * 
+		 * @see EstadoJuego.EstadoPieza#empaquetar
 		 * 
 		 * @param mundo
-		 *            the mundo
+		 *            el  mundo done crear la pieza
+		 *            
 		 * @param estado
-		 *            the estado
-		 * @return the i pieza
+		 *            el estado guardado de la pieza
+		 *            
+		 * @return Una pieza nueva acorde al estado
 		 */
 		public static IPieza desempaquetar(PhysicsWorld mundo, EstadoPieza estado){
 			IPieza pieza = null;

@@ -1,35 +1,29 @@
 /*
- *  @author Pablo Morillas Lozano
+ *  @author Nishant
  */
 package proyecto.blocktris.recursos;
 
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
 
-// TODO: Auto-generated Javadoc
+
 /**
- * The Class ExclStrat.
+ * 
+ * Clase que define una estrategia de exclusión para  Gson
+ * 
+ * @author Nishant
+ * http://stackoverflow.com/a/4803346
+ * 
  */
 public class ExclStrat implements ExclusionStrategy {
 
-    /** The c. */
+    
     private Class<?> c;
     
-    /** The field name. */
+   
     private String fieldName;
     
-    /**
-	 * Instantiates a new excl strat.
-	 * 
-	 * @param fqfn
-	 *            the fqfn
-	 * @throws SecurityException
-	 *             the security exception
-	 * @throws NoSuchFieldException
-	 *             the no such field exception
-	 * @throws ClassNotFoundException
-	 *             the class not found exception
-	 */
+
     public ExclStrat(String fqfn) throws SecurityException, NoSuchFieldException, ClassNotFoundException
     {
         this.c = Class.forName(fqfn.substring(0, fqfn.lastIndexOf(".")));

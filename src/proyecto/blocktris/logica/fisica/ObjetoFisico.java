@@ -11,12 +11,12 @@ import org.andengine.extension.physics.box2d.PhysicsWorld;
 
 import com.badlogic.gdx.physics.box2d.Body;
 
-// TODO: Auto-generated Javadoc
+
 /**
  * The Class ObjetoFisico.
  * 
  * @param <T>
- *            the generic type
+ *            el tipo de gráfico
  */
 public abstract class ObjetoFisico <T extends IEntity> {
 	

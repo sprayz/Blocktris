@@ -1303,7 +1303,7 @@ piezasTocadas.clear();
 															 Puntuacion p = new Puntuacion();
 															 p.setNombre(pCallbackValue);
 															 p.setPuntos(puntuacion);
-															 bd.addContact(p);
+															 bd.añadirPuntuacion(p);
 															 bd.close();
 															ActividadPuntuaciones.lanzar(actividadJuego);
 														}
@@ -1363,7 +1363,7 @@ piezasTocadas.clear();
 		// parar el sonido
 		if(	managerRecursos.musicaFondo.isPlaying())
 			managerRecursos.musicaFondo.pause();
-
+		
 		//Obtenemos el lock de el motor para  poder ejecutar el guardado inmediatamente
 		// no podemos  encargarlo al siguiente fotograma
 		// porque en caso de, por ejemplo ser una pausa externa ( apagar la pantalla o boton home)
@@ -1380,7 +1380,7 @@ piezasTocadas.clear();
 		motor.runOnUpdateThread(new Runnable() {
 			@Override
 			public void run() {
-				
+				cartelPuntos.setText(Integer.toString(puntuacion));
 				pausado = true;
 				EscenaJuego.this.setChildScene(new EscenaMenu(camara, acabada,
 						EscenaJuego.this), false, true, true);

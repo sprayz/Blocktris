@@ -16,36 +16,38 @@ import proyecto.blocktris.logica.EscenaBase;
 
 
 
-// TODO: Auto-generated Javadoc
+
 /**
- * The Class ManagerEscenas.
+ * Esta clase contiene las distintas escenas del juego y gestiona  la creación ,destrucción 
+ * y sus cambios.
+ * 
+ * Es un  Singleton, es decir solo se permite una instancia de la misma.
  */
 public class ManagerEscenas
 {
+	
  
-
-    /** The escena juego. */
+	private ManagerEscenas(){};
+   
     public EscenaJuego escenaJuego;
    
-   /** The escena menu. */
+
    public MenuScene escenaMenu;
     
  
-    /** The instancia. */
+   
     private static  ManagerEscenas INSTANCIA= null;
     
-    /** The tipo escena actual. */
+   
     private TipoEscena tipoEscenaActual = null;
     
-    /** The escena actual. */
+   
     private EscenaBase escenaActual;
     
     
     
     
-    /**
-	 * The Enum TipoEscena.
-	 */
+   
     public enum TipoEscena
     {
         
@@ -56,9 +58,6 @@ public class ManagerEscenas
     
    
     
-     /**
-		 * Crear escena juego.
-		 */
      public void crearEscenaJuego(){
     	 
     	 escenaJuego = new EscenaJuego();
@@ -66,10 +65,10 @@ public class ManagerEscenas
      }
      
     /**
-	 * Sets the escena.
+	 * Cambia la escena.
 	 * 
 	 * @param escena
-	 *            the new escena
+	 *             la escena a hacer actual
 	 */
     public void setEscena(EscenaBase escena)
     {
@@ -78,13 +77,18 @@ public class ManagerEscenas
     }
    
     /**
-	 * Sets the escena.
+	 * Cambia la secena a
 	 * 
 	 * @param tipoEscena
-	 *            the new escena
+	 *            el tipo de la escena
 	 */
     public void setEscena(TipoEscena tipoEscena)
-    {
+    { 
+        /**
+    	 * Gets the escena actual.
+    	 * 
+    	 * @return the escena actual
+    	 */
         switch (tipoEscena)
         {
             
@@ -103,11 +107,7 @@ public class ManagerEscenas
     // GETTERS AND SETTERS
     //---------------------------------------------
     
-    /**
-	 * Gets the instancia.
-	 * 
-	 * @return the instancia
-	 */
+    
     public static ManagerEscenas getInstancia()
     {
     	if(INSTANCIA == null){
@@ -116,21 +116,12 @@ public class ManagerEscenas
         return INSTANCIA;
     }
     
-    /**
-	 * Gets the tipo escena actual.
-	 * 
-	 * @return the tipo escena actual
-	 */
+    
     public TipoEscena getTipoEscenaActual()
     {
         return tipoEscenaActual;
     }
-    
-    /**
-	 * Gets the escena actual.
-	 * 
-	 * @return the escena actual
-	 */
+   
     public EscenaBase getEscenaActual()
     {
         return escenaActual;

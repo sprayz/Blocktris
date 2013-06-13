@@ -23,9 +23,14 @@ import proyecto.blocktris.recursos.ManagerEscenas;
 import proyecto.blocktris.recursos.ManagerEscenas.TipoEscena;
 import proyecto.blocktris.recursos.ManagerRecursos;
 
-// TODO: Auto-generated Javadoc
+/*
+ * 
+ * 
+ * f
+ */
+
 /**
- * The Class EscenaMenu.
+ * Clase que representa el menú del juego.
  */
 public class EscenaMenu extends MenuScene {
 

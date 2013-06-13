@@ -29,20 +29,20 @@ import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 public class PiezaL1 extends PiezaBase {
 
 	/**
-	 * Instantiates a new pieza l1.
+	 * Crea una pieza  de tipo L1
 	 * 
 	 * @param mundo
-	 *            the mundo
+	 *            el mundo
 	 * @param x
-	 *            the x
+	 *            coordenada x
 	 * @param y
-	 *            the y
+	 *            coordenada y
 	 * @param tamaño_bloque
-	 *            the tamaño_bloque
+	 *            el tamaño del bloque
 	 * @param fixturedef
-	 *            the fixturedef
+	 *            la propiedades de los bloques
 	 * @param bodydef
-	 *            the bodydef
+	 *            las propiedades de la pieza
 	 */
 	public PiezaL1(PhysicsWorld mundo, float x, float y, float tamaño_bloque,
 			FixtureDef fixturedef,BodyDef bodydef) {
@@ -69,7 +69,7 @@ public class PiezaL1 extends PiezaBase {
 		bloques.get(1).getAdyacentes().add(bloques.get(0));
 		
 		
-//	bloques.get(0).getCuerpo().destroyFixture();
+
 		bloques.get(2).getAdyacentes().add(bloques.get(1));
 		bloques.get(2).getAdyacentes().add(bloques.get(3));
 		

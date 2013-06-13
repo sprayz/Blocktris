@@ -23,9 +23,8 @@ import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.Shape;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class Utilidades.
+ * Clase estática que contiene métodos auxiliares sobre el motor box2d.
  */
 public final class Utilidades {
 

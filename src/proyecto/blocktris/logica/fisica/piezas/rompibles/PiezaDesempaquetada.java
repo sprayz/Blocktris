@@ -25,17 +25,17 @@ import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 
 // TODO: Auto-generated Javadoc
 /**
- * The Class PiezaDesempaquetada.
+ *  Pieza a partir de  un {@link EstadoJuego.EstadoPieza}
  */
 public class PiezaDesempaquetada extends PiezaBase {
 
 	/**
-	 * Instantiates a new pieza desempaquetada.
+	 * Crea una pieza  a partir de  un {@link EstadoJuego.EstadoPieza}
 	 * 
 	 * @param mundo
-	 *            the mundo
+	 *            el mundo
 	 * @param estado
-	 *            the estado
+	 *            el estado
 	 */
 	public PiezaDesempaquetada(PhysicsWorld mundo, EstadoJuego.EstadoPieza estado) {
 		

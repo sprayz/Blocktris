@@ -29,20 +29,20 @@ import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 public class PiezaPalo extends PiezaBase {
 
 	/**
-	 * Instantiates a new pieza palo.
+	 * Crea una pieza  de tipo Palo
 	 * 
 	 * @param mundo
-	 *            the mundo
+	 *            el mundo
 	 * @param x
-	 *            the x
+	 *            coordenada x
 	 * @param y
-	 *            the y
+	 *            coordenada y
 	 * @param tamaño_bloque
-	 *            the tamaño_bloque
+	 *            el tamaño del bloque
 	 * @param fixturedef
-	 *            the fixturedef
+	 *            la propiedades de los bloques
 	 * @param bodydef
-	 *            the bodydef
+	 *            las propiedades de la pieza
 	 */
 	public PiezaPalo(PhysicsWorld mundo, float x, float y, float tamaño_bloque,
 			FixtureDef fixturedef,BodyDef bodydef) {

@@ -29,20 +29,20 @@ import com.badlogic.gdx.physics.box2d.joints.WeldJointDef;
 public class PiezaT extends PiezaBase {
 
 	/**
-	 * Instantiates a new pieza t.
+	 * Crea una pieza  de tipo T
 	 * 
 	 * @param mundo
-	 *            the mundo
+	 *            el mundo
 	 * @param x
-	 *            the x
+	 *            coordenada x
 	 * @param y
-	 *            the y
+	 *            coordenada y
 	 * @param tamaño_bloque
-	 *            the tamaño_bloque
+	 *            el tamaño del bloque
 	 * @param fixturedef
-	 *            the fixturedef
+	 *            la propiedades de los bloques
 	 * @param bodydef
-	 *            the bodydef
+	 *            las propiedades de la pieza
 	 */
 	public PiezaT(PhysicsWorld mundo, float x, float y, float tamaño_bloque,
 			FixtureDef fixturedef,BodyDef bodydef) {
