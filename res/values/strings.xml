@@ -2,7 +2,6 @@
 <resources>
 
     <string name="app_name">Phytris</string>
-
     <string name="title_activity_actividad_bluetooth">Select a Device</string>
     <string name="actividadBluetooth_refrescar">Scan</string>
     <string name="actividadBluetooth_conectar">Connect</string>
@@ -13,7 +12,22 @@
     <string name="menu_salir">Quit</string>
     <string name="dialogo_titulo">Phytris</string>
     <string name="dialogo_mensaje">Enter your name</string>
-   
     <string name="title_activity_actividad_puntuaciones">High Scores</string>
+    <string name="title_activity_actividad_instrucciones">Instructions</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+     
+     <string name="instrucciones_pieza">Esto es una pieza.Está hecha de bloques.
+         Puedes arrastrarla con el dedo para colocarla  o lanzarla para apartarla.</string>
+         <string name="instrucciones_linea">El objetivo del juego consiste en alinear horizontalmente bloques
+             para formar una línea.Esto destruye los bloques  de la línea.El juego acaba cuando se llena la pantalla de piezas
+             </string>
+             
+          <string name="instrucciones_pieza">This is a piece.It\'s made of blocks.
+        You can drag it with your finger to position it  or throw it away to set it apart.</string>
+         <string name="instrucciones_linea">The game\'s objective is to line up blocks horizontally  to form  a line
+             .This destroys the blocks of the line.The game ends when the screen fills up with pieces.
+             </string>
+         
 
 </resources>

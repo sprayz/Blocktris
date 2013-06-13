@@ -12,6 +12,11 @@
     <string name="menu_salir">Quitar</string>
     <string name="dialogo_titulo">Phytris</string>
     <string name="dialogo_mensaje">Introduce tu nombre</string>
-   
+    <string name="title_activity_actividad_instrucciones">Instrucciones</string>
     <string name="title_activity_actividad_puntuaciones">Mejores Puntuaciones</string>
+     <string name="instrucciones_pieza">Esto es una pieza.Está hecha de bloques.
+         Puedes arrastrarla con el dedo para colocarla  o lanzarla para apartarla.</string>
+         <string name="instrucciones_linea">El objetivo del juego consiste en alinear horizontalmente bloques
+             hasta formar una línea.Esto destruye los bloques  de la línea.El juego acaba cuando se llena la pantalla de piezas
+             </string>
 </resources>

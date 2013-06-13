@@ -68,8 +68,7 @@ public class PiezaCuadrado extends PiezaBase {
 		bloques.get(1).getAdyacentes().add(bloques.get(0));
 		bloques.get(1).getAdyacentes().add(bloques.get(3));
 		
-		
-//	bloques.get(0).getCuerpo().destroyFixture();
+	
 		bloques.get(2).getAdyacentes().add(bloques.get(0));
 		bloques.get(2).getAdyacentes().add(bloques.get(3));
 		

@@ -31,10 +31,16 @@
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
-            android:theme="@android:style/Theme.Dialog"
-            android:excludeFromRecents="true"
             android:name="proyecto.blocktris.ActividadPuntuaciones"
-            android:label="@string/title_activity_actividad_puntuaciones" >
+            android:excludeFromRecents="true"
+            android:label="@string/title_activity_actividad_puntuaciones"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:name="proyecto.blocktris.ActividadInstrucciones"
+             android:excludeFromRecents="true"
+            android:label="@string/title_activity_actividad_instrucciones"
+            android:theme="@android:style/Theme.Dialog" >
         </activity>
     </application>
 

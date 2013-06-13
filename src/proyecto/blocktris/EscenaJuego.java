@@ -665,9 +665,9 @@ public class EscenaJuego extends EscenaBase implements
 		mouseJointDef.bodyA = suelo;
 		mouseJointDef.bodyB = body;
 		mouseJointDef.dampingRatio = 0.00f;
-		mouseJointDef.frequencyHz = 20f;
-		mouseJointDef.maxForce = (200 * body.getMass() * 4);
-		mouseJointDef.collideConnected = true; //si desactivamos la colision las piezas atraviesarán el suelo :-)
+		mouseJointDef.frequencyHz = 10f;
+		mouseJointDef.maxForce = (100 * body.getMass() * 4);
+		mouseJointDef.collideConnected = true; //si desactivamos la colision las piezas ignorarán el suelo :-)
 
 		mouseJointDef.target.set(localPoint);
 		Vector2Pool.recycle(localPoint);
@@ -718,8 +718,8 @@ public class EscenaJuego extends EscenaBase implements
 		/*
 		 * El motor físico (Box2d) no garantiza que el orden en el que se reportan las
 		 * intersecciones sea el de proximidad al origen del rayo. Por lo tanto
-		 * hay que ordenar en base al parametro fraction, que representa con un
-		 * decimal de 0.0f a 1.0f en que fraccion de la distancia del origen al
+		 * hay que ordenar en base al parámetro fraction, que representa con un
+		 * decimal de 0.0f a 1.0f en que fracción de la distancia del origen al
 		 * objetivo nos encontramos al colisionar.
 		 */
 
@@ -757,9 +757,9 @@ piezasTocadas.clear();
 
 					/*
 					 * Dado que la estabilidad absoluta es ridículamente dificil de alcanzar
-					 * por el método  a base de aproximación que usa el motor fisico.
+					 * por el método  a base de aproximación que usa el motor fisico...
 					 * 
-					 * Fijamos una valor  de una quietud aceptable.
+					 * Fijamos un valor  de una quietud aceptable.
 					 * 
 					 */
 						if (Math.abs(velocidad.x) < VELOCIDAD_MAX
@@ -843,8 +843,8 @@ piezasTocadas.clear();
 			 * Devolvemos los vectores a la reserva
 			 * 
 			 * En  otras aplicaciones más intensivas  en el uso de box2d
-			 * la creación  y consiguiente deshecho de vectores  provoca pausas fecuentes por el recolector de basura
-			 * Vector2Pool soluciona esto  creando una "piscina" global de vectores que se reciclan.
+			 * la creación  y consiguiente deshecho de vectores  provoca pausas frecuentes por el recolector de basura
+			 * Vector2Pool soluciona esto  creando una "reserva" global de vectores que se reciclan.
 			 */
 			Vector2Pool.recycle(p1);
 			Vector2Pool.recycle(p2);
@@ -1262,7 +1262,6 @@ piezasTocadas.clear();
 	}
 });
 		
-		puntuacion++;
 		IPieza pieza = PiezaFactory.piezaAleatoria(mundo,
 				camara.getWidth() / 2, camara.getHeight() * 2f, tamaño_bloque,
 				IPieza.FIXTUREDEF_DEFECTO, PiezaBase.BODYDEF_DEFECTO);
@@ -1399,7 +1398,7 @@ piezasTocadas.clear();
 			@Override
 			public void run() {
 				cargarEstado();
-
+				cartelPuntos.setText(Integer.toString(puntuacion));
 				pausado = false;
 
 			}
@@ -1468,7 +1467,7 @@ piezasTocadas.clear();
 			managerRecursos.musicaFondo.resume();
 			return true;
 		case EscenaMenu.ID_INSTRUCCIONES:
-			ActividadBluetooth
+			ActividadInstrucciones
 					.lanzar(ManagerRecursos.getInstancia().actividadJuego);
 			return true;
 		case EscenaMenu.ID_SALIR:
